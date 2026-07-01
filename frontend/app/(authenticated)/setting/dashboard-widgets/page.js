@@ -61,6 +61,9 @@ function Section({ title, children }) {
 export default function DashboardWidgetsPage() {
   const [widgets, setWidgets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingWidget, setEditingWidget] = useState(null);
   const [sqlQuery, setSqlQuery] = useState('');
@@ -70,13 +73,19 @@ export default function DashboardWidgetsPage() {
   const [testResult, setTestResult] = useState(null);
   const [helpOpen, setHelpOpen] = useState(false);
 
-  useEffect(() => { fetchWidgets(); }, []);
+  useEffect(() => { fetchWidgets(page); }, [page]);
 
-  const fetchWidgets = async () => {
+  const fetchWidgets = async (pageNum) => {
     try {
       setLoading(true);
       const response = await dashboardWidgetApi.getAll();
-      setWidgets(response.data?.items || []);
+      const allWidgets = response.data?.items || [];
+      setTotal(allWidgets.length);
+      
+      // 前端分页
+      const start = (pageNum - 1) * limit;
+      const end = start + limit;
+      setWidgets(allWidgets.slice(start, end));
     } catch {
       toast.error('加载失败');
     } finally {
@@ -163,6 +172,8 @@ export default function DashboardWidgetsPage() {
             data={widgets}
             loading={loading}
             emptyText="暂无 Widget 数据，请执行数据库初始化"
+            pagination={{ page, total, pageSize: limit }}
+            onPageChange={setPage}
             actions={(row) => (
               <div className="flex justify-end">
                 <Button variant="ghost" size="sm" onClick={() => openEdit(row)}>
