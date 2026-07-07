@@ -29,8 +29,9 @@ export default function NotificationSettingsPage() {
     setIsLoading(true);
     try {
       const response = await notificationSettingsApi.getSettings();
-      if (response.data.success) {
-        setSettings(response.data.data || {});
+      // http-client 拦截器已解包 response.data
+      if (response?.success) {
+        setSettings(response.data || {});
         setHasChanges(false);
       }
     } catch (error) {
@@ -69,8 +70,9 @@ export default function NotificationSettingsPage() {
   const handleReset = async () => {
     try {
       const response = await notificationSettingsApi.resetSettings();
-      if (response.data.success) {
-        setSettings(response.data.data || {});
+      // http-client 拦截器已解包 response.data
+      if (response?.success) {
+        setSettings(response.data || {});
         setHasChanges(false);
         toast.success('设置已重置为默认值');
       }

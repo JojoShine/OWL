@@ -150,10 +150,11 @@ export default function NotificationsPage() {
   };
 
   // 监听实时通知
+  // 模块归属：通知模块 - 通知列表页面
+  // 使用场景：实时接收新通知并插入列表顶部
+  // 只依赖 on/off，不依赖 filters/limit —— 避免筛选条件变化时重建 WebSocket 监听器
   useEffect(() => {
     const handleNewNotification = (notification) => {
-      // console.log('Received new notification:', notification);
-
       // 如果当前筛选条件匹配，添加到列表顶部
       const matchesReadStatus = filters.readStatus === 'all' || filters.readStatus === 'unread';
       const matchesType = filters.type === 'all' || filters.type === notification.type;
@@ -169,7 +170,7 @@ export default function NotificationsPage() {
     return () => {
       off('notification', handleNewNotification);
     };
-  }, [on, off, filters, limit]);
+  }, [on, off]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 监听跨组件的已读事件
   useEffect(() => {

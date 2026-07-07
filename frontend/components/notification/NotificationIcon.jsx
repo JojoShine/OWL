@@ -35,22 +35,26 @@ export default function NotificationIcon() {
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { socket, isConnected, on, off } = useSocket();
+  const { socket, on, off } = useSocket();
 
   // 获取未读数量
+  // 模块归属：通知模块 - NotificationIcon组件
+  // 使用场景：初始化加载、WebSocket重连后同步未读数
   const fetchUnreadCount = useCallback(async () => {
     try {
       const response = await notificationApi.getUnreadCount();
-      if (response?.data?.success && typeof response.data.data?.count === 'number') {
-        setUnreadCount(response.data.data.count);
+      // http-client 拦截器已解包 response.data，直接用 response 访问
+      if (response?.success && typeof response.data?.count === 'number') {
+        setUnreadCount(response.data.count);
       }
-    } catch (error) {
-      console.error('Failed to fetch unread count:', error);
-      // 静默失败，不显示错误提示
+    } catch {
+      // 静默失败，不打印错误避免频繁报错
     }
   }, []);
 
   // 获取最近通知
+  // 模块归属：通知模块 - NotificationIcon组件
+  // 使用场景：下拉菜单打开时加载最新未读通知列表
   const fetchRecentNotifications = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -59,8 +63,9 @@ export default function NotificationIcon() {
         limit: 5,
         isRead: false,
       });
-      if (response?.data?.success && Array.isArray(response.data.data?.notifications)) {
-        setNotifications(response.data.data.notifications);
+      // http-client 拦截器已解包 response.data
+      if (response?.success && Array.isArray(response.data?.notifications)) {
+        setNotifications(response.data.notifications);
       }
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
@@ -147,13 +152,14 @@ export default function NotificationIcon() {
   }, [fetchUnreadCount]);
 
   // 监听 WebSocket 推送
+  // 模块归属：通知模块 - NotificationIcon组件
+  // 使用场景：实时接收新通知推送，WebSocket重连后自动同步未读数
+  // 只依赖 socket，不依赖 isConnected —— socket.io 重连时自动保留已注册的监听器
   useEffect(() => {
-    if (!isConnected || !socket) return;
+    if (!socket) return;
 
     const handleNewNotification = (notification) => {
       if (!notification) return;
-
-      // console.log('Received new notification:', notification);
 
       // 更新未读数量
       setUnreadCount((prev) => prev + 1);
@@ -172,12 +178,19 @@ export default function NotificationIcon() {
       }
     };
 
-    on('notification', handleNewNotification);
+    // 重连后重新同步未读数量，防止断连期间遗漏
+    const handleReconnect = () => {
+      fetchUnreadCount();
+    };
+
+    socket.on('notification', handleNewNotification);
+    socket.on('connect', handleReconnect);
 
     return () => {
-      off('notification', handleNewNotification);
+      socket.off('notification', handleNewNotification);
+      socket.off('connect', handleReconnect);
     };
-  }, [isConnected, socket, on, off]);
+  }, [socket, fetchUnreadCount]);
 
   // 下拉菜单打开时加载最新通知
   useEffect(() => {

@@ -5,6 +5,7 @@ import { userApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import UserFormDialog from '@/components/users/user-form-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
@@ -115,6 +116,23 @@ export default function UsersPage() {
     }
   };
 
+  // 切换用户状态（乐观更新，避免页面闪烁）
+  const handleToggleStatus = async (user) => {
+    const newStatus = user.status === 'active' ? 'inactive' : 'active';
+    const prevStatus = user.status;
+    // 先更新本地状态
+    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: newStatus } : u));
+    try {
+      await userApi.updateUser(user.id, { status: newStatus });
+      toast.success(newStatus === 'active' ? '已启用' : '已禁用');
+    } catch (error) {
+      // 失败回滚
+      setUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: prevStatus } : u));
+      console.error('切换状态失败:', error);
+      toast.error(error.response?.data?.message || error.message || '操作失败');
+    }
+  };
+
   // 状态徽章颜色
   const getStatusBadge = (status) => {
     const statusMap = {
@@ -204,7 +222,13 @@ export default function UsersPage() {
     {
       key: 'status',
       label: '状态',
-      render: (value) => getStatusBadge(value)
+      render: (value, row) => (
+        <Switch
+          checked={value === 'active'}
+          onCheckedChange={() => handleToggleStatus(row)}
+          disabled={!canUpdate('user')}
+        />
+      )
     },
     {
       key: 'last_login_at',

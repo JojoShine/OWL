@@ -5,6 +5,7 @@ import { roleApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import RoleFormDialog from '@/components/roles/role-form-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
@@ -114,6 +115,23 @@ export default function RolesPage() {
     }
   };
 
+  // 切换角色状态（乐观更新，避免页面闪烁）
+  const handleToggleStatus = async (role) => {
+    const newStatus = role.status === 'active' ? 'inactive' : 'active';
+    const prevStatus = role.status;
+    // 先更新本地状态
+    setRoles(prev => prev.map(r => r.id === role.id ? { ...r, status: newStatus } : r));
+    try {
+      await roleApi.updateRole(role.id, { status: newStatus });
+      toast.success(newStatus === 'active' ? '已启用' : '已禁用');
+    } catch (error) {
+      // 失败回滚
+      setRoles(prev => prev.map(r => r.id === role.id ? { ...r, status: prevStatus } : r));
+      console.error('切换状态失败:', error);
+      toast.error(error.response?.data?.message || error.message || '操作失败');
+    }
+  };
+
   // 状态徽章颜色
   const getStatusBadge = (status) => {
     const statusMap = {
@@ -156,7 +174,13 @@ export default function RolesPage() {
     {
       key: 'status',
       label: '状态',
-      render: (value) => getStatusBadge(value)
+      render: (value, row) => (
+        <Switch
+          checked={value === 'active'}
+          onCheckedChange={() => handleToggleStatus(row)}
+          disabled={!canUpdate('role')}
+        />
+      )
     },
     {
       key: 'sort',
