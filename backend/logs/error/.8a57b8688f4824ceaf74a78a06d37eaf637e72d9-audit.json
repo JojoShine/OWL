@@ -9,6 +9,36 @@
             "date": 1782791252202,
             "name": "/Users/jojoshine/projects/owl_platform/backend/logs/error/error-2026-06-30.log",
             "hash": "9ca2c65c9fdcef0bbe1695b57c45f46b19e917227de0c1e58b4c8b6db4d6f599"
+        },
+        {
+            "date": 1782865057356,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/error/error-2026-07-01.log",
+            "hash": "28fba88466214c97f6e3ab83a2fc32a365f85374d7dcd7b3e5134e0b6f112c21"
+        },
+        {
+            "date": 1783083977947,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/error/error-2026-07-03.log",
+            "hash": "52fde8fee7e2d085cc7938b0a28feed3d8ba4d5472c1d09c91b78be718e1e81f"
+        },
+        {
+            "date": 1783297714115,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/error/error-2026-07-06.log",
+            "hash": "946c3a5779f5060b3710deaa1b2362b0f04b2f35a0df6db62403ffa6240a5b38"
+        },
+        {
+            "date": 1783390728329,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/error/error-2026-07-07.log",
+            "hash": "060e1678e6aef57976ee0e236ca191296d75e36584ca75db63581c33edb6dbf3"
+        },
+        {
+            "date": 1783924177403,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/error/error-2026-07-13.log",
+            "hash": "218c0bcae5d92348c93e8e2d44bec29c1df885c1dfcd04353547df12b6a20dc1"
+        },
+        {
+            "date": 1784533980326,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/error/error-2026-07-20.log",
+            "hash": "b58775381723c50b894c3dc32db95f7001fcc145fce6676481c8693c3b567046"
         }
     ],
     "hashType": "sha256"

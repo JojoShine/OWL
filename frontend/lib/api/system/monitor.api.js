@@ -77,3 +77,42 @@ export const alertApi = {
   // 手动触发告警检查
   triggerCheck: () => axios.post('/monitor/alerts/check'),
 };
+
+// 服务器监控API
+export const serverMonitorApi = {
+  // 获取所有服务器列表
+  getAllServers: (params) => axios.get('/monitor/servers', { params }),
+
+  // 根据 ID 获取服务器详情
+  getServerById: (id) => axios.get(`/monitor/servers/${id}`),
+
+  // 创建服务器监控配置
+  createServer: (data) => axios.post('/monitor/servers', data),
+
+  // 更新服务器监控配置
+  updateServer: (id, data) => axios.put(`/monitor/servers/${id}`, data),
+
+  // 删除服务器监控配置
+  deleteServer: (id) => axios.delete(`/monitor/servers/${id}`),
+
+  // 测试服务器连接（SSH）
+  testConnection: (id) => axios.post(`/monitor/servers/${id}/test`),
+
+  // 手动触发检查（采集指标）
+  triggerCheck: (id) => axios.post(`/monitor/servers/${id}/check`),
+
+  // 获取服务器监控日志
+  getServerLogs: (id, params) => axios.get(`/monitor/servers/${id}/logs`, { params }),
+
+  // 启动/停止服务器监控
+  toggleMonitoring: (id) => axios.post(`/monitor/servers/${id}/toggle`),
+
+  // 添加服务端口
+  addPort: (serverId, data) => axios.post(`/monitor/servers/${serverId}/ports`, data),
+
+  // 更新服务端口
+  updatePort: (portId, data) => axios.put(`/monitor/ports/${portId}`, data),
+
+  // 删除服务端口
+  deletePort: (portId) => axios.delete(`/monitor/ports/${portId}`),
+};

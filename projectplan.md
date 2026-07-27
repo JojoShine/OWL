@@ -751,6 +751,203 @@ const values = batch.map(row => {
 
 ---
 
+# Zabbix 集成方案
+
+## 目标
+通过 Zabbix API 在系统中完成各类指标的监控与展示，支持：
+1. 在前端配置 Zabbix 实例连接信息
+2. 提供完整的 Zabbix 安装引导（Server + Agent + 中间件监控配置）
+3. 定时同步 Zabbix 监控数据
+4. 在监控页面展示 Zabbix 数据
+5. 在仪表板集成 Zabbix Widget
+
+## 监控范围
+
+### 1. 服务器基础状态
+- CPU 使用率、负载
+- 内存使用率
+- 磁盘使用率、IO
+- 网络流量、连接数
+- 系统运行时间
+
+### 2. 中间件/服务状态监测
+- **数据库**：MySQL、PostgreSQL 连接状态、QPS、慢查询
+- **缓存**：Redis 连接状态、内存使用、命中率
+- **Web 服务**：Nginx/Apache 状态、请求数、活跃连接
+- **容器**：Docker 容器运行状态、资源使用
+- **应用进程**：自定义进程存活检测、端口存活
+- **消息队列**：RabbitMQ、Kafka 状态（按需）
+
+### 实现方式
+- Zabbix Agent 配置自定义 UserParameter 检测中间件状态
+- 使用 Zabbix 模板（Template）批量应用监控规则
+- 安装引导中包含中间件监控配置步骤
+
+## 技术选型
+- **Zabbix 版本**: 6.x（兼容麒麟系统）
+- **认证方式**: API Token
+- **同步策略**: 短周期定时同步（30秒-1分钟）
+- **告警处理**: 仅展示，不在平台做额外处理（Zabbix 本身会更新）
+
+## 待办事项
+
+### P0 阶段：基础设施（核心）
+
+- [x] 1. 数据库迁移 - owl_zabbix_instances 表
+  - 文件：`backend/migrations/postgres/sql/044-owl_zabbix_instances.sql`
+  - 字段：id, name, url, api_token, status, sync_interval, last_sync_at, description, created_at, updated_at, deleted_at
+
+- [x] 2. Sequelize Model - ZabbixInstance
+  - 文件：`backend/src/models/third_party/ZabbixInstance.js`
+  - 注册：`backend/src/models/index.js`
+
+- [x] 3. Zabbix API 客户端
+  - 文件：`backend/src/core/modules/zabbix/zabbix-client.js`
+  - 功能：JSON-RPC 2.0 协议封装、API Token 认证、常用方法（host.get, item.get, history.get, trigger.get）
+
+- [x] 4. 后端 Service - Zabbix 实例管理
+  - 文件：`backend/src/core/modules/zabbix/zabbix.service.js`
+  - 功能：CRUD、测试连接、手动同步
+
+- [x] 5. 后端 Controller + Routes + Validation
+  - 文件：`backend/src/core/modules/zabbix/zabbix.controller.js`
+  - 文件：`backend/src/core/modules/zabbix/zabbix.routes.js`
+  - 文件：`backend/src/core/modules/zabbix/zabbix.validation.js`
+
+- [x] 6. 注册路由到 core.routes.js
+  - 修改：`backend/src/routes/core.routes.js`
+
+- [x] 7. 前端 API 客户端
+  - 文件：`frontend/lib/api/system/zabbix.api.js`
+  - 导出：`frontend/lib/api/index.js`
+
+- [x] 8. 前端 - Zabbix 安装引导组件
+  - 文件：`frontend/components/zabbix/ZabbixInstallGuide.jsx`
+  - 功能：多个Tab（Server Docker、Server 原生、Agent Linux、Agent 离线、中间件监控配置）
+  - 包含完整安装命令、配置说明、验证步骤
+  - **中间件监控配置**：自定义 UserParameter、模板导入、服务发现配置
+
+- [x] 9. 前端 - Zabbix 实例配置页面
+  - 文件：`frontend/app/(authenticated)/setting/zabbix/page.js`
+  - 功能：DataTable 展示实例列表、测试连接、手动同步、编辑、删除
+  - 顶部"安装引导"按钮打开 ZabbixInstallGuide
+
+### P1 阶段：数据同步与展示
+
+- [x] 10. 后端 - 数据同步服务
+  - 文件：`backend/src/core/modules/zabbix/zabbix-sync.service.js`
+  - 功能：定时拉取 Zabbix 数据（主机、监控项、历史数据、触发器）
+  - 存储：本地数据库缓存表
+
+- [x] 11. 后端 - 同步数据 API
+  - 提供前端查询同步后的 Zabbix 数据
+
+- [x] 12. 前端 - Zabbix 监控数据展示页面
+  - 文件：`frontend/app/(authenticated)/monitor/zabbix/page.js`
+  - 功能：
+    - 主机列表（系统基础信息 + 服务状态概览）
+    - 监控项详情（系统指标 + 中间件指标）
+    - 历史趋势图
+    - 触发器/告警状态
+    - **服务状态面板**：展示各中间件运行状态（正常/异常/未监控）
+
+### P2 阶段：仪表板集成
+
+- [ ] 13. 仪表板集成 Zabbix Widget
+  - 展示关键监控指标（CPU、内存、磁盘使用率）
+  - 展示最近告警
+  - **展示中间件服务状态卡片**（各服务运行状态一览）
+
+## 文件结构
+
+```
+backend/
+├── migrations/postgres/sql/
+│   ├── 044-owl_zabbix_instances.sql
+│   └── 045-owl_zabbix_hosts.sql
+├── src/
+│   ├── core/modules/zabbix/
+│   │   ├── zabbix-client.js        # Zabbix API 客户端
+│   │   ├── zabbix.service.js       # 实例管理 Service
+│   │   ├── zabbix.controller.js    # Controller
+│   │   ├── zabbix.routes.js        # 路由
+│   │   ├── zabbix.validation.js    # 参数校验
+│   │   └── zabbix-sync.service.js  # 数据同步服务
+│   ├── models/
+│   │   └── third_party/
+│   │       ├── ZabbixInstance.js   # 实例配置 Model
+│   │       └── ZabbixHost.js       # 同步主机 Model
+│   └── routes/
+│       └── core.routes.js          # 注册 zabbix 路由
+
+frontend/
+├── app/(authenticated)/
+│   ├── setting/zabbix/
+│   │   └── page.js                 # Zabbix 配置页面
+│   └── monitor/zabbix/
+│       └── page.js                 # Zabbix 监控展示页面
+├── components/zabbix/
+│   └── ZabbixInstallGuide.jsx      # 安装引导组件
+└── lib/api/system/
+    └── zabbix.api.js               # API 客户端
+```
+
+## API 设计
+
+### Zabbix 实例管理
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/system/zabbix | 获取实例列表 |
+| GET | /api/system/zabbix/:id | 获取实例详情 |
+| POST | /api/system/zabbix | 创建实例 |
+| PUT | /api/system/zabbix/:id | 更新实例 |
+| DELETE | /api/system/zabbix/:id | 删除实例 |
+| POST | /api/system/zabbix/:id/test | 测试连接 |
+| POST | /api/system/zabbix/:id/sync | 手动同步 |
+
+### Zabbix 数据查询（P1）
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/system/zabbix/:id/hosts | 获取主机列表（本地同步数据） |
+| GET | /api/system/zabbix/:id/hosts/:hostId | 获取主机详情+监控项（实时） |
+| GET | /api/system/zabbix/:id/problems | 获取问题/告警列表（实时） |
+
+## 实施原则
+
+1. **代码不冗余**：复用现有模式（controller → service → routes → validation）
+2. **参照已有页面**：使用 DataTable、SearchFilter、Card 等现有组件
+3. **遵循 Rule**：
+   - 后端使用 ApiError、logger、response helpers
+   - 前端使用 shadcn/ui 组件、Tailwind CSS
+   - API 调用使用 http-client 模式
+   - 注释包含模块归属和使用场景
+
+---
+
+## Review
+
+### 已完成内容
+
+**P0 阶段（全部完成）**：
+- 数据库迁移：`044-owl_zabbix_instances.sql` 创建实例配置表
+- 后端模块：完整的 controller → service → routes → validation 模式
+- Zabbix API 客户端：JSON-RPC 2.0 协议封装，支持 API Token 认证
+- 前端配置页面：使用 DataTable、SearchFilter、Dialog 等已有组件
+- 安装引导组件：5个Tab（Server Docker/原生、Agent Linux/离线、中间件监控）
+- 菜单/权限：已添加菜单项和 CRUD 权限，分配给 admin 角色
+
+**P1 阶段（全部完成）**：
+- 数据库迁移：`045-owl_zabbix_hosts.sql` 创建同步主机表
+- 数据同步服务：定时拉取主机列表，支持多实例独立同步
+- 监控数据 API：主机列表（本地）、主机详情+监控项（实时）、告警列表（实时）
+- 监控展示页面：实例选择、主机列表、告警面板、主机详情弹窗
+- 菜单项：添加到“监控系统”分组下
+
+**待完成**：
+- P2：仪表板集成 Zabbix Widget
+
+---
+
 # 取消 Sequelize 查询缓存并检查 PG 查询优化
 
 ## 问题分析

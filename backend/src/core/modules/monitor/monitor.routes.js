@@ -3,6 +3,7 @@ const router = express.Router();
 const monitorController = require('./monitor.controller');
 const apiMonitorController = require('./api-monitor.controller');
 const alertController = require('./alert.controller');
+const serverMonitorController = require('./server-monitor.controller');
 const { authenticate } = require('../../../middlewares/auth');
 const { checkPermission } = require('../../../middlewares/permission');
 
@@ -81,5 +82,43 @@ router.get('/alerts/stats', checkPermission('monitor', 'read'), alertController.
 
 // 手动触发告警检查
 router.post('/alerts/check', checkPermission('monitor', 'create'), alertController.triggerCheck);
+
+// ========== 服务器监控路由 ==========
+
+// 获取所有服务器列表
+router.get('/servers', checkPermission('monitor', 'read'), serverMonitorController.getAllServers);
+
+// 创建服务器监控配置
+router.post('/servers', checkPermission('monitor', 'create'), serverMonitorController.createServer);
+
+// 根据 ID 获取服务器详情
+router.get('/servers/:id', checkPermission('monitor', 'read'), serverMonitorController.getServerById);
+
+// 更新服务器监控配置
+router.put('/servers/:id', checkPermission('monitor', 'update'), serverMonitorController.updateServer);
+
+// 删除服务器监控配置
+router.delete('/servers/:id', checkPermission('monitor', 'delete'), serverMonitorController.deleteServer);
+
+// 测试服务器连接（SSH）
+router.post('/servers/:id/test', checkPermission('monitor', 'create'), serverMonitorController.testConnection);
+
+// 手动触发检查（采集指标）
+router.post('/servers/:id/check', checkPermission('monitor', 'create'), serverMonitorController.triggerCheck);
+
+// 获取服务器监控日志
+router.get('/servers/:id/logs', checkPermission('monitor', 'read'), serverMonitorController.getServerLogs);
+
+// 启动/停止服务器监控
+router.post('/servers/:id/toggle', checkPermission('monitor', 'update'), serverMonitorController.toggleMonitoring);
+
+// 添加服务端口
+router.post('/servers/:id/ports', checkPermission('monitor', 'create'), serverMonitorController.addPort);
+
+// 更新服务端口
+router.put('/ports/:portId', checkPermission('monitor', 'update'), serverMonitorController.updatePort);
+
+// 删除服务端口
+router.delete('/ports/:portId', checkPermission('monitor', 'delete'), serverMonitorController.deletePort);
 
 module.exports = router;

@@ -9,6 +9,116 @@
             "date": 1782791252212,
             "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-06-30.log",
             "hash": "f041b0df085a3fc300dcb09691f7c969b4b2570f541a10dcfd878c0a150fcb91"
+        },
+        {
+            "date": 1782835200705,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-01.log",
+            "hash": "252ae386f005adac53f06fb0cead27c7fcb014862c942f8acdb67f085a6d9d03"
+        },
+        {
+            "date": 1782921600701,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-02.log",
+            "hash": "f80232e7d151af8663556e16d369173ec30419d6bd17fd60e40779eccf4c35c3"
+        },
+        {
+            "date": 1783008001000,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-03.log",
+            "hash": "4c59fb8b70295eb16cbf860813fd9b224800af925e7eb0bcc3fdb38011620abc"
+        },
+        {
+            "date": 1783094400947,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-04.log",
+            "hash": "ffdfe121a1c9805d5e03402e1701381f7d297df2d6c7cf942d72a9346c845263"
+        },
+        {
+            "date": 1783180800598,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-05.log",
+            "hash": "465ab68c0a6d2aad43c60e7dc83000993fb9a87b70bc542ed18fb5a633355242"
+        },
+        {
+            "date": 1783267200114,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-06.log",
+            "hash": "dcacc1b5004f945245443a9d86c6dcae93156f746f3e5f8a34213599454e574b"
+        },
+        {
+            "date": 1783353600860,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-07.log",
+            "hash": "c64007bcf6c6958608f8d8a1e808cfac0942aa35494a3d6f07e0be88d48adf38"
+        },
+        {
+            "date": 1783440000402,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-08.log",
+            "hash": "0e6ddf36691b57121bcc030d6dc7930815d704255847198c6a29d790d71a9817"
+        },
+        {
+            "date": 1783526400998,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-09.log",
+            "hash": "0822285b94b3764525bd61f554564dbdbb28f566256c27dbb370fde480867bf1"
+        },
+        {
+            "date": 1783612800279,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-10.log",
+            "hash": "e3b32b959d0dca2aa26dd871c841398825ea87cb47e34013f92770700e6d43f6"
+        },
+        {
+            "date": 1783699200226,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-11.log",
+            "hash": "ba230cb6d8e708092b6ea1213d0a1d0591c01a75d91aefa456cbcc42e9a0a76b"
+        },
+        {
+            "date": 1783785600091,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-12.log",
+            "hash": "a50680ee09d4b0188da9f5b504589ca1cf073414041c8338b2ff67b205587223"
+        },
+        {
+            "date": 1783872000823,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-13.log",
+            "hash": "aad6aa3302e93a7e64e12887a752af447c21024770bb59da3e5144b7e539ae1a"
+        },
+        {
+            "date": 1783958400823,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-14.log",
+            "hash": "5f3ec7068bdfcb82e7ff166e48d8d8b52ec0fe8260b98c29584ad259511d493c"
+        },
+        {
+            "date": 1784044800201,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-15.log",
+            "hash": "78bf80b67f0637673f9a4b57ee686b02540ea03287583e72010fbaba6a568685"
+        },
+        {
+            "date": 1784131200079,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-16.log",
+            "hash": "a886fd45a86e0a584826bd8038c46f59a46b042e68c030f63299681405e513bf"
+        },
+        {
+            "date": 1784217600409,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-17.log",
+            "hash": "9ad23798a34c4ae3f2f18eab5f660f59dc33bb724faf708aaf168d9741fbb310"
+        },
+        {
+            "date": 1784304000352,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-18.log",
+            "hash": "b3356f5f2a285b05753e7098cc54ffafb4a276339499d48bee0a26cfc8057c63"
+        },
+        {
+            "date": 1784390400969,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-19.log",
+            "hash": "6dba96bf5dfc0f97941dc9ad7b18e9bb17b0bca5930e6b241368af6e3498233d"
+        },
+        {
+            "date": 1784476800422,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-20.log",
+            "hash": "44b387e0202ea17008b02ef30da5a17c9b9ae4a8de36995dbe20ee952b32f2fa"
+        },
+        {
+            "date": 1784563200848,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-21.log",
+            "hash": "13f6cb4c97ce70a3f657390a551f04846983876b8a044fe3f6a9ed5719394852"
+        },
+        {
+            "date": 1784649600411,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/database-access/database-access-2026-07-22.log",
+            "hash": "3c002084f05f33ce5c725d2b114e65d49d5eee6ad3d464e8eaa518d15686f6de"
         }
     ],
     "hashType": "sha256"

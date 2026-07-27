@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import React from 'react';
 import {
   Table,
   TableBody,
@@ -10,6 +12,8 @@ import {
 } from '@/components/ui/table';
 import { TableLoading } from '@/components/ui/table-loading';
 import { Pagination } from '@/components/ui/pagination';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 /**
  * 数据表格组件 - 通用的数据展示表格
@@ -24,6 +28,7 @@ import { Pagination } from '@/components/ui/pagination';
  * @param {Function} props.onPageChange - 页码变化回调
  * @param {Function} props.onPageSizeChange - 每页数量变化回调
  * @param {string} props.rowKey - 行唯一标识字段名，默认 'id'
+ * @param {Function} props.renderSubRow - 子行渲染函数 (row) => ReactNode，如果提供则支持展开
  *
  * @example
  * // 基础用法
@@ -57,10 +62,27 @@ export function DataTable({
   pagination,
   onPageChange,
   onPageSizeChange,
-  rowKey = 'id'
+  rowKey = 'id',
+  renderSubRow
 }) {
+  const [expandedRows, setExpandedRows] = useState(new Set());
+
+  // 切换行展开状态
+  const toggleRow = (rowId) => {
+    setExpandedRows(prev => {
+      const next = new Set(prev);
+      if (next.has(rowId)) {
+        next.delete(rowId);
+      } else {
+        next.add(rowId);
+      }
+      return next;
+    });
+  };
+
   // 计算总列数（包括操作列）
-  const totalColumns = columns.length + (actions ? 1 : 0);
+  const hasExpandable = !!renderSubRow;
+  const totalColumns = columns.length + (actions ? 1 : 0) + (hasExpandable ? 1 : 0);
 
   return (
     <div className="space-y-4">
@@ -69,6 +91,7 @@ export function DataTable({
         <Table>
           <TableHeader>
             <TableRow>
+              {hasExpandable && <TableHead className="w-10"></TableHead>}
               {columns.map((column) => (
                 <TableHead
                   key={column.key}
@@ -96,27 +119,59 @@ export function DataTable({
                 </TableCell>
               </TableRow>
             ) : (
-              data.map((row, index) => (
-                <TableRow key={row[rowKey] || index}>
-                  {columns.map((column) => (
-                    <TableCell
-                      key={column.key}
-                      className={column.cellClassName}
-                    >
-                      {column.render
-                        ? column.render(row[column.key], row)
-                        : row[column.key] ?? '-'}
-                    </TableCell>
-                  ))}
-                  {actions && (
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        {actions(row)}
-                      </div>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))
+              data.map((row, index) => {
+                const rowId = row[rowKey] || index;
+                const isExpanded = expandedRows.has(rowId);
+                
+                return (
+                  <React.Fragment key={rowId}>
+                    <TableRow>
+                      {hasExpandable && (
+                        <TableCell className="w-10">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => toggleRow(rowId)}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                      )}
+                      {columns.map((column) => (
+                        <TableCell
+                          key={column.key}
+                          className={column.cellClassName}
+                        >
+                          {column.render
+                            ? column.render(row[column.key], row)
+                            : row[column.key] ?? '-'}
+                        </TableCell>
+                      ))}
+                      {actions && (
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            {actions(row)}
+                          </div>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                    {isExpanded && renderSubRow && (
+                      <TableRow>
+                        <TableCell colSpan={totalColumns} className="p-0">
+                          <div className="bg-muted/30 p-4">
+                            {renderSubRow(row)}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                );
+              })
             )}
           </TableBody>
         </Table>

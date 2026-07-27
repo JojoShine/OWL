@@ -26,6 +26,7 @@ import * as generatorModule from './system/generator.api';
 import * as statsModule from './system/stats.api';
 import * as fileManagerModule from './system/file-manager.api';
 import * as emailTaskModule from './system/email-task.api';
+import * as zabbixModule from './system/zabbix.api';
 
 // 认证相关
 export const authApi = authModule.authApi;
@@ -35,7 +36,7 @@ export const smsAuthApi = smsModule.smsAuthApi;
 export const { folderApi, fileApi, fileShareApi } = fileManagerModule;
 
 // 导出监控相关 API
-export const { monitorApi, apiMonitorApi, alertApi } = monitorModule;
+export const { monitorApi, apiMonitorApi, alertApi, serverMonitorApi } = monitorModule;
 
 // 导出仪表盘相关 API
 export const dashboardApi = dashboardModule.dashboardApi;
@@ -65,6 +66,7 @@ export const captchaApi = captchaModule.captchaApi;
 export const sensitiveFieldApi = sensitiveFieldModule.sensitiveFieldApi;
 export const dataAccessApi = dataAccessModule.dataAccessApi;
 export const emailTaskApi = emailTaskModule.emailTaskApi;
+export const zabbixApi = zabbixModule.zabbixApi;
 
 // 默认导出（用于向后兼容）
 export default {
@@ -81,6 +83,7 @@ export default {
   monitorApi,
   apiMonitorApi,
   alertApi,
+  serverMonitorApi,
   
   // 仪表盘相关
   dashboardApi,
@@ -113,4 +116,5 @@ export default {
   sensitiveFieldApi,
   dataAccessApi,
   emailTaskApi,
+  zabbixApi,
 };

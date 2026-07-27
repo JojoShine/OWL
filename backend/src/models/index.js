@@ -62,6 +62,9 @@ db.ApiMonitor = require('./monitor/ApiMonitor')(sequelize, Sequelize.DataTypes);
 db.ApiMonitorLog = require('./monitor/ApiMonitorLog')(sequelize, Sequelize.DataTypes);
 db.AlertRule = require('./monitor/AlertRule')(sequelize, Sequelize.DataTypes);
 db.AlertHistory = require('./monitor/AlertHistory')(sequelize, Sequelize.DataTypes);
+db.ServerMonitor = require('./monitor/ServerMonitor')(sequelize, Sequelize.DataTypes);
+db.ServerMonitorPort = require('./monitor/ServerMonitorPort')(sequelize, Sequelize.DataTypes);
+db.ServerMonitorLog = require('./monitor/ServerMonitorLog')(sequelize, Sequelize.DataTypes);
 
 // ========== Notification Models ==========
 // 邮件、通知相关模型
@@ -87,6 +90,8 @@ db.RoleMenu = require('./association/RoleMenu')(sequelize, Sequelize.DataTypes);
 // ========== Third Party Models ==========
 // 第三方对接相关模型
 db.ThirdPartyApiKey = require('./third_party/ThirdPartyApiKey')(sequelize, Sequelize.DataTypes);
+db.ZabbixInstance = require('./third_party/ZabbixInstance')(sequelize, Sequelize.DataTypes);
+db.ZabbixHost = require('./third_party/ZabbixHost')(sequelize, Sequelize.DataTypes);
 
 // 动态生成的模型会在代码生成时自动注册到这里
 // (使用原生SQL时无需在此注册)

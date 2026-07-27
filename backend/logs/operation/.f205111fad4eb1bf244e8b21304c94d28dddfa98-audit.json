@@ -9,6 +9,26 @@
             "date": 1782791252192,
             "name": "/Users/jojoshine/projects/owl_platform/backend/logs/operation/operation-2026-06-30.log",
             "hash": "53d6929b460e2b35eeb7d8eb329117ac0fd573c59e7f28df56c23714e4cd25bd"
+        },
+        {
+            "date": 1782865390956,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/operation/operation-2026-07-01.log",
+            "hash": "dc8e26e49490b96a1ee88edf87eba24faacd1374af1db7e27074fe4783ae5c36"
+        },
+        {
+            "date": 1783297695402,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/operation/operation-2026-07-06.log",
+            "hash": "ca6008f6e8054adeaa46a48d60b51f706583e5245b9002ccb4cc076a05d8b82b"
+        },
+        {
+            "date": 1783392908244,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/operation/operation-2026-07-07.log",
+            "hash": "22a4fa2138b3852ea5b9e1ddaf115612bbe5073490a071ea75dce6551b535f40"
+        },
+        {
+            "date": 1783924177394,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/operation/operation-2026-07-13.log",
+            "hash": "ad4d3aa378297af4256ab33fe0812f38f83c2389ff408855004bf64e6c5927ef"
         }
     ],
     "hashType": "sha256"

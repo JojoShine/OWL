@@ -9,6 +9,41 @@
             "date": 1782791252198,
             "name": "/Users/jojoshine/projects/owl_platform/backend/logs/system/system-2026-06-30.log",
             "hash": "02a187b58a90c8ee49d6649bcf017408fe7df55eca1347c84290581318c7ded1"
+        },
+        {
+            "date": 1782865057354,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/system/system-2026-07-01.log",
+            "hash": "269b732b120cced2bb7c33af2819f398fef2a007fae137e7fce68ab8f771e44a"
+        },
+        {
+            "date": 1782957153468,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/system/system-2026-07-02.log",
+            "hash": "df929c467c162d507b6baeb882410b196d9bd35bc242437e6ac9da7bf47afdb2"
+        },
+        {
+            "date": 1783083977940,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/system/system-2026-07-03.log",
+            "hash": "2e349f54ce2555b5b82021b45346eeace733acb74aa8806f4427944d78bb181f"
+        },
+        {
+            "date": 1783297695332,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/system/system-2026-07-06.log",
+            "hash": "213b38f777416fe1d75ea65fee67020e5c2ab3f6653fc8d519605ad75a5cb1b2"
+        },
+        {
+            "date": 1783390728326,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/system/system-2026-07-07.log",
+            "hash": "66b9c8a3c9fabf83e28f9f7cd50e40e8a483e2a34e36c45e4c34cfe0418e33e8"
+        },
+        {
+            "date": 1783924177401,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/system/system-2026-07-13.log",
+            "hash": "7d721791ff1a98d0c75f64fe696c50ce0fa6b0d6de20d04c8c71cf28190b9bf8"
+        },
+        {
+            "date": 1784533980320,
+            "name": "/Users/jojoshine/projects/owl_platform/backend/logs/system/system-2026-07-20.log",
+            "hash": "0515ba0cffab96418b4afce2508fce5e151a6b1e7ce527b228e96a904d5bb4f4"
         }
     ],
     "hashType": "sha256"

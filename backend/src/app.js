@@ -115,6 +115,14 @@ const startServer = async () => {
     const alertService = require('./core/modules/monitor/alert.service');
     alertService.startAlertCheckJob();
 
+    // 启动服务器监控调度器
+    const serverMonitorService = require('./core/modules/monitor/server-monitor.service');
+    await serverMonitorService.initializeScheduledJobs();
+
+    // 启动Zabbix数据同步调度器
+    const zabbixSyncService = require('./core/modules/zabbix/zabbix-sync.service');
+    zabbixSyncService.startSyncScheduler();
+
     // 创建HTTP服务器（用于Socket.io）
     const http = require('http');
     const server = http.createServer(app);

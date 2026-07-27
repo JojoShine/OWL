@@ -408,6 +408,11 @@ VALUES ('cfa8dc2d-0554-4999-8f2b-98077bcebbc3', '51785958-3437-4938-b77d-ce7cf2d
         '"2025-10-28T00:43:06.737Z"');
 INSERT INTO public."owl_menus" ("id", "parent_id", "name", "path", "component", "icon", "type", "visible", "sort",
                                 "status", "permission_code", "menu_type", "created_at", "updated_at")
+VALUES ('6f13b0c0-3d3f-4aeb-aa75-79cfbb3f806e', '51785958-3437-4938-b77d-ce7cf2d9782b', '服务器监控', '/monitor/servers',
+        NULL, 'Server', 'menu', true, 4, 'active', 'monitor:read', 'system', '"2025-10-28T00:43:06.737Z"',
+        '"2025-10-28T00:43:06.737Z"');
+INSERT INTO public."owl_menus" ("id", "parent_id", "name", "path", "component", "icon", "type", "visible", "sort",
+                                "status", "permission_code", "menu_type", "created_at", "updated_at")
 VALUES ('9289f417-0496-4d7f-839a-7b1198eaa0fd', '0e734687-5eb8-472f-a138-ed35ce17556a', '权限管理',
         '/setting/permissions', 'PermissionsPage', 'Shield', 'menu', true, 3, 'active', 'permission:read', 'system',
         '"2025-10-28T00:43:06.737Z"', '"2025-10-28T00:43:06.737Z"');
@@ -920,6 +925,12 @@ VALUES ('fce2efe8-0615-4ecb-8c48-c79b37d6d087', 'b4f563f7-b8a8-4322-b9ac-4b6daae
 INSERT INTO public."owl_role_permissions" ("id", "role_id", "permission_id", "created_at")
 VALUES ('fd669c6e-c519-45a3-a17f-8796a887be07', '6b81e3c2-ec0c-40f3-8e00-ec54f1b41345',
         '4e527c72-862e-46d6-bd15-05547109dcb9', '"2025-11-12T06:43:07.180Z"');
+INSERT INTO public."owl_role_permissions" ("id", "role_id", "permission_id", "created_at")
+VALUES ('a1b2c3d4-0001-4000-8000-000000000001', '6b81e3c2-ec0c-40f3-8e00-ec54f1b41345',
+        'c5e37e50-a136-4dfd-9291-1cbd6195539e', '"2025-10-28T00:43:06.737Z"');
+INSERT INTO public."owl_role_permissions" ("id", "role_id", "permission_id", "created_at")
+VALUES ('a1b2c3d4-0002-4000-8000-000000000002', '6b81e3c2-ec0c-40f3-8e00-ec54f1b41345',
+        '9d1ca541-1649-4444-b8f7-8f77a818667e', '"2025-10-28T00:43:06.737Z"');
 
 
 -- ============================================
@@ -1089,6 +1100,9 @@ VALUES ('aaaaaaaa-bbbb-cccc-dddd-eeeeeeee0001', '5bbddbca-0ace-4641-8a5b-8882a64
 INSERT INTO public."owl_role_menus" ("id", "role_id", "menu_id", "created_at")
 VALUES ('aaaaaaaa-bbbb-cccc-dddd-eeeeeeee0002', '6b81e3c2-ec0c-40f3-8e00-ec54f1b41345',
         'ffffffff-ffff-ffff-ffff-111111111111', '"2025-12-10T06:08:37.830Z"');
+INSERT INTO public."owl_role_menus" ("id", "role_id", "menu_id", "created_at")
+VALUES ('b1b2c3d4-0001-4000-8000-000000000001', '6b81e3c2-ec0c-40f3-8e00-ec54f1b41345',
+        '6f13b0c0-3d3f-4aeb-aa75-79cfbb3f806e', '"2025-10-28T00:43:06.737Z"');
 
 
 -- ============================================
