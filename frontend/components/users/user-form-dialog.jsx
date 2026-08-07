@@ -131,10 +131,6 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
   };
 
   const onSubmit = async (data) => {
-    console.log('=== onSubmit 开始 ===');
-    console.log('isEdit:', isEdit);
-    console.log('原始表单数据:', data);
-
     try {
       // 如果是编辑且密码为空，则不传递密码字段
       const submitData = { ...data };
@@ -152,8 +148,6 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
 
       // 移除所有包含脱敏标记的字段（编辑模式下）
       const finalData = isEdit ? filterMaskedFields(submitData) : submitData;
-
-      console.log('最终提交数据:', finalData);
 
       if (isEdit) {
         await userApi.updateUser(user.id, finalData);

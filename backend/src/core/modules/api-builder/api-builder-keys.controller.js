@@ -67,7 +67,7 @@ class ApiBuilderKeysController {
 
       // 生成api_secret (HMAC-SHA256哈希)
       const apiSecret = crypto
-        .createHmac('sha256', process.env.API_SECRET_KEY || 'your-secret-key')
+        .createHmac('sha256', process.env.API_SECRET_KEY || process.env.JWT_SECRET)
         .update(appKey)
         .digest('hex');
 

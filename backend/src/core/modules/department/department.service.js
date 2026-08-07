@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const db = require('../../../models');
 const ApiError = require('../../../utils/ApiError');
 const { logger } = require('../../../config/logger');
+const { validateSortField, validateOrder } = require('../../../utils/query-validator');
 
 class DepartmentService {
   /**
@@ -38,6 +39,9 @@ class DepartmentService {
       where.parent_id = parent_id === 'null' ? null : parent_id;
     }
 
+    const safeSort = validateSortField(sort, ['name', 'code', 'sort', 'status'], 'sort');
+    const safeOrder = validateOrder(order);
+
     const { count, rows } = await db.Department.findAndCountAll({
       where,
       include: [
@@ -52,9 +56,9 @@ class DepartmentService {
           attributes: ['id', 'username', 'real_name'],
         },
       ],
-      pageSize: parseInt(limit),
+      limit: parseInt(limit),
       offset,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
     });
 
     return {

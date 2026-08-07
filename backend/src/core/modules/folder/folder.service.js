@@ -3,6 +3,7 @@ const db = require('../../../models');
 const ApiError = require('../../../utils/ApiError');
 const { logger } = require('../../../config/logger');
 const filePermissionService = require('../file/file-permission.service');
+const { validateSortField, validateOrder } = require('../../../utils/query-validator');
 
 class FolderService {
   /**
@@ -33,6 +34,9 @@ class FolderService {
       where.parent_id = parent_id === 'null' ? null : parent_id;
     }
 
+    const safeSort = validateSortField(sort, ['name']);
+    const safeOrder = validateOrder(order);
+
     const { count, rows } = await db.Folder.findAndCountAll({
       where,
       include: [
@@ -47,9 +51,9 @@ class FolderService {
           attributes: ['id', 'username', 'real_name'],
         },
       ],
-      pageSize: parseInt(limit),
+      limit: parseInt(limit),
       offset,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
     });
 
     return {
@@ -141,6 +145,8 @@ class FolderService {
     }
 
     const { search, sort = 'created_at', order = 'DESC' } = query;
+    const safeSort = validateSortField(sort, ['name', 'original_name']);
+    const safeOrder = validateOrder(order);
 
     // 构建文件夹的查询条件
     const folderWhere = {
@@ -155,7 +161,7 @@ class FolderService {
     // 查询子文件夹
     const folders = await db.Folder.findAll({
       where: folderWhere,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
     });
 
     // 查询文件（基于文件的查询条件）
@@ -170,7 +176,7 @@ class FolderService {
 
     const files = await db.File.findAll({
       where: fileWhere,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
     });
 
     return {

@@ -226,7 +226,7 @@ class AuthService {
 
     // 验证API密钥的api_secret
     const expectedSecret = crypto
-      .createHmac('sha256', process.env.API_SECRET_KEY || 'your-secret-key')
+      .createHmac('sha256', process.env.API_SECRET_KEY || process.env.JWT_SECRET)
       .update(appKey)
       .digest('hex');
 

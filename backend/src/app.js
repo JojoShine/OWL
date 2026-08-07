@@ -24,8 +24,20 @@ app.use(helmet({
   crossOriginResourcePolicy: false, // 允许跨域资源访问
 }));
 app.use(compression());
+
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 
@@ -58,8 +70,6 @@ const limiter = rateLimit({
       '/api/system/monitor',
       '/api/health',
       '/api/system/captcha',
-      '/api/system/auth/login',
-      '/api/system/auth/register',
       '/api/system/dashboard',
       '/api/system/files',
       '/api/system/folders',

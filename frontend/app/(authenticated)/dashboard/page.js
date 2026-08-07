@@ -2,24 +2,40 @@
 
 import { useState, useEffect } from 'react';
 import DashboardCard from '@/components/dashboard/DashboardCard';
-import { dashboardWidgetApi } from '@/lib/api';
+import { dashboardWidgetApi, menuApi } from '@/lib/api';
+
+function hasPath(menus, targetPath) {
+  for (const menu of menus) {
+    if (menu.path === targetPath) return true;
+    if (menu.children?.length && hasPath(menu.children, targetPath)) return true;
+  }
+  return false;
+}
 
 export default function DashboardPage() {
   const [widgets, setWidgets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [hasAccess, setHasAccess] = useState(true);
 
   useEffect(() => {
-    const fetchWidgets = async () => {
+    const init = async () => {
       try {
-        const response = await dashboardWidgetApi.executeAll();
-        setWidgets(response.data || []);
+        const response = await menuApi.getUserMenus();
+        const { businessMenus = [], systemMenus = [] } = response.data || {};
+        const accessible = hasPath([...businessMenus, ...systemMenus], '/dashboard');
+        setHasAccess(accessible);
+
+        if (accessible) {
+          const widgetRes = await dashboardWidgetApi.executeAll();
+          setWidgets(widgetRes.data || []);
+        }
       } catch (error) {
-        console.error('Failed to fetch widgets:', error);
+        console.error('Failed to init dashboard:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchWidgets();
+    init();
   }, []);
 
   const metricWidgets = widgets.filter(({ widget }) => widget.widget_type === 'metric');
@@ -37,7 +53,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="p-8 space-y-6">
+      <div className="space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="bg-card border rounded-lg p-6 animate-pulse">
@@ -58,8 +74,12 @@ export default function DashboardPage() {
     );
   }
 
+  if (!hasAccess) {
+    return null;
+  }
+
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       {/* 数字指标行 */}
       {metricWidgets.length > 0 && (
         <div className={`grid ${getMetricCols(metricWidgets.length)} gap-4`}>

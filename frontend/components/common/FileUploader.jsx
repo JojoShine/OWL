@@ -46,17 +46,12 @@ export default function FileUploader({
     try {
       // 上传文件到通用上传接口
       const response = await uploadApi.uploadFile(file, category);
-      console.log('Upload response:', response);
 
-      // 后端返回格式: { data: { path: '...' } }
       const path = response.data?.data?.path || response.data?.path;
 
       if (path) {
-        console.log('Upload success, path:', path);
         onUpload?.(path);
         toast.success('文件上传成功');
-      } else {
-        console.log('No path in response:', response.data);
       }
     } catch (error) {
       console.error('Upload error:', error);
@@ -75,13 +70,9 @@ export default function FileUploader({
 
   // 构造文件 URL - 使用流接口获取文件
   const getFileUrl = (path) => {
-    console.log('getFileUrl called with:', path);
     if (!path) return '';
-    // 如果已经是完整 URL，直接返回
     if (path.startsWith('http')) return path;
-    // 否则使用流接口获取
     const url = uploadApi.getFileStreamUrl(path);
-    console.log('getFileUrl returns:', url);
     return url;
   };
 

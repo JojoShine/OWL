@@ -3,6 +3,7 @@ const db = require('../../../models');
 const ApiError = require('../../../utils/ApiError');
 const { logger } = require('../../../config/logger');
 const { clearCache } = require('../../../config/rbac');
+const { validateSortField, validateOrder } = require('../../../utils/query-validator');
 
 class RoleService {
   /**
@@ -35,11 +36,14 @@ class RoleService {
       where.status = status;
     }
 
+    const safeSort = validateSortField(sort, ['name', 'code', 'sort', 'status'], 'sort');
+    const safeOrder = validateOrder(order);
+
     const { count, rows } = await db.Role.findAndCountAll({
       where,
       limit: parseInt(limit),
       offset,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
     });
 
     return {

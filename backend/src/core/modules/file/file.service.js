@@ -15,6 +15,7 @@ const {
   getFileCategory,
 } = require('../../../utils/file');
 const filePermissionService = require('./file-permission.service');
+const { validateSortField, validateOrder } = require('../../../utils/query-validator');
 
 /**
  * 转换文件对象为安全 JSON（兼容 Sequelize 实例和普通对象）
@@ -81,6 +82,9 @@ class FileService {
       where.mime_type = { [Op.in]: categoryMimeTypes };
     }
 
+    const safeSort = validateSortField(sort, ['original_name', 'mime_type', 'file_size', 'category']);
+    const safeOrder = validateOrder(order);
+
     const { count, rows } = await db.File.findAndCountAll({
       where,
       include: [
@@ -97,7 +101,7 @@ class FileService {
       ],
       limit: parseInt(limit),
       offset,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
     });
 
     // 为每个文件添加格式化信息

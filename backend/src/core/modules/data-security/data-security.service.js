@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const db = require('../../../models');
 const ApiError = require('../../../utils/ApiError');
 const { logger, operationLogger } = require('../../../config/logger');
+const { validateSortField, validateOrder } = require('../../../utils/query-validator');
 
 class DataSecurityService {
   /**
@@ -30,11 +31,14 @@ class DataSecurityService {
       where.is_active = is_active === 'true';
     }
 
+    const safeSort = validateSortField(sort, ['field_name', 'table_name', 'mask_type', 'is_active']);
+    const safeOrder = validateOrder(order);
+
     const { count, rows } = await db.SensitiveField.findAndCountAll({
       where,
       limit: parseInt(limit),
       offset,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
     });
 
     return {

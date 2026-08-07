@@ -21,8 +21,8 @@ const validate = (schema) => {
     const schemaObject = Joi.object(schema);
     const { value, error } = schemaObject.validate(validSchema, {
       abortEarly: false,
-      allowUnknown: true,  // 允许额外字段
-      stripUnknown: false, // 不删除额外字段
+      allowUnknown: false,
+      stripUnknown: true,
     });
 
     if (error) {

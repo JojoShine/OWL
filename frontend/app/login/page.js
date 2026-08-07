@@ -129,8 +129,10 @@ function LoginForm() {
       const result = await authLogin(loginData);
 
       if (result.success) {
-        // 登录成功，跳转到redirect参数指定的页面，或默认跳转到dashboard
-        const redirectPath = searchParams.get('redirect') || '/dashboard';
+        const rawRedirect = searchParams.get('redirect') || '/dashboard';
+        const redirectPath = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
+          ? rawRedirect
+          : '/dashboard';
         router.push(redirectPath);
       } else {
         setError(result.error || '登录失败，请重试');
@@ -202,8 +204,10 @@ function LoginForm() {
           {(loginMethod === 'sms' || loginMethod === 'both') && (
             <TabsContent value="sms">
               <SmsLoginForm onSuccess={() => {
-                const redirectPath = searchParams.get('redirect') || '/dashboard';
-                // 使用 window.location 强制刷新页面，让 AuthProvider 重新初始化
+                const rawRedirect = searchParams.get('redirect') || '/dashboard';
+                const redirectPath = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
+                  ? rawRedirect
+                  : '/dashboard';
                 window.location.href = `${basePath}${redirectPath}`;
               }} />
             </TabsContent>

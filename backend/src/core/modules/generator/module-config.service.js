@@ -13,6 +13,7 @@ const {
   isSystemField,
   isReadonlyField,
 } = require('./template-helpers');
+const { validateSortField, validateOrder } = require('../../../utils/query-validator');
 
 class ModuleConfigService {
   /**
@@ -39,6 +40,9 @@ class ModuleConfigService {
       where.module_name = { [Op.iLike]: `%${module_name}%` };
     }
 
+    const safeSort = validateSortField(sort, ['module_name', 'table_name']);
+    const safeOrder = validateOrder(order);
+
     const { count, rows } = await db.GeneratedModule.findAndCountAll({
       where,
       include: [
@@ -48,9 +52,9 @@ class ModuleConfigService {
           order: [['field_order', 'ASC']],
         },
       ],
-      pageSize: parseInt(limit),
+      limit: parseInt(limit),
       offset,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
     });
 
     return {

@@ -22,8 +22,6 @@ export default function SharePage() {
       try {
         setLoading(true);
         const response = await axios.get(`/file-shares/${shareCode}`);
-        console.log('share response:', response);
-        console.log('share response.data:', response.data);
         setShare(response.data);
         setError(null);
       } catch (err) {

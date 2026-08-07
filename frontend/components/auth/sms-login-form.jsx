@@ -75,26 +75,16 @@ export default function SmsLoginForm({ onSuccess }) {
 
   // 短信登录
   const onSubmit = async (data) => {
-    console.log('=== 短信登录提交 ===');
-    console.log('表单数据:', data);
-    console.log('调用 API 方法: smsAuthApi.login');
-    console.log('请求路径: auth/sms/login');
-    console.log('完整URL应该是: /api/system/auth/sms/login');
     try {
       setIsLoading(true);
       setError('');
 
       const result = await smsAuthApi.login(data);
-      console.log('API 响应:', result);
 
       if (result.success && result.data) {
-        // 直接保存token和用户信息到localStorage（使用命名空间化的key）
         localStorage.setItem(getStorageKey('token'), result.data.token);
         localStorage.setItem(getStorageKey('user'), JSON.stringify(result.data.user));
 
-        console.log('短信登录成功，已保存token和用户信息');
-
-        // 强制刷新页面，让AuthProvider重新初始化
         if (onSuccess) {
           onSuccess();
         }
@@ -146,7 +136,7 @@ export default function SmsLoginForm({ onSuccess }) {
               variant="outline"
               onClick={handleSendCode}
               disabled={countdown > 0 || isLoading || !phone}
-              className="whitespace-nowrap min-w-[120px]"
+              className="whitespace-nowrap min-w-[120px] h-10"
             >
               {countdown > 0 ? `${countdown}秒后重发` : '获取验证码'}
             </Button>

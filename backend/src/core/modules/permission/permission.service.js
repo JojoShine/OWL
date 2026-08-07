@@ -3,6 +3,7 @@ const db = require('../../../models');
 const ApiError = require('../../../utils/ApiError');
 const { logger } = require('../../../config/logger');
 const { clearCache } = require('../../../config/rbac');
+const { validateSortField, validateOrder } = require('../../../utils/query-validator');
 
 class PermissionService {
   /**
@@ -45,11 +46,14 @@ class PermissionService {
       where.category = category;
     }
 
+    const safeSort = validateSortField(sort, ['name', 'code', 'resource', 'action', 'category'], 'category');
+    const safeOrder = validateOrder(order);
+
     const { count, rows } = await db.Permission.findAndCountAll({
       where,
       limit: parseInt(limit),
       offset,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
     });
 
     return {

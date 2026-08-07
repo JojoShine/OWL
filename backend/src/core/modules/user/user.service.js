@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const db = require('../../../models');
 const ApiError = require('../../../utils/ApiError');
 const { logger } = require('../../../config/logger');
+const { validateSortField, validateOrder } = require('../../../utils/query-validator');
 
 class UserService {
   /**
@@ -50,13 +51,16 @@ class UserService {
       include[0].required = true;
     }
 
+    const safeSort = validateSortField(sort, ['username', 'email', 'status', 'department_id', 'access_level']);
+    const safeOrder = validateOrder(order);
+
     const { count, rows } = await db.User.findAndCountAll({
       where,
       attributes: { exclude: ['password', 'deleted_at'] },
       include,
       limit: parseInt(limit),
       offset,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
       distinct: true, // 多对多关系需要distinct避免重复计数
     });
 

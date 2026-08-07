@@ -41,15 +41,13 @@ export default function HistorySection({
   ];
 
   return (
-    <div className="max-h-[600px] overflow-y-auto">
-      <DataTable
-        columns={columns}
-        data={history}
-        loading={loading}
-        pagination={pagination}
-        onPageChange={onPageChange}
-        onPageSizeChange={onPageSizeChange}
-      />
-    </div>
+    <DataTable
+      columns={columns}
+      data={history}
+      loading={loading}
+      pagination={pagination}
+      onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
+    />
   );
 }

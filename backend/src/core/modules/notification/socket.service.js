@@ -49,17 +49,23 @@ class SocketService {
    */
   async authenticateSocket(socket, next) {
     try {
-      // 从握手中获取token
       const token = socket.handshake.auth.token || socket.handshake.query.token;
 
       if (!token) {
         return next(new Error('未提供认证令牌'));
       }
 
-      // 验证JWT token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // 将用户信息附加到socket
+      const db = require('../../../models');
+      const user = await db.User.findByPk(decoded.id, {
+        attributes: ['id', 'username', 'status'],
+      });
+
+      if (!user || user.status !== 'active') {
+        return next(new Error('用户不存在或已被禁用'));
+      }
+
       socket.userId = decoded.id;
       socket.username = decoded.username;
 

@@ -22,10 +22,6 @@ router.use('/biz', businessRoutes);
 const publicRoutes = require('./public.routes');
 router.use('/public', publicRoutes);
 
-// 调试路由
-const debugRoutes = require('./debug.routes');
-router.use('/debug', debugRoutes);
-
 // 动态生成的模块路由将通过 dynamic-routes.js 自动加载
 const dynamicRoutes = require('./dynamic-routes');
 router.use('/modules', dynamicRoutes);

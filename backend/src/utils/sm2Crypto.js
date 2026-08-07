@@ -7,10 +7,15 @@ const { logger } = require('../config/logger');
  */
 class SM2Crypto {
   constructor() {
-    // SM2 密钥对（生产环境应该从环境变量或配置文件读取）
-    // 这里使用固定密钥对，实际部署时应该替换
-    this.publicKey = process.env.SM2_PUBLIC_KEY || '04298364ec840088475eae92a591e01284d1abefcda348b47eb324bb521bb03b1b2b5d8b5d8f6e8c8d8e8f8a8b8c8d8e8f8a8b8c8d8e8f8a8b8c8d8e8f8a8b8c8d';
-    this.privateKey = process.env.SM2_PRIVATE_KEY || '00d5e4e3e2e1e0dfdedddcdbdad9d8d7d6d5d4d3d2d1d0cfcecdcccbcac9c8c7c6';
+    if (process.env.SM2_PUBLIC_KEY && process.env.SM2_PRIVATE_KEY) {
+      this.publicKey = process.env.SM2_PUBLIC_KEY;
+      this.privateKey = process.env.SM2_PRIVATE_KEY;
+    } else {
+      logger.warn('[SM2Crypto] SM2_PUBLIC_KEY/SM2_PRIVATE_KEY not set, generating temporary key pair');
+      const tempKeys = sm2.generateKeyPairHex();
+      this.publicKey = tempKeys.publicKey;
+      this.privateKey = tempKeys.privateKey;
+    }
 
     // 加密模式：1 - C1C3C2，0 - C1C2C3（默认）
     this.cipherMode = 1;

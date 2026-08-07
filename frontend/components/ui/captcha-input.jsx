@@ -103,9 +103,10 @@ export const CaptchaInput = forwardRef(({ onCaptchaChange, error, disabled, ...p
           {isLoading ? (
             <div className="text-xs text-muted-foreground">加载中...</div>
           ) : captchaSvg ? (
-            <div
-              dangerouslySetInnerHTML={{ __html: captchaSvg }}
-              className="w-full h-full flex items-center justify-center"
+            <img
+              src={`data:image/svg+xml,${encodeURIComponent(captchaSvg)}`}
+              alt="验证码"
+              className="w-full h-full object-contain"
             />
           ) : (
             <div className="text-xs text-muted-foreground">无验证码</div>

@@ -1075,10 +1075,13 @@ class GenericService {
     replacements.limit = parseInt(limit);
     replacements.offset = offset;
 
+    const safeSort = this._validateSortField(moduleConfig, sort);
+    const safeOrder = this._validateOrder(order);
+
     // 执行数据查询（包含ORDER BY和LIMIT）
     const dataQuery = `
       ${baseSql}
-      ORDER BY ${sort} ${order.toUpperCase()}
+      ORDER BY ${safeSort} ${safeOrder}
       LIMIT :limit OFFSET :offset
     `;
 

@@ -157,7 +157,7 @@ class ApiBuilderService {
     // 生成API Key和Secret
     const apiKey = this.generateApiKey();
     const apiSecret = crypto
-      .createHmac('sha256', process.env.API_SECRET_KEY || 'your-secret-key')
+      .createHmac('sha256', process.env.API_SECRET_KEY || process.env.JWT_SECRET)
       .update(apiKey)
       .digest('hex');
 
@@ -217,7 +217,7 @@ class ApiBuilderService {
 
     const apiKey = this.generateApiKey();
     const apiSecret = crypto
-      .createHmac('sha256', process.env.API_SECRET_KEY || 'your-secret-key')
+      .createHmac('sha256', process.env.API_SECRET_KEY || process.env.JWT_SECRET)
       .update(apiKey)
       .digest('hex');
 

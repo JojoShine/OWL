@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const db = require('../../../models');
 const { logger } = require('../../../config/logger');
+const { validateSortField, validateOrder } = require('../../../utils/query-validator');
 
 class GenerationHistoryService {
   /**
@@ -73,6 +74,9 @@ class GenerationHistoryService {
       where.success = success === 'true' || success === true;
     }
 
+    const safeSort = validateSortField(sort, ['module_name', 'table_name', 'operation_type', 'success']);
+    const safeOrder = validateOrder(order);
+
     const { count, rows } = await db.GenerationHistory.findAndCountAll({
       where,
       include: [
@@ -82,9 +86,9 @@ class GenerationHistoryService {
           attributes: ['id', 'module_name', 'table_name', 'description'],
         },
       ],
-      pageSize: parseInt(limit),
+      limit: parseInt(limit),
       offset,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
     });
 
     return {
@@ -139,6 +143,9 @@ class GenerationHistoryService {
       where.success = success === 'true' || success === true;
     }
 
+    const safeSort = validateSortField(sort, ['module_name', 'table_name', 'operation_type', 'success']);
+    const safeOrder = validateOrder(order);
+
     const { count, rows } = await db.GenerationHistory.findAndCountAll({
       where,
       include: [
@@ -148,9 +155,9 @@ class GenerationHistoryService {
           attributes: ['id', 'module_name', 'table_name', 'description'],
         },
       ],
-      pageSize: parseInt(limit),
+      limit: parseInt(limit),
       offset,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
     });
 
     return {

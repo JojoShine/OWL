@@ -3,6 +3,7 @@ const db = require('../../../models');
 const ApiError = require('../../../utils/ApiError');
 const { logger } = require('../../../config/logger');
 const { generatePermissionsFromMenu, getMenuPermissionCode } = require('../../../utils/permission-generator');
+const { validateSortField, validateOrder } = require('../../../utils/query-validator');
 
 class MenuService {
   /**
@@ -44,6 +45,9 @@ class MenuService {
       where.parent_id = parent_id === 'null' ? null : parent_id;
     }
 
+    const safeSort = validateSortField(sort, ['name', 'path', 'sort', 'type', 'status'], 'sort');
+    const safeOrder = validateOrder(order);
+
     const { count, rows } = await db.Menu.findAndCountAll({
       where,
       include: [
@@ -59,9 +63,9 @@ class MenuService {
           attributes: ['id', 'name', 'code'],
         },
       ],
-      pageSize: parseInt(limit),
+      limit: parseInt(limit),
       offset,
-      order: [[sort, order.toUpperCase()]],
+      order: [[safeSort, safeOrder]],
     });
 
     return {
