@@ -112,7 +112,7 @@ export default function ZabbixInstallGuide({ open, onOpenChange }) {
         </DialogHeader>
 
         {/* 分类按钮组 */}
-        <div className="flex flex-none gap-1 rounded-lg bg-muted p-1">
+        <div className="grid w-full flex-none grid-cols-3 gap-1 rounded-lg bg-muted p-1">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             return (
@@ -120,14 +120,14 @@ export default function ZabbixInstallGuide({ open, onOpenChange }) {
                 key={cat.key}
                 onClick={() => handleCategoryChange(cat.key)}
                 className={cn(
-                  'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                  'flex min-w-0 items-center justify-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium transition-colors sm:px-3',
                   category === cat.key
                     ? 'border border-border bg-background text-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                <Icon className="h-4 w-4" />
-                {cat.label}
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="min-w-0 truncate">{cat.label}</span>
               </button>
             );
           })}
