@@ -85,7 +85,7 @@ describe('SearchFilter', () => {
     expect(screen.getByRole('button', { name: '导出' })).toBeInTheDocument();
   });
 
-  it('renders both date range controls at 36px in toolbar mode', () => {
+  it('keeps toolbar controls at 40px', () => {
     render(
       <SearchFilter
         fields={[{ type: 'dateRange', name: 'createdAt' }]}
@@ -100,7 +100,9 @@ describe('SearchFilter', () => {
     const rangeField = controls[0].parentElement.parentElement;
 
     expect(controls).toHaveLength(2);
-    expect(controls.every((control) => control.className.includes('h-9'))).toBe(true);
+    expect(controls.every((control) => control.className.includes('h-10'))).toBe(true);
+    expect(screen.getByRole('button', { name: '查询' })).toHaveClass('h-10');
+    expect(screen.getByRole('button', { name: '重置' })).toHaveClass('h-10');
     expect(rangeField).toHaveClass('flex-1', 'min-w-0', 'sm:min-w-[360px]');
     expect(rangeField).not.toHaveClass('min-w-[360px]');
   });

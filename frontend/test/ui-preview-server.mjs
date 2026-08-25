@@ -37,7 +37,7 @@ const previewMenusResponse = {
 const jsonRoutes = new Map([
   ['/api/system/users', previewUsersResponse],
   ['/api/system/menus/user-tree', previewMenusResponse],
-  ['/api/system/system-config', { success: true, data: { system_name: 'Owl 管理平台', primary_color: 'blue', enable_theme_switch: true } }],
+  ['/api/system/system-config', { success: true, data: { system_name: 'Owl 管理平台', primary_color: 'default', enable_theme_switch: true } }],
   ['/api/system/notifications/unread-count', { success: true, data: { count: 8 } }],
   ['/api/system/watermark/rendered', { success: true, data: { enabled: false, lines: [] } }],
   ['/api/system/data-security/fields', { success: true, data: { items: [] } }],

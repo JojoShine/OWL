@@ -9,13 +9,12 @@ vi.mock('@/lib/utils', () => ({
 import { Input } from './input';
 
 describe('Input', () => {
-  it('uses the brand focus treatment instead of the foreground color', () => {
+  it('uses a single brand border without a focus ring', () => {
     render(<Input aria-label="用户名" />);
 
     const input = screen.getByRole('textbox', { name: '用户名' });
-    expect(input).toHaveClass('focus-visible:border-ring');
-    expect(input).toHaveClass('focus-visible:ring-ring/20');
-    expect(input).toHaveClass('focus-visible:ring-[3px]');
+    expect(input).toHaveClass('focus-visible:border-primary');
+    expect(input.className).not.toContain('focus-visible:ring');
     expect(input).not.toHaveClass('focus-visible:border-foreground');
   });
 });

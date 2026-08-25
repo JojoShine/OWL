@@ -7,11 +7,13 @@ const read = (path) => readFileSync(resolve(process.cwd(), path), 'utf8');
 describe('admin shell design contract', () => {
   it('defines the approved light palette', () => {
     const css = read('app/globals.css');
-    expect(css).toContain('--background: #f4f7fb');
-    expect(css).toContain('--foreground: #182230');
-    expect(css).toContain('--primary: #2563eb');
+    expect(css).toContain('--background: #f5f6f8');
+    expect(css).toContain('--foreground: #1f2328');
+    expect(css).toContain('--primary: #25282d');
+    expect(css).toContain('--accent: #f1f3f5');
     expect(css).toContain('--sidebar: #ffffff');
-    expect(css).toContain('--sidebar-accent: #eef4ff');
+    expect(css).toContain('--sidebar-primary: #25282d');
+    expect(css).toContain('--sidebar-accent: #f1f3f5');
   });
 
   it('uses a lightweight sidebar rather than a primary color block', () => {

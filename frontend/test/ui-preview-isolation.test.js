@@ -34,6 +34,17 @@ afterEach(async () => {
 });
 
 describe('read-only UI preview isolation', () => {
+  it('serves the approved neutral visual theme', async () => {
+    const origin = await startPreviewServer();
+    if (!origin) return;
+
+    const response = await fetch(`${origin}/api/system/system-config`);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.data.primary_color).toBe('default');
+  });
+
   it('serves the fixed users sample and filters it without leaving the local server', async () => {
     const origin = await startPreviewServer();
     if (!origin) return;

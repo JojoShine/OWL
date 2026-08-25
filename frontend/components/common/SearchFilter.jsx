@@ -39,7 +39,7 @@ function SearchField({ field, value, onChange, variant = 'default' }) {
     );
   };
 
-  const controlClassName = variant === 'toolbar' ? 'h-9' : undefined;
+  const controlClassName = variant === 'toolbar' ? 'h-10' : undefined;
 
   // 渲染不同类型的输入控件
   switch (type) {
@@ -65,7 +65,7 @@ function SearchField({ field, value, onChange, variant = 'default' }) {
             value={value || 'all'}
             onValueChange={(val) => handleChange(normalizeSelectValue(val, field))}
           >
-            <SelectTrigger className={`w-[180px]${variant === 'toolbar' ? ' h-9' : ''}`}>
+            <SelectTrigger className={`w-[180px]${variant === 'toolbar' ? ' h-10' : ''}`}>
               <SelectValue placeholder={placeholder || '请选择'} />
             </SelectTrigger>
             <SelectContent>
@@ -177,6 +177,8 @@ export function SearchFilter({
   rightActions,
   variant = 'default'
 }) {
+  const toolbarControlClassName = variant === 'toolbar' ? 'h-10' : undefined;
+
   const handleFieldChange = (name, value) => {
     onChange({
       ...values,
@@ -208,11 +210,11 @@ export function SearchFilter({
 
         {/* 按钮区域 */}
         <div className="flex-shrink-0 flex gap-2">
-          <Button onClick={onSearch} size={variant === 'toolbar' ? 'default' : 'lg'}>
+          <Button className={toolbarControlClassName} onClick={onSearch} size={variant === 'toolbar' ? 'default' : 'lg'}>
             <Search className="h-4 w-4 mr-2" />
             查询
           </Button>
-          <Button onClick={onReset} variant="outline" size={variant === 'toolbar' ? 'default' : 'lg'}>
+          <Button className={toolbarControlClassName} onClick={onReset} variant="outline" size={variant === 'toolbar' ? 'default' : 'lg'}>
             <X className="h-4 w-4 mr-2" />
             重置
           </Button>
