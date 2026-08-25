@@ -223,7 +223,7 @@ export default function RoleFormDialog({ open, onOpenChange, role, onSuccess }) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh]">
+      <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? '编辑角色' : '新增角色'}</DialogTitle>
           <DialogDescription>

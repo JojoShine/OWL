@@ -6,7 +6,6 @@ import { apiBuilderApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -21,10 +20,12 @@ import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { PageHeader, PageShell, PageSurface } from '@/components/layout/page-shell';
 
 // 脱敏显示密钥
 const maskKey = (key) => {
@@ -173,30 +174,27 @@ export default function ApiKeyManagementPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h2 className="text-xl font-bold">API密钥管理</h2>
-          <p className="text-sm text-muted-foreground">管理所有应用的API密钥</p>
+    <PageShell>
+      <PageHeader
+        title="API 密钥"
+        description="管理接口调用凭据和使用状态。"
+        actions={
+          <>
+            <Button variant="outline" size="icon" onClick={() => router.back()} aria-label="返回">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <Button onClick={handleCreate}>
+              <Plus className="h-4 w-4 mr-1" />
+              创建密钥
+            </Button>
+          </>
+        }
+      />
+      <PageSurface className="p-5">
+        <div className="mb-4">
+          <h2 className="font-medium">密钥列表</h2>
+          <p className="mt-1 text-sm text-muted-foreground">使用这些密钥通过 app_id 和 app_key 方式登录获取 token</p>
         </div>
-      </div>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>密钥列表</CardTitle>
-            <CardDescription>使用这些密钥通过app_id和app_key方式登录获取token</CardDescription>
-          </div>
-          <Button onClick={handleCreate} size="lg">
-            <Plus className="h-4 w-4 mr-1" />
-            新增密钥
-          </Button>
-        </CardHeader>
-
-        <CardContent>
           <div className="border rounded-lg overflow-hidden">
             <Table>
               <TableHeader>
@@ -310,12 +308,11 @@ export default function ApiKeyManagementPage() {
               </TableBody>
             </Table>
           </div>
-        </CardContent>
-      </Card>
+      </PageSurface>
 
       {/* 编辑/新增对话框 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingKey ? '编辑密钥' : '新增密钥'}</DialogTitle>
             <DialogDescription>
@@ -343,17 +340,17 @@ export default function ApiKeyManagementPage() {
               </div>
             )}
 
-            <div className="flex gap-2 justify-end">
+            <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 取消
               </Button>
               <Button onClick={handleSave}>
                 {editingKey ? '更新' : '创建'}
               </Button>
-            </div>
+            </DialogFooter>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   );
 }

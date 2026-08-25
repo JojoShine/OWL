@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { departmentApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Loading } from '@/components/ui/loading';
 import { Plus } from 'lucide-react';
 import { SearchFilter } from '@/components/common/SearchFilter';
@@ -13,6 +12,7 @@ import DepartmentFormDialog from '@/components/departments/department-form-dialo
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
 import { usePermission } from '@/lib/hooks/usePermission';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 
 export default function DepartmentsPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
@@ -176,85 +176,77 @@ export default function DepartmentsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* 统计信息 */}
-      <Card>
-        <CardContent className="py-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <p className="text-muted-foreground">部门总数</p>
-              <p className="text-xl font-bold">{countDepartments(departments)}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">一级部门</p>
-              <p className="text-xl font-bold">{departments.length}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">启用部门</p>
-              <p className="text-xl font-bold">{countActiveDepartments(departments)}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">禁用部门</p>
-              <p className="text-xl font-bold">{countDepartments(departments) - countActiveDepartments(departments)}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 搜索过滤区域 */}
-      <div className="bg-card rounded-lg p-6 border">
+    <PageShell>
+      <PageHeader
+        title="组织架构"
+        description="维护部门层级与人员归属。"
+        actions={
+          canCreate('department') ? (
+            <Button onClick={() => handleAdd()}>
+              <Plus className="h-4 w-4 mr-2" />
+              新增部门
+            </Button>
+          ) : null
+        }
+      />
+      <PageToolbar>
         <SearchFilter
+          variant="toolbar"
           fields={searchFields}
           values={searchValues}
           onChange={setSearchValues}
           onSearch={() => {}}
           onReset={() => setSearchValues({ keyword: '', status: 'all' })}
-          extra={
-            canCreate('department') && (
-              <Button onClick={() => handleAdd()} size="lg">
-                <Plus className="h-4 w-4 mr-2" />
-                新增部门
-              </Button>
-            )
-          }
         />
-      </div>
-
-      {/* 操作按钮 */}
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <Button
-          onClick={() => {
-            const getAllIds = (deptList) => {
-              let ids = [];
-              deptList.forEach(dept => {
-                ids.push(dept.id);
-                if (dept.children && dept.children.length > 0) {
-                  ids = ids.concat(getAllIds(dept.children));
-                }
-              });
-              return ids;
-            };
-            setExpandedDepartments(new Set(getAllIds(departments)));
-          }}
-          variant="outline"
-        >
-          全部展开
-        </Button>
-        <Button onClick={() => setExpandedDepartments(new Set())} variant="outline">
-          全部收起
-        </Button>
-      </div>
-
-      {/* 部门树 */}
-      {isLoading ? (
-        <Card>
-          <CardContent className="pt-6">
+      </PageToolbar>
+      <PageSurface className="p-5">
+        <div className="grid grid-cols-2 gap-4 border-b pb-5 text-sm md:grid-cols-4">
+          <div>
+            <p className="text-muted-foreground">部门总数</p>
+            <p className="text-xl font-semibold tabular-nums">{countDepartments(departments)}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">一级部门</p>
+            <p className="text-xl font-semibold tabular-nums">{departments.length}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">启用部门</p>
+            <p className="text-xl font-semibold tabular-nums">{countActiveDepartments(departments)}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">禁用部门</p>
+            <p className="text-xl font-semibold tabular-nums">{countDepartments(departments) - countActiveDepartments(departments)}</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-2 py-4">
+          <Button
+            onClick={() => {
+              const getAllIds = (deptList) => {
+                let ids = [];
+                deptList.forEach(dept => {
+                  ids.push(dept.id);
+                  if (dept.children && dept.children.length > 0) {
+                    ids = ids.concat(getAllIds(dept.children));
+                  }
+                });
+                return ids;
+              };
+              setExpandedDepartments(new Set(getAllIds(departments)));
+            }}
+            variant="outline"
+          >
+            全部展开
+          </Button>
+          <Button onClick={() => setExpandedDepartments(new Set())} variant="outline">
+            全部收起
+          </Button>
+        </div>
+        {isLoading ? (
+          <div className="py-6">
             <Loading size="md" variant="pulse" />
-          </CardContent>
-        </Card>
-      ) : filteredDepartments.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12 text-muted-foreground">
+          </div>
+        ) : filteredDepartments.length === 0 ? (
+          <div className="py-12 text-center text-muted-foreground">
             <p>{searchValues.keyword || searchValues.status !== 'all' ? '未找到匹配的部门' : '暂无部门'}</p>
             {canCreate('department') && (
               <Button onClick={() => handleAdd()} variant="outline" className="mt-4">
@@ -262,26 +254,26 @@ export default function DepartmentsPage() {
                 创建第一个部门
               </Button>
             )}
-          </CardContent>
-        </Card>
-      ) : (
-        <TreeView
-          data={filteredDepartments}
-          renderNode={(node) => (
-            <DepartmentTreeNode
-              node={node}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onAddChild={handleAdd}
-              canCreate={canCreate('department')}
-              canUpdate={canUpdate('department')}
-              canDelete={canDelete('department')}
-            />
-          )}
-          onToggleExpand={toggleExpanded}
-          expandedIds={expandedDepartments}
-        />
-      )}
+          </div>
+        ) : (
+          <TreeView
+            data={filteredDepartments}
+            renderNode={(node) => (
+              <DepartmentTreeNode
+                node={node}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onAddChild={handleAdd}
+                canCreate={canCreate('department')}
+                canUpdate={canUpdate('department')}
+                canDelete={canDelete('department')}
+              />
+            )}
+            onToggleExpand={toggleExpanded}
+            expandedIds={expandedDepartments}
+          />
+        )}
+      </PageSurface>
 
       {/* 部门表单弹窗 */}
       <DepartmentFormDialog
@@ -306,6 +298,6 @@ export default function DepartmentsPage() {
         cancelText="取消"
         variant="destructive"
       />
-    </div>
+    </PageShell>
   );
 }

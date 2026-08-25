@@ -107,7 +107,7 @@ export default function KeyFormDialog({ open, onOpenChange, editingKey, onSucces
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{isEdit ? '编辑API密钥' : '创建API密钥'}</DialogTitle>
           <DialogDescription>

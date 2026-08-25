@@ -8,10 +8,10 @@ import { Plus, Edit, Trash2 } from 'lucide-react';
 import SensitiveFieldFormDialog from '@/components/sensitive-fields/sensitive-field-form-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { usePermission } from '@/lib/hooks/usePermission';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 
 export default function SensitiveFieldsPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
@@ -220,63 +220,62 @@ export default function SensitiveFieldsPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <CardTitle>敏感字段管理</CardTitle>
-            <CardDescription>配置和管理需要脱敏的敏感字段</CardDescription>
-          </div>
-          {canCreate('sensitive_field') && (
-            <Button onClick={handleAdd} className="sm:w-auto">
+    <PageShell>
+      <PageHeader
+        title="敏感字段"
+        description="管理敏感数据识别和脱敏规则。"
+        actions={
+          canCreate('sensitive_field') ? (
+            <Button onClick={handleAdd}>
               <Plus className="h-4 w-4 mr-2" />
               新增字段
             </Button>
+          ) : null
+        }
+      />
+      <PageToolbar>
+        <SearchFilter
+          variant="toolbar"
+          fields={searchFields}
+          values={searchValues}
+          onChange={setSearchValues}
+          onSearch={handleSearch}
+          onReset={handleReset}
+        />
+      </PageToolbar>
+      <PageSurface className="p-5 pt-4">
+        <DataTable
+          variant="workspace"
+          columns={columns}
+          data={fields}
+          loading={isLoading}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          actions={(field) => (
+            <>
+              {canUpdate('sensitive_field') && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEdit(field)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
+              {canDelete('sensitive_field') && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(field)}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              )}
+            </>
           )}
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* 搜索栏 */}
-          <SearchFilter
-            fields={searchFields}
-            values={searchValues}
-            onChange={setSearchValues}
-            onSearch={handleSearch}
-            onReset={handleReset}
-          />
-
-          {/* 数据表格 */}
-          <DataTable
-            columns={columns}
-            data={fields}
-            loading={isLoading}
-            pagination={pagination}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            actions={(field) => (
-              <>
-                {canUpdate('sensitive_field') && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(field)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                )}
-                {canDelete('sensitive_field') && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(field)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                )}
-              </>
-            )}
-          />
-        </CardContent>
-      </Card>
+        />
+      </PageSurface>
 
       {/* 敏感字段表单弹窗 */}
       <SensitiveFieldFormDialog
@@ -301,6 +300,6 @@ export default function SensitiveFieldsPage() {
         cancelText="取消"
         variant="destructive"
       />
-    </div>
+    </PageShell>
   );
 }

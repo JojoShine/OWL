@@ -171,7 +171,7 @@ export default function UserAuthDialog({ open, onClose, user, onSuccess }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{user ? '编辑核查人员' : '新增核查人员'}</DialogTitle>
           <DialogDescription>

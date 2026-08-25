@@ -145,7 +145,7 @@ export default function DepartmentFormDialog({ open, onOpenChange, department, o
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? '编辑部门' : '新增部门'}</DialogTitle>
           <DialogDescription>

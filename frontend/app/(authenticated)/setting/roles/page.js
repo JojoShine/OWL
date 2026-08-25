@@ -9,10 +9,10 @@ import { Switch } from '@/components/ui/switch';
 import RoleFormDialog from '@/components/roles/role-form-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { usePermission } from '@/lib/hooks/usePermission';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 
 export default function RolesPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
@@ -194,63 +194,62 @@ export default function RolesPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <CardTitle>角色列表</CardTitle>
-            <CardDescription>查看和维护系统角色配置</CardDescription>
-          </div>
-          {canCreate('role') && (
-            <Button onClick={handleAdd} className="sm:w-auto">
+    <PageShell>
+      <PageHeader
+        title="角色管理"
+        description="配置角色及其关联权限范围。"
+        actions={
+          canCreate('role') ? (
+            <Button onClick={handleAdd}>
               <Plus className="h-4 w-4 mr-2" />
               新增角色
             </Button>
+          ) : null
+        }
+      />
+      <PageToolbar>
+        <SearchFilter
+          variant="toolbar"
+          fields={searchFields}
+          values={searchValues}
+          onChange={setSearchValues}
+          onSearch={handleSearch}
+          onReset={handleReset}
+        />
+      </PageToolbar>
+      <PageSurface className="p-5 pt-4">
+        <DataTable
+          variant="workspace"
+          columns={columns}
+          data={roles}
+          loading={isLoading}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          actions={(role) => (
+            <>
+              {canUpdate('role') &&  (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEdit(role)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
+              {canDelete('role') && role.code !== 'super_admin' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(role)}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              )}
+            </>
           )}
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* 搜索栏 */}
-          <SearchFilter
-            fields={searchFields}
-            values={searchValues}
-            onChange={setSearchValues}
-            onSearch={handleSearch}
-            onReset={handleReset}
-          />
-
-          {/* 数据表格 */}
-          <DataTable
-            columns={columns}
-            data={roles}
-            loading={isLoading}
-            pagination={pagination}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            actions={(role) => (
-              <>
-                {canUpdate('role') &&  (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(role)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                )}
-                {canDelete('role') && role.code !== 'super_admin' && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(role)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                )}
-              </>
-            )}
-          />
-        </CardContent>
-      </Card>
+        />
+      </PageSurface>
 
       {/* 角色表单弹窗 */}
       <RoleFormDialog
@@ -275,6 +274,6 @@ export default function RolesPage() {
         cancelText="取消"
         variant="destructive"
       />
-    </div>
+    </PageShell>
   );
 }

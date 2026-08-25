@@ -3,9 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit, Trash2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -15,6 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import EmailTaskDialog from '@/components/notification/EmailTaskDialog';
 import EmailTemplateFormDialog from '@/components/notification/EmailTemplateFormDialog';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 
 const frequencyMap = {
   once: '一次',
@@ -31,6 +31,8 @@ const statusMap = {
 };
 
 export default function EmailManagementPage() {
+  const [activeView, setActiveView] = useState('tasks');
+
   // =============== 发送任务相关状态 ===============
   const [tasks, setTasks] = useState([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
@@ -372,127 +374,119 @@ export default function EmailManagementPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="space-y-1">
-            <CardTitle>邮件管理</CardTitle>
-            <CardDescription>
-              管理邮件模板和配置定时邮件发送任务
-            </CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="tasks" className="w-full">
+    <PageShell>
+      <PageHeader
+        title="邮件模板"
+        description="维护系统邮件内容和变量。"
+        actions={
+          <Button onClick={handleAddTemplate}>
+            <Plus className="h-4 w-4 mr-2" />
+            新增模板
+          </Button>
+        }
+      />
+      <PageToolbar>
+        <Tabs value={activeView} onValueChange={setActiveView} className="space-y-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <TabsList>
               <TabsTrigger value="tasks">发送任务</TabsTrigger>
               <TabsTrigger value="templates">邮件模板</TabsTrigger>
             </TabsList>
-
-            {/* 发送任务 Tab */}
-            <TabsContent value="tasks" className="space-y-4">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
-                <Button onClick={handleAddTask}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  新建任务
+            {activeView === 'tasks' ? (
+              <Button onClick={handleAddTask}>
+                <Plus className="h-4 w-4 mr-2" />
+                新建任务
+              </Button>
+            ) : null}
+          </div>
+          {activeView === 'tasks' ? (
+            <SearchFilter
+              variant="toolbar"
+              fields={taskSearchFields}
+              values={taskSearchValues}
+              onChange={setTaskSearchValues}
+              onSearch={handleTaskSearch}
+              onReset={handleTaskReset}
+            />
+          ) : (
+            <SearchFilter
+              variant="toolbar"
+              fields={templateSearchFields}
+              values={templateSearchValues}
+              onChange={setTemplateSearchValues}
+              onSearch={handleTemplateSearch}
+              onReset={handleTemplateReset}
+            />
+          )}
+        </Tabs>
+      </PageToolbar>
+      <PageSurface className="p-5 pt-4">
+        {activeView === 'tasks' ? (
+          <DataTable
+            variant="workspace"
+            columns={taskColumns}
+            data={tasks}
+            loading={isLoadingTasks}
+            pagination={taskPagination}
+            onPageChange={handleTaskPageChange}
+            onPageSizeChange={handleTaskPageSizeChange}
+            actions={(task) => (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleExecuteTask(task)}
+                  title="立即执行"
+                >
+                  <Play className="h-4 w-4" />
                 </Button>
-              </div>
-
-              {/* 搜索栏 */}
-              <SearchFilter
-                fields={taskSearchFields}
-                values={taskSearchValues}
-                onChange={setTaskSearchValues}
-                onSearch={handleTaskSearch}
-                onReset={handleTaskReset}
-              />
-
-              {/* 数据表格 */}
-              <DataTable
-                columns={taskColumns}
-                data={tasks}
-                loading={isLoadingTasks}
-                pagination={taskPagination}
-                onPageChange={handleTaskPageChange}
-                onPageSizeChange={handleTaskPageSizeChange}
-                actions={(task) => (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleExecuteTask(task)}
-                      title="立即执行"
-                    >
-                      <Play className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditTask(task)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteTask(task)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </>
-                )}
-              />
-            </TabsContent>
-
-            {/* 邮件模板 Tab */}
-            <TabsContent value="templates" className="space-y-4">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
-                <Button onClick={handleAddTemplate}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  新建模板
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEditTask(task)}
+                >
+                  <Edit className="h-4 w-4" />
                 </Button>
-              </div>
-
-              {/* 搜索栏 */}
-              <SearchFilter
-                fields={templateSearchFields}
-                values={templateSearchValues}
-                onChange={setTemplateSearchValues}
-                onSearch={handleTemplateSearch}
-                onReset={handleTemplateReset}
-              />
-
-              {/* 数据表格 */}
-              <DataTable
-                columns={templateColumns}
-                data={templates}
-                loading={isLoadingTemplates}
-                pagination={templatePagination}
-                onPageChange={handleTemplatePageChange}
-                onPageSizeChange={handleTemplatePageSizeChange}
-                actions={(template) => (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditTemplate(template)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteTemplate(template)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </>
-                )}
-              />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeleteTask(task)}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </>
+            )}
+          />
+        ) : (
+          <DataTable
+            variant="workspace"
+            columns={templateColumns}
+            data={templates}
+            loading={isLoadingTemplates}
+            pagination={templatePagination}
+            onPageChange={handleTemplatePageChange}
+            onPageSizeChange={handleTemplatePageSizeChange}
+            actions={(template) => (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEditTemplate(template)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeleteTemplate(template)}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </>
+            )}
+          />
+        )}
+      </PageSurface>
 
       {/* 邮件任务表单弹窗 */}
       <EmailTaskDialog
@@ -541,6 +535,6 @@ export default function EmailManagementPage() {
         cancelText="取消"
         variant="destructive"
       />
-    </div>
+    </PageShell>
   );
 }

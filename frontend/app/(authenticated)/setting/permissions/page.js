@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { permissionApi } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 
 export default function PermissionsPage() {
   const [permissions, setPermissions] = useState([]);
@@ -127,36 +127,33 @@ export default function PermissionsPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="space-y-1">
-            <CardTitle>权限列表</CardTitle>
-            <CardDescription>支持按名称、代码或资源快速筛选</CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* 搜索栏 */}
-          <SearchFilter
-            fields={searchFields}
-            values={searchValues}
-            onChange={setSearchValues}
-            onSearch={handleSearch}
-            onReset={handleReset}
-          />
-
-          {/* 数据表格 */}
-          <DataTable
-            columns={columns}
-            data={permissions}
-            loading={isLoading}
-            pagination={pagination}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            actions={() => <div className="h-8"></div>}
-          />
-        </CardContent>
-      </Card>
-    </div>
+    <PageShell>
+      <PageHeader
+        title="权限管理"
+        description="维护系统权限标识和访问能力。"
+      />
+      <PageToolbar>
+        <SearchFilter
+          variant="toolbar"
+          fields={searchFields}
+          values={searchValues}
+          onChange={setSearchValues}
+          onSearch={handleSearch}
+          onReset={handleReset}
+        />
+      </PageToolbar>
+      <PageSurface className="p-5 pt-4">
+        <DataTable
+          variant="workspace"
+          columns={columns}
+          data={permissions}
+          loading={isLoading}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          actions={() => <div className="h-8"></div>}
+        />
+      </PageSurface>
+    </PageShell>
   );
 }

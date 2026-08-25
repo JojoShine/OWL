@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LogFilters from '@/components/logs/LogFilters';
 import LogTable from '@/components/logs/LogTable';
 import { logApi } from '@/lib/api/system/log.api';
 import { toast } from 'sonner';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 
 const LOG_TYPES = [
   { value: 'operation', label: '操作日志' },
@@ -109,46 +109,37 @@ export default function LogsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">日志管理</h1>
-        <p className="text-muted-foreground mt-2">
-          查看和管理系统各类日志记录
-        </p>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>日志查询</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-7">
-              {LOG_TYPES.map((type) => (
-                <TabsTrigger key={type.value} value={type.value}>
-                  {type.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
+    <PageShell>
+      <PageHeader
+        title="系统日志"
+        description="查询系统操作和运行记录。"
+      />
+      <PageToolbar>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-7">
             {LOG_TYPES.map((type) => (
-              <TabsContent key={type.value} value={type.value} className="mt-4">
-                <LogFilters
-                  type={type.value}
-                  filters={filters}
-                  onChange={handleFilterChange}
-                />
-              </TabsContent>
+              <TabsTrigger key={type.value} value={type.value}>
+                {type.label}
+              </TabsTrigger>
             ))}
-          </Tabs>
-        </CardContent>
-      </Card>
+          </TabsList>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{LOG_TYPES.find(t => t.value === activeTab)?.label}</CardTitle>
-        </CardHeader>
-        <CardContent>
+          {LOG_TYPES.map((type) => (
+            <TabsContent key={type.value} value={type.value} className="mt-4">
+              <LogFilters
+                type={type.value}
+                filters={filters}
+                onChange={handleFilterChange}
+              />
+            </TabsContent>
+          ))}
+        </Tabs>
+      </PageToolbar>
+      <PageSurface>
+        <div className="border-b px-5 py-4">
+          <h2 className="font-medium">{LOG_TYPES.find(t => t.value === activeTab)?.label}</h2>
+        </div>
+        <div className="p-5 pt-4">
           <LogTable
             type={activeTab}
             logs={logs}
@@ -157,8 +148,8 @@ export default function LogsPage() {
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
           />
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </PageSurface>
+    </PageShell>
   );
 }

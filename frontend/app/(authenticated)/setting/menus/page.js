@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { menuApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Loading } from '@/components/ui/loading';
 import { Plus } from 'lucide-react';
 import { SearchFilter } from '@/components/common/SearchFilter';
@@ -13,6 +12,7 @@ import MenuFormDialog from '@/components/menus/menu-form-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
 import { usePermission } from '@/lib/hooks/usePermission';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 
 export default function MenusPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
@@ -188,77 +188,69 @@ export default function MenusPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* 统计信息 */}
-      <Card>
-        <CardContent className="py-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <p className="text-muted-foreground">菜单总数</p>
-              <p className="text-xl font-bold">{countMenus(menus)}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">一级菜单</p>
-              <p className="text-xl font-bold">{menus.length}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">启用菜单</p>
-              <p className="text-xl font-bold">{countActiveMenus(menus)}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">隐藏菜单</p>
-              <p className="text-xl font-bold">
-                {menus.reduce((count, menu) => {
-                  const childHiddenCount = menu.children
-                    ? menu.children.filter(c => !c.visible).length
-                    : 0;
-                  return count + (!menu.visible ? 1 : 0) + childHiddenCount;
-                }, 0)}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 搜索过滤区域 */}
-      <div className="bg-card rounded-lg p-6 border">
+    <PageShell>
+      <PageHeader
+        title="菜单管理"
+        description="配置导航结构、路由与菜单权限。"
+        actions={
+          canCreate('menu') ? (
+            <Button onClick={() => handleAdd()}>
+              <Plus className="h-4 w-4 mr-2" />
+              新增菜单
+            </Button>
+          ) : null
+        }
+      />
+      <PageToolbar>
         <SearchFilter
+          variant="toolbar"
           fields={searchFields}
           values={searchValues}
           onChange={setSearchValues}
           onSearch={() => {}}
           onReset={() => setSearchValues({ keyword: '', type: 'all', status: 'all' })}
-          extra={
-            canCreate('menu') && (
-              <Button onClick={() => handleAdd()} size="lg">
-                <Plus className="h-4 w-4 mr-2" />
-                新增菜单
-              </Button>
-            )
-          }
         />
-      </div>
-
-      {/* 操作按钮 */}
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <Button onClick={() => setExpandedMenus(new Set(menus.map(m => m.id)))} variant="outline">
-          全部展开
-        </Button>
-        <Button onClick={() => setExpandedMenus(new Set())} variant="outline">
-          全部收起
-        </Button>
-      </div>
-
-      {/* 菜单树 */}
-      {isLoading ? (
-        <Card>
-          <CardContent className="pt-6">
+      </PageToolbar>
+      <PageSurface className="p-5">
+        <div className="grid grid-cols-2 gap-4 border-b pb-5 text-sm md:grid-cols-4">
+          <div>
+            <p className="text-muted-foreground">菜单总数</p>
+            <p className="text-xl font-semibold tabular-nums">{countMenus(menus)}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">一级菜单</p>
+            <p className="text-xl font-semibold tabular-nums">{menus.length}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">启用菜单</p>
+            <p className="text-xl font-semibold tabular-nums">{countActiveMenus(menus)}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">隐藏菜单</p>
+            <p className="text-xl font-semibold tabular-nums">
+              {menus.reduce((count, menu) => {
+                const childHiddenCount = menu.children
+                  ? menu.children.filter(c => !c.visible).length
+                  : 0;
+                return count + (!menu.visible ? 1 : 0) + childHiddenCount;
+              }, 0)}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-2 py-4">
+          <Button onClick={() => setExpandedMenus(new Set(menus.map(m => m.id)))} variant="outline">
+            全部展开
+          </Button>
+          <Button onClick={() => setExpandedMenus(new Set())} variant="outline">
+            全部收起
+          </Button>
+        </div>
+        {isLoading ? (
+          <div className="py-6">
             <Loading size="md" variant="pulse" />
-          </CardContent>
-        </Card>
-      ) : filteredMenus.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12 text-muted-foreground">
+          </div>
+        ) : filteredMenus.length === 0 ? (
+          <div className="py-12 text-center text-muted-foreground">
             <p>{searchValues.keyword || searchValues.type !== 'all' || searchValues.status !== 'all' ? '未找到匹配的菜单' : '暂无菜单'}</p>
             {canCreate('menu') && (
               <Button onClick={() => handleAdd()} variant="outline" className="mt-4">
@@ -266,26 +258,26 @@ export default function MenusPage() {
                 创建第一个菜单
               </Button>
             )}
-          </CardContent>
-        </Card>
-      ) : (
-        <TreeView
-          data={filteredMenus}
-          renderNode={(node) => (
-            <MenuTreeNode
-              node={node}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onAddChild={handleAdd}
-              canCreate={canCreate('menu')}
-              canUpdate={canUpdate('menu')}
-              canDelete={canDelete('menu')}
-            />
-          )}
-          onToggleExpand={toggleExpanded}
-          expandedIds={expandedMenus}
-        />
-      )}
+          </div>
+        ) : (
+          <TreeView
+            data={filteredMenus}
+            renderNode={(node) => (
+              <MenuTreeNode
+                node={node}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onAddChild={handleAdd}
+                canCreate={canCreate('menu')}
+                canUpdate={canUpdate('menu')}
+                canDelete={canDelete('menu')}
+              />
+            )}
+            onToggleExpand={toggleExpanded}
+            expandedIds={expandedMenus}
+          />
+        )}
+      </PageSurface>
 
       {/* 菜单表单弹窗 */}
       <MenuFormDialog
@@ -310,6 +302,6 @@ export default function MenusPage() {
         cancelText="取消"
         variant="destructive"
       />
-    </div>
+    </PageShell>
   );
 }

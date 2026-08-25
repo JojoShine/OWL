@@ -13,6 +13,7 @@ import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { usePermission } from '@/lib/hooks/usePermission';
 import PlainAccessButton from '@/components/sensitive-fields/plain-access-button';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 
 export default function UsersPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
@@ -282,47 +283,43 @@ export default function UsersPage() {
   );
 
   return (
-    <>
-      <section className="overflow-hidden rounded-lg border bg-card shadow-[0_1px_2px_rgba(16,24,40,0.03)]">
-        <header className="flex flex-col gap-4 border-b px-5 py-5 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl font-semibold tracking-tight">用户管理</h1>
-              <span className="text-sm text-muted-foreground">共 {pagination.total} 位用户</span>
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">管理系统用户账号、访问状态与数据权限。</p>
-          </div>
-          {canCreate('user') && (
+    <PageShell>
+      <PageHeader
+        title="用户管理"
+        description="管理系统用户账号、访问状态与数据权限。"
+        meta={<span className="text-sm text-muted-foreground">共 {pagination.total} 位用户</span>}
+        actions={
+          canCreate('user') ? (
             <Button onClick={handleAdd}>
               <Plus className="h-4 w-4" />
               新增用户
             </Button>
-          )}
-        </header>
-        <div className="border-b px-5 py-4">
-          <SearchFilter
-            variant="toolbar"
-            fields={searchFields}
-            values={searchValues}
-            onChange={setSearchValues}
-            onSearch={handleSearch}
-            onReset={handleReset}
-          />
-        </div>
-        <div className="p-5 pt-4">
-          <DataTable
-            variant="workspace"
-            density="compact"
-            columns={columns}
-            data={users}
-            loading={isLoading}
-            pagination={pagination}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            actions={renderUserActions}
-          />
-        </div>
-      </section>
+          ) : null
+        }
+      />
+      <PageToolbar>
+        <SearchFilter
+          variant="toolbar"
+          fields={searchFields}
+          values={searchValues}
+          onChange={setSearchValues}
+          onSearch={handleSearch}
+          onReset={handleReset}
+        />
+      </PageToolbar>
+      <PageSurface className="p-5 pt-4">
+        <DataTable
+          variant="workspace"
+          density="compact"
+          columns={columns}
+          data={users}
+          loading={isLoading}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          actions={renderUserActions}
+        />
+      </PageSurface>
 
       {/* 用户表单弹窗 */}
       <UserFormDialog
@@ -347,6 +344,6 @@ export default function UsersPage() {
         cancelText="取消"
         variant="destructive"
       />
-    </>
+    </PageShell>
   );
 }

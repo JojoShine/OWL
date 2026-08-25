@@ -9,9 +9,9 @@ import KeyFormDialog from '@/components/third-party-keys/key-form-dialog';
 import SecretDisplayDialog from '@/components/third-party-keys/secret-display-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 
 export default function ThirdPartyKeysPage() {
   const [keys, setKeys] = useState([]);
@@ -270,75 +270,74 @@ export default function ThirdPartyKeysPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <CardTitle>第三方API密钥管理</CardTitle>
-            <CardDescription>管理第三方系统接入的API密钥</CardDescription>
-          </div>
+    <PageShell>
+      <PageHeader
+        title="第三方密钥"
+        description="集中管理外部服务访问凭据。"
+        actions={
           <Button onClick={handleAdd} className="sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
-            创建密钥
+            新增密钥
           </Button>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* 搜索栏 */}
-          <SearchFilter
-            fields={searchFields}
-            values={searchValues}
-            onChange={setSearchValues}
-            onSearch={handleSearch}
-            onReset={handleReset}
-          />
-
-          {/* 数据表格 */}
-          <DataTable
-            columns={columns}
-            data={keys}
-            loading={isLoading}
-            pagination={pagination}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            actions={(row) => (
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleEdit(row)}
-                  title="编辑"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleChangeStatus(row)}
-                  title={row.status === 'active' ? '禁用' : '启用'}
-                >
-                  <Power className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRegenerate(row)}
-                  title="重新生成密钥"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(row)}
-                  title="删除"
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
-            )}
-          />
-        </CardContent>
-      </Card>
+        }
+      />
+      <PageToolbar>
+        <SearchFilter
+          variant="toolbar"
+          fields={searchFields}
+          values={searchValues}
+          onChange={setSearchValues}
+          onSearch={handleSearch}
+          onReset={handleReset}
+        />
+      </PageToolbar>
+      <PageSurface className="p-5 pt-4">
+        <DataTable
+          variant="workspace"
+          columns={columns}
+          data={keys}
+          loading={isLoading}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          actions={(row) => (
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleEdit(row)}
+                title="编辑"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleChangeStatus(row)}
+                title={row.status === 'active' ? '禁用' : '启用'}
+              >
+                <Power className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleRegenerate(row)}
+                title="重新生成密钥"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDelete(row)}
+                title="删除"
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          )}
+        />
+      </PageSurface>
 
       {/* 密钥表单弹窗 */}
       <KeyFormDialog
@@ -402,6 +401,6 @@ export default function ThirdPartyKeysPage() {
         cancelText="取消"
         variant={keyToChangeStatus?.status === 'active' ? 'destructive' : 'default'}
       />
-    </div>
+    </PageShell>
   );
 }

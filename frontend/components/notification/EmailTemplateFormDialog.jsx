@@ -64,7 +64,7 @@ export default function EmailTemplateFormDialog({ open, onOpenChange, template, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="flex max-h-[85vh] max-w-5xl flex-col overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {template ? '编辑邮件模版' : '创建邮件模版'}

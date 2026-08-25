@@ -177,7 +177,7 @@ export default function MenuFormDialog({ open, onOpenChange, menu, onSuccess }) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? '编辑菜单' : '新增菜单'}</DialogTitle>
           <DialogDescription>
