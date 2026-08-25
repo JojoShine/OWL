@@ -13,7 +13,20 @@ vi.mock('@/components/ui/date-picker', () => ({
     <button data-testid="date-picker" className={className}>{placeholder}</button>
   ),
 }));
-vi.mock('@/components/ui/combobox', () => ({ Combobox: () => null }));
+
+Object.defineProperties(HTMLElement.prototype, {
+  hasPointerCapture: { configurable: true, value: () => false },
+  releasePointerCapture: { configurable: true, value: () => {} },
+  scrollIntoView: { configurable: true, value: () => {} },
+});
+
+if (!globalThis.ResizeObserver) {
+  globalThis.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
 
 const fields = [{ type: 'text', name: 'keyword', placeholder: '搜索用户' }];
 
@@ -30,6 +43,35 @@ describe('SearchFilter', () => {
     const onSearch = vi.fn();
     render(<SearchFilter fields={fields} values={{}} onChange={vi.fn()} onSearch={onSearch} onReset={vi.fn()} variant="toolbar" />);
     fireEvent.keyDown(screen.getByRole('button', { name: '重置' }), { key: 'Enter' });
+    expect(onSearch).not.toHaveBeenCalled();
+  });
+
+  it('does not submit when Enter originates from the real Combobox search input', async () => {
+    const onSearch = vi.fn();
+    const interaction = userEvent.setup();
+    render(
+      <SearchFilter
+        fields={[{
+          type: 'combobox',
+          name: 'role',
+          placeholder: '选择角色',
+          options: [
+            { value: 'admin', label: '管理员' },
+            { value: 'user', label: '普通用户' },
+          ],
+        }]}
+        values={{}}
+        onChange={vi.fn()}
+        onSearch={onSearch}
+        onReset={vi.fn()}
+        variant="toolbar"
+      />
+    );
+
+    await interaction.click(screen.getByRole('combobox'));
+    const comboboxSearch = await screen.findByPlaceholderText('搜索...');
+    await interaction.type(comboboxSearch, '管理{enter}');
+
     expect(onSearch).not.toHaveBeenCalled();
   });
 
@@ -54,7 +96,12 @@ describe('SearchFilter', () => {
         variant="toolbar"
       />
     );
-    expect(screen.getAllByTestId('date-picker')).toHaveLength(2);
-    expect(screen.getAllByTestId('date-picker').every((control) => control.className.includes('h-9'))).toBe(true);
+    const controls = screen.getAllByTestId('date-picker');
+    const rangeField = controls[0].parentElement.parentElement;
+
+    expect(controls).toHaveLength(2);
+    expect(controls.every((control) => control.className.includes('h-9'))).toBe(true);
+    expect(rangeField).toHaveClass('flex-1', 'min-w-0', 'sm:min-w-[360px]');
+    expect(rangeField).not.toHaveClass('min-w-[360px]');
   });
 });

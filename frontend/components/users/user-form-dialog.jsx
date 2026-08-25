@@ -307,9 +307,10 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
                       <p className="text-sm text-muted-foreground">暂无可用角色</p>
                     ) : (
                       roles.map((role) => (
-                        <div key={role.id} className="flex items-center gap-2">
+                        <div key={role.id} className="flex items-start gap-2">
                           <Checkbox
                             id={`role-${role.id}`}
+                            className="mt-0.5"
                             checked={roleIdsValue.includes(role.id.toString())}
                             onCheckedChange={(checked) =>
                               setValue(
@@ -320,12 +321,19 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
                               )
                             }
                           />
-                          <Label
-                            htmlFor={`role-${role.id}`}
-                            className="cursor-pointer font-normal"
-                          >
-                            {role.name}
-                          </Label>
+                          <div className="min-w-0">
+                            <Label
+                              htmlFor={`role-${role.id}`}
+                              className="cursor-pointer font-normal"
+                            >
+                              {role.name}
+                            </Label>
+                            {role.description ? (
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                {role.description}
+                              </p>
+                            ) : null}
+                          </div>
                         </div>
                       ))
                     )}

@@ -48,6 +48,7 @@ function SearchField({ field, value, onChange, variant = 'default' }) {
         <div className="flex-1 min-w-[200px]">
           {renderLabel()}
           <Input
+            data-search-filter-enter="true"
             className={controlClassName}
             placeholder={placeholder || '请输入'}
             value={value || ''}
@@ -112,7 +113,7 @@ function SearchField({ field, value, onChange, variant = 'default' }) {
 
     case 'dateRange':
       return (
-        <div className="flex-1 min-w-[360px]">
+        <div className="flex-1 min-w-0 sm:min-w-[360px]">
           {renderLabel()}
           <div className="flex gap-2 items-center">
             <DatePicker
@@ -187,7 +188,7 @@ export function SearchFilter({
     if (event.key !== 'Enter') return;
     const target = event.target;
     if (!(target instanceof HTMLInputElement)) return;
-    if (!['text', 'search', 'email', 'tel'].includes(target.type)) return;
+    if (target.dataset.searchFilterEnter !== 'true') return;
     onSearch();
   };
 

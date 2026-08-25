@@ -2,7 +2,7 @@ import React from 'react';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { userApi } from '@/lib/api';
+import { roleApi, userApi } from '@/lib/api';
 import * as userFormDialogModule from './user-form-dialog';
 
 const UserFormDialog = userFormDialogModule.default;
@@ -40,6 +40,8 @@ describe('UserFormDialog', () => {
   beforeEach(() => {
     userApi.createUser.mockClear();
     userApi.updateUser.mockClear();
+    roleApi.getRoles.mockReset();
+    roleApi.getRoles.mockResolvedValue({ data: { items: [] } });
   });
 
   it('groups fields and resets an edited value when reopened', async () => {
@@ -101,6 +103,27 @@ describe('UserFormDialog', () => {
     expect(rolesField).toHaveClass('md:col-span-2');
     expect(rolesScroller).toHaveClass('max-h-40', 'overflow-y-auto');
     expect(dialog.querySelector('[data-slot="dialog-footer"]')).toHaveClass('border-t');
+  });
+
+  it('renders backend role descriptions without changing the checkbox label', async () => {
+    roleApi.getRoles.mockResolvedValueOnce({
+      data: {
+        items: [{ id: 2, name: '管理员', description: '管理系统用户' }],
+      },
+    });
+
+    render(
+      <UserFormDialog
+        open
+        user={null}
+        onOpenChange={vi.fn()}
+        onSuccess={vi.fn()}
+      />
+    );
+
+    expect(await screen.findByText('管理员')).toBeInTheDocument();
+    expect(screen.getByText('管理系统用户')).toHaveClass('text-muted-foreground');
+    expect(screen.getByRole('checkbox', { name: '管理员' })).toBeInTheDocument();
   });
 
   it('filters masked edit fields and routes a successful submit to updateUser', async () => {

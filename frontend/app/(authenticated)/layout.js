@@ -38,8 +38,8 @@ export default function AuthenticatedLayout({ children }) {
           )}
           <aside
             className={cn(
-              'fixed inset-y-0 left-0 z-50 w-60 flex-shrink-0 transform transition-transform md:static md:translate-x-0',
-              mobileNavOpen ? 'translate-x-0' : '-translate-x-full'
+              'fixed inset-y-0 left-0 z-50 w-60 flex-shrink-0 transform transition-transform md:static md:visible md:translate-x-0',
+              mobileNavOpen ? 'visible translate-x-0' : 'invisible -translate-x-full'
             )}
           >
             <Sidebar onNavigate={() => setMobileNavOpen(false)} />

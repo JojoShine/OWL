@@ -29,67 +29,67 @@ const MenuItemComponent = ({
   const hasChildren = item.children && item.children.length > 0;
   const isExpanded = expandedMenus.has(item.id);
   const hasValidPath = item.path && item.path !== '#';
+  const expansionLabel = `${isExpanded ? '收起' : '展开'}${item.name}`;
+  const rowClassName = cn(
+    'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
+    level > 0 && 'ml-4',
+    isActive
+      ? 'relative bg-sidebar-accent text-sidebar-primary font-medium before:absolute before:left-0 before:top-1/2 before:h-5 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-sidebar-primary'
+      : 'text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground'
+  );
 
   return (
     <div key={item.id}>
-      <div
-        className={cn(
-          'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
-          level > 0 && 'ml-4',
-          isActive
-            ? 'relative bg-sidebar-accent text-sidebar-primary font-medium before:absolute before:left-0 before:top-1/2 before:h-5 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-sidebar-primary'
-            : 'text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground',
-          hasChildren && !hasValidPath && 'cursor-pointer'
-        )}
-        onClick={hasChildren && !hasValidPath ? () => toggleMenu(item.id) : undefined}
-      >
-        {hasValidPath ? (
+      {hasValidPath ? (
+        <div className={rowClassName}>
           <Link
             href={item.path}
-            className="flex items-center gap-2 flex-1"
+            className="flex min-w-0 flex-1 items-center gap-2"
             onClick={onNavigate}
           >
             <Icon className="h-4 w-4" />
             <span className="flex-1">{item.name}</span>
-            {hasChildren && (
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  toggleMenu(item.id);
-                }}
-                className="p-0 hover:opacity-70 shrink-0"
-              >
-                {isExpanded ? (
-                  <ChevronDown className="h-3 w-3" />
-                ) : (
-                  <ChevronRight className="h-3 w-3" />
-                )}
-              </button>
-            )}
           </Link>
-        ) : (
-          <div className="flex items-center gap-2 flex-1">
+          {hasChildren && (
+            <button
+              type="button"
+              aria-expanded={isExpanded}
+              aria-label={expansionLabel}
+              onClick={() => toggleMenu(item.id)}
+              className="shrink-0 p-0 hover:opacity-70"
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-3 w-3" />
+              ) : (
+                <ChevronRight className="h-3 w-3" />
+              )}
+            </button>
+          )}
+        </div>
+      ) : hasChildren ? (
+        <button
+          type="button"
+          aria-expanded={isExpanded}
+          aria-label={expansionLabel}
+          className={cn(rowClassName, 'w-full cursor-pointer text-left')}
+          onClick={() => toggleMenu(item.id)}
+        >
+          <Icon className="h-4 w-4" />
+          <span className="flex-1">{item.name}</span>
+          {isExpanded ? (
+            <ChevronDown className="h-3 w-3 shrink-0" />
+          ) : (
+            <ChevronRight className="h-3 w-3 shrink-0" />
+          )}
+        </button>
+      ) : (
+        <div className={rowClassName}>
+          <div className="flex flex-1 items-center gap-2">
             <Icon className="h-4 w-4" />
             <span className="flex-1">{item.name}</span>
-            {hasChildren && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleMenu(item.id);
-                }}
-                className="p-0 hover:opacity-70 shrink-0"
-              >
-                {isExpanded ? (
-                  <ChevronDown className="h-3 w-3" />
-                ) : (
-                  <ChevronRight className="h-3 w-3" />
-                )}
-              </button>
-            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {hasChildren && isExpanded && (
         <div className="mt-1 space-y-1">

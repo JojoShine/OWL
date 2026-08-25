@@ -30,6 +30,18 @@ vi.mock('@/lib/utils', () => ({
 }));
 
 describe('AuthenticatedLayout', () => {
+  it('hides the closed mobile sidebar while keeping the desktop visibility override', async () => {
+    const user = userEvent.setup();
+    render(<AuthenticatedLayout>页面内容</AuthenticatedLayout>);
+
+    const aside = screen.getByRole('navigation').closest('aside');
+    expect(aside).toHaveClass('-translate-x-full', 'invisible', 'md:visible');
+
+    await user.click(screen.getByRole('button', { name: '打开导航菜单' }));
+    expect(aside).toHaveClass('translate-x-0', 'visible', 'md:visible');
+    expect(aside).not.toHaveClass('invisible');
+  });
+
   it('closes mobile navigation with Escape or the overlay', async () => {
     const user = userEvent.setup();
     render(<AuthenticatedLayout>页面内容</AuthenticatedLayout>);

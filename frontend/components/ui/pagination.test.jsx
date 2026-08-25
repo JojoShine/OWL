@@ -21,6 +21,29 @@ describe('Pagination', () => {
     expect(screen.getByRole('button', { name: '第 1 页' })).toHaveAttribute('aria-current', 'page');
   });
 
+  it('disables Next on the last page', () => {
+    render(<Pagination page={8} total={80} pageSize={10} onPageChange={vi.fn()} onPageSizeChange={vi.fn()} />);
+    expect(screen.getByRole('button', { name: '下一页' })).toBeDisabled();
+  });
+
+  it('invokes the page-size callback before the reset callback', async () => {
+    const interaction = userEvent.setup();
+    const calls = [];
+    render(
+      <Pagination
+        page={2}
+        total={80}
+        pageSize={10}
+        onPageChange={(page) => calls.push(`page:${page}`)}
+        onPageSizeChange={(pageSize) => calls.push(`size:${pageSize}`)}
+      />
+    );
+
+    await interaction.click(screen.getByRole('combobox'));
+    await interaction.click(screen.getByRole('option', { name: '20' }));
+    expect(calls).toEqual(['size:20', 'page:1']);
+  });
+
   it('preserves the default page-size reset contract and allows an opt-out', async () => {
     const interaction = userEvent.setup();
     const onPageChange = vi.fn();
