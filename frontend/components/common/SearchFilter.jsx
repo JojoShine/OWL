@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -16,7 +17,12 @@ import { Search, X } from 'lucide-react';
 /**
  * 搜索字段组件 - 根据类型渲染不同的输入控件
  */
-function SearchField({ field, value, onChange }) {
+export function normalizeSelectValue(value, field = {}) {
+  if (field.preserveAllValue) return value;
+  return value === (field.allValue ?? 'all') ? (field.emptyValue ?? '') : value;
+}
+
+function SearchField({ field, value, onChange, variant = 'default' }) {
   const { type = 'text', name, label, placeholder, options = [] } = field;
 
   const handleChange = (newValue) => {
@@ -33,6 +39,8 @@ function SearchField({ field, value, onChange }) {
     );
   };
 
+  const controlClassName = variant === 'toolbar' ? 'h-9' : undefined;
+
   // 渲染不同类型的输入控件
   switch (type) {
     case 'text':
@@ -40,6 +48,7 @@ function SearchField({ field, value, onChange }) {
         <div className="flex-1 min-w-[200px]">
           {renderLabel()}
           <Input
+            className={controlClassName}
             placeholder={placeholder || '请输入'}
             value={value || ''}
             onChange={(e) => handleChange(e.target.value)}
@@ -53,9 +62,9 @@ function SearchField({ field, value, onChange }) {
           {renderLabel()}
           <Select
             value={value || 'all'}
-            onValueChange={(val) => handleChange(val === 'all' ? '' : val)}
+            onValueChange={(val) => handleChange(normalizeSelectValue(val, field))}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className={`w-[180px]${variant === 'toolbar' ? ' h-9' : ''}`}>
               <SelectValue placeholder={placeholder || '请选择'} />
             </SelectTrigger>
             <SelectContent>
@@ -83,6 +92,7 @@ function SearchField({ field, value, onChange }) {
             placeholder={placeholder || '请选择'}
             searchPlaceholder="搜索..."
             emptyText="未找到结果"
+            className={controlClassName}
           />
         </div>
       );
@@ -95,6 +105,7 @@ function SearchField({ field, value, onChange }) {
             value={value}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={placeholder || '选择日期'}
+            className={controlClassName}
           />
         </div>
       );
@@ -159,7 +170,9 @@ export function SearchFilter({
   onChange,
   onSearch,
   onReset,
-  extra
+  extra,
+  rightActions,
+  variant = 'default'
 }) {
   const handleFieldChange = (name, value) => {
     onChange({
@@ -168,14 +181,16 @@ export function SearchFilter({
     });
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      onSearch();
-    }
+  const handleKeyDown = (event) => {
+    if (event.key !== 'Enter') return;
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    if (!['text', 'search', 'email', 'tel'].includes(target.type)) return;
+    onSearch();
   };
 
   return (
-    <div className="bg-card rounded-lg" onKeyDown={handleKeyDown}>
+    <div className="bg-card rounded-lg" data-variant={variant} onKeyDown={handleKeyDown}>
       <div className="flex flex-wrap items-end gap-2">
         {/* 渲染所有搜索字段 */}
         {fields.map((field) => (
@@ -184,21 +199,25 @@ export function SearchFilter({
             field={field}
             value={values[field.name]}
             onChange={handleFieldChange}
+            variant={variant}
           />
         ))}
 
         {/* 按钮区域 */}
         <div className="flex-shrink-0 flex gap-2">
-          <Button onClick={onSearch} size="lg">
+          <Button onClick={onSearch} size={variant === 'toolbar' ? 'default' : 'lg'}>
             <Search className="h-4 w-4 mr-2" />
             查询
           </Button>
-          <Button onClick={onReset} variant="outline" size="lg">
+          <Button onClick={onReset} variant="outline" size={variant === 'toolbar' ? 'default' : 'lg'}>
             <X className="h-4 w-4 mr-2" />
             重置
           </Button>
           {extra}
         </div>
+        {variant === 'toolbar' && rightActions ? (
+          <div className="ml-auto flex items-center gap-2">{rightActions}</div>
+        ) : null}
       </div>
     </div>
   );
