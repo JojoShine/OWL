@@ -46,7 +46,7 @@ const jsonRoutes = new Map([
 ]);
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'http://localhost:4173',
+  'Access-Control-Allow-Origin': process.env.UI_PREVIEW_ORIGIN || 'http://localhost:4173',
   'Access-Control-Allow-Headers': 'Authorization, Content-Type',
   'Access-Control-Allow-Methods': 'GET, OPTIONS, POST, PUT, PATCH, DELETE',
   Vary: 'Origin',
