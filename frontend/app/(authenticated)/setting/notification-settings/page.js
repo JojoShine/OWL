@@ -1,15 +1,16 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Bell, Mail, Save, RotateCcw, AlertTriangle } from 'lucide-react';
+import { Bell, Mail, Save, RotateCcw, AlertTriangle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { notificationSettingsApi, monitorApi } from '@/lib/api';
 import { toast } from 'sonner';
+import { PageHeader, PageShell, PageSurface } from '@/components/layout/page-shell';
 
 export default function NotificationSettingsPage() {
   const [settings, setSettings] = useState({
@@ -102,9 +103,12 @@ export default function NotificationSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="h-8 w-64 bg-muted animate-pulse rounded" />
-        <div className="space-y-4">
+      <PageShell>
+        <PageHeader
+          title="通知设置"
+          description="选择通知渠道与需要接收的消息类型。"
+        />
+        <PageSurface className="space-y-4 p-5">
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardHeader>
@@ -119,30 +123,36 @@ export default function NotificationSettingsPage() {
               </CardContent>
             </Card>
           ))}
-        </div>
-      </div>
+        </PageSurface>
+      </PageShell>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <Button
-          variant="outline"
-          onClick={handleReset}
-          disabled={isSaving}
-        >
-          <RotateCcw className="h-4 w-4 mr-2" />
-          重置为默认
-        </Button>
-        <Button
-          onClick={handleSave}
-          disabled={!hasChanges || isSaving}
-        >
-          <Save className="h-4 w-4 mr-2" />
-          {isSaving ? '保存中...' : '保存更改'}
-        </Button>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="通知设置"
+        description="选择通知渠道与需要接收的消息类型。"
+        actions={(
+          <>
+            <Button
+              variant="outline"
+              onClick={handleReset}
+              disabled={isSaving}
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              重置为默认
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={!hasChanges || isSaving}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {isSaving ? '保存中...' : '保存更改'}
+            </Button>
+          </>
+        )}
+      />
 
       {/* 通知渠道设置 */}
       <Card>
@@ -275,19 +285,16 @@ export default function NotificationSettingsPage() {
       </Card>
 
       {/* 帮助说明 */}
-      <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
-        <CardHeader>
-          <CardTitle className="text-blue-900 dark:text-blue-100">
-            温馨提示
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertTitle>温馨提示</AlertTitle>
+        <AlertDescription className="space-y-2 text-muted-foreground">
           <p>• 站内推送通知会实时显示在页面右上角的通知图标中</p>
           <p>• 邮件通知会发送到您的注册邮箱</p>
           <p>• 关闭某类通知后，您将不会收到该类型的任何通知</p>
           <p>• 建议保持错误通知开启，以便及时了解系统问题</p>
-        </CardContent>
-      </Card>
+        </AlertDescription>
+      </Alert>
 
       {/* 保存提示 */}
       {hasChanges && (
@@ -313,6 +320,6 @@ export default function NotificationSettingsPage() {
           </div>
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

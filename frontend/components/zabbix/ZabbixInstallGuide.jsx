@@ -112,7 +112,7 @@ export default function ZabbixInstallGuide({ open, onOpenChange }) {
         </DialogHeader>
 
         {/* 分类按钮组 */}
-        <div className="flex gap-1 p-1 rounded-lg bg-muted flex-none">
+        <div className="flex flex-none gap-1 rounded-lg bg-muted p-1">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             return (
@@ -122,7 +122,7 @@ export default function ZabbixInstallGuide({ open, onOpenChange }) {
                 className={cn(
                   'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   category === cat.key
-                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    ? 'border border-border bg-background text-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
@@ -135,7 +135,7 @@ export default function ZabbixInstallGuide({ open, onOpenChange }) {
 
         {/* 子Tab（Server/Agent 分类显示） */}
         {category !== 'middleware' && SUB_TABS[category] && (
-          <div className="inline-flex h-9 items-center justify-center rounded-lg p-1 border border-border bg-white dark:bg-muted">
+          <div className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-muted/50 p-1">
             {SUB_TABS[category].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.value;
@@ -146,7 +146,7 @@ export default function ZabbixInstallGuide({ open, onOpenChange }) {
                   className={cn(
                     'inline-flex items-center justify-center gap-1.5 flex-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap transition-all',
                     isActive
-                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      ? 'border border-border bg-background text-foreground'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >

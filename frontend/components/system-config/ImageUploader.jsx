@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useId, useRef, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Upload, X } from 'lucide-react';
@@ -16,6 +16,7 @@ export default function ImageUploader({
 }) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const inputId = useId();
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -56,17 +57,18 @@ export default function ImageUploader({
 
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label htmlFor={inputId}>{label}</Label>
 
       <div
         className={`
-        relative border-2 border-dashed rounded-lg overflow-hidden ${height}
+        relative overflow-hidden rounded-lg border border-dashed bg-muted/20 ${height}
         ${aspectRatio === 'square' ? 'aspect-square' : ''}
-        ${!value ? 'bg-muted' : ''}
       `}
       >
         {value ? (
           <>
+            {/* The API can return runtime image paths that are intentionally previewed as-is. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={getFullImageUrl(value)}
               alt={label}
@@ -79,12 +81,13 @@ export default function ImageUploader({
               className="absolute top-2 right-2"
               onClick={handleDelete}
               disabled={uploading}
+              aria-label={`删除${label}`}
             >
               <X className="w-4 h-4" />
             </Button>
           </>
         ) : (
-          <label className="flex flex-col items-center justify-center h-full cursor-pointer hover:bg-muted/50 transition">
+          <label htmlFor={inputId} className="flex h-full cursor-pointer flex-col items-center justify-center transition-colors hover:bg-muted/50">
             <Upload className="w-8 h-8 text-muted-foreground mb-2" />
             <span className="text-sm text-muted-foreground">
               {uploading ? '上传中...' : '点击上传'}
@@ -93,6 +96,7 @@ export default function ImageUploader({
               最大 {maxSize}MB
             </span>
             <input
+              id={inputId}
               ref={fileInputRef}
               type="file"
               accept="image/*"

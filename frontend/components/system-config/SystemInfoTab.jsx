@@ -74,7 +74,7 @@ export default function SystemInfoTab({ config, onUpdate }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* 基本信息和登录注册配置 */}
       <Card>
         <CardHeader>
@@ -83,7 +83,7 @@ export default function SystemInfoTab({ config, onUpdate }) {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* 系统名称和公司信息 */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="company_name">公司名称</Label>
               <Input
@@ -110,8 +110,8 @@ export default function SystemInfoTab({ config, onUpdate }) {
           </div>
 
           {/* 开关配置 */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center justify-between p-3 border rounded-lg">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4">
               <div className="space-y-0.5">
                 <Label>技术栈展示</Label>
                 <p className="text-xs text-muted-foreground">
@@ -126,7 +126,7 @@ export default function SystemInfoTab({ config, onUpdate }) {
               />
             </div>
 
-            <div className="flex items-center justify-between p-3 border rounded-lg">
+            <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4">
               <div className="space-y-0.5">
                 <Label>开放注册</Label>
                 <p className="text-xs text-muted-foreground">
@@ -143,7 +143,7 @@ export default function SystemInfoTab({ config, onUpdate }) {
           </div>
 
           {/* 登录和注册方式 */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="login_method">登录方式</Label>
               <Select
@@ -184,7 +184,7 @@ export default function SystemInfoTab({ config, onUpdate }) {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                需开启"开放注册"才生效
+                需开启“开放注册”才生效
               </p>
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function SystemInfoTab({ config, onUpdate }) {
           <CardDescription>上传系统 Logo 和登录背景图片</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-6 md:grid-cols-2">
             <FileUploader
               label="系统 Logo"
               value={formData.logo_url}
@@ -229,7 +229,7 @@ export default function SystemInfoTab({ config, onUpdate }) {
           <CardDescription>选择登录页的展示布局（左右布局时登录区域占 2/3，图片占 1/3）</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid gap-4 md:grid-cols-3">
             {[
               {
                 value: 'center',
@@ -245,7 +245,7 @@ export default function SystemInfoTab({ config, onUpdate }) {
                 label: '左图右登录',
                 preview: (
                   <div className="w-full h-16 bg-muted rounded flex overflow-hidden">
-                    <div className="w-1/3 bg-slate-300 dark:bg-slate-600" />
+                    <div className="w-1/3 bg-muted-foreground/20" />
                     <div className="w-2/3 flex items-center justify-center">
                       <div className="w-10 h-8 bg-background border rounded" />
                     </div>
@@ -260,7 +260,7 @@ export default function SystemInfoTab({ config, onUpdate }) {
                     <div className="w-2/3 flex items-center justify-center">
                       <div className="w-10 h-8 bg-background border rounded" />
                     </div>
-                    <div className="w-1/3 bg-slate-300 dark:bg-slate-600" />
+                    <div className="w-1/3 bg-muted-foreground/20" />
                   </div>
                 ),
               },
@@ -284,7 +284,7 @@ export default function SystemInfoTab({ config, onUpdate }) {
       </Card>
 
       {/* 保存按钮 */}
-      <div className="flex justify-end">
+      <div className="flex justify-end border-t pt-5">
         <Button type="submit" disabled={saving}>
           {saving ? '保存中...' : '保存配置'}
         </Button>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import SystemInfoTab from '@/components/system-config/SystemInfoTab';
 import { systemConfigApi } from '@/lib/api';
 import { Loading } from '@/components/ui/loading';
+import { PageHeader, PageShell, PageSurface } from '@/components/layout/page-shell';
 
 export default function ConfigManagementPage() {
   const [config, setConfig] = useState(null);
@@ -27,19 +28,28 @@ export default function ConfigManagementPage() {
   };
 
   if (loading) {
-    return <Loading size="sm" variant="pulse" />;
+    return (
+      <PageShell>
+        <PageHeader
+          title="配置管理"
+          description="管理系统信息、登录方式与品牌展示配置。"
+        />
+        <PageSurface className="flex min-h-48 items-center justify-center p-5">
+          <Loading size="sm" variant="pulse" />
+        </PageSurface>
+      </PageShell>
+    );
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">配置管理</h1>
-        <p className="text-muted-foreground mt-1">
-          管理系统的外观和主题配置
-        </p>
-      </div>
-
-      <SystemInfoTab config={config} onUpdate={fetchConfig} />
-    </div>
+    <PageShell>
+      <PageHeader
+        title="配置管理"
+        description="管理系统信息、登录方式与品牌展示配置。"
+      />
+      <PageSurface className="p-5">
+        <SystemInfoTab config={config} onUpdate={fetchConfig} />
+      </PageSurface>
+    </PageShell>
   );
 }

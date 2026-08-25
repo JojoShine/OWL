@@ -6,11 +6,11 @@ import { Plus } from 'lucide-react';
 
 export default function DashboardConfigTab() {
   return (
-    <div className="space-y-6">
+    <div className="grid gap-5 lg:grid-cols-2">
       {/* 指标配置 */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between gap-4">
             <div>
               <CardTitle>指标配置</CardTitle>
               <CardDescription>配置概览页面顶部的指标卡片</CardDescription>
@@ -31,7 +31,7 @@ export default function DashboardConfigTab() {
       {/* 图表配置 */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between gap-4">
             <div>
               <CardTitle>图表配置</CardTitle>
               <CardDescription>配置概览页面的图表布局和数据源</CardDescription>

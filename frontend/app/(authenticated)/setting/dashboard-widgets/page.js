@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { dashboardWidgetApi } from '@/lib/api';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +24,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { DataTable } from '@/components/common/DataTable';
+import { PageHeader, PageShell, PageSurface } from '@/components/layout/page-shell';
 import { toast } from 'sonner';
 import { Edit, Play, BookOpen, Copy, Check } from 'lucide-react';
 
@@ -73,6 +73,8 @@ export default function DashboardWidgetsPage() {
   const [testResult, setTestResult] = useState(null);
   const [helpOpen, setHelpOpen] = useState(false);
 
+  // fetchWidgets intentionally refreshes only when the visible page changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchWidgets(page); }, [page]);
 
   const fetchWidgets = async (pageNum) => {
@@ -154,36 +156,40 @@ export default function DashboardWidgetsPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-start justify-between">
-          <div>
-            <CardTitle>概览 Widget 配置</CardTitle>
-            <CardDescription>编辑各卡片的 SQL 查询，数据将实时展示在概览页面</CardDescription>
-          </div>
+    <PageShell>
+      <PageHeader
+        title="概览 Widget 配置"
+        description="编辑各卡片的 SQL 查询，数据将实时展示在概览页面。"
+        actions={(
           <Button variant="outline" size="sm" onClick={() => setHelpOpen(true)}>
             <BookOpen className="h-4 w-4 mr-1" />
             SQL 帮助
           </Button>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            columns={columns}
-            data={widgets}
-            loading={loading}
-            emptyText="暂无 Widget 数据，请执行数据库初始化"
-            pagination={{ page, total, pageSize: limit }}
-            onPageChange={setPage}
-            actions={(row) => (
-              <div className="flex justify-end">
-                <Button variant="ghost" size="sm" onClick={() => openEdit(row)}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          />
-        </CardContent>
-      </Card>
+        )}
+      />
+      <PageSurface className="p-5">
+        <DataTable
+          variant="workspace"
+          columns={columns}
+          data={widgets}
+          loading={loading}
+          emptyText="暂无 Widget 数据，请执行数据库初始化"
+          pagination={{ page, total, pageSize: limit }}
+          onPageChange={setPage}
+          actions={(row) => (
+            <div className="flex justify-end">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => openEdit(row)}
+                aria-label={`编辑 Widget ${row.title}`}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        />
+      </PageSurface>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -224,7 +230,7 @@ export default function DashboardWidgetsPage() {
                 {editingWidget.widget_type === 'metric' ? (
                   <div className="rounded-md bg-muted/50 border px-3 py-2 text-xs text-muted-foreground space-y-1">
                     <p className="font-medium text-foreground">数字指标 SQL 说明</p>
-                    <p>查询须返回单行单列，列名即为展示的数值字段（对应"数值字段"配置）。</p>
+                    <p>查询须返回单行单列，列名即为展示的数值字段（对应“数值字段”配置）。</p>
                     <p>示例：</p>
                     <code className="block bg-muted rounded px-2 py-1 font-mono">
                       SELECT COUNT(*) AS value FROM owl_users WHERE enabled = true
@@ -233,7 +239,7 @@ export default function DashboardWidgetsPage() {
                 ) : (
                   <div className="rounded-md bg-muted/50 border px-3 py-2 text-xs text-muted-foreground space-y-1">
                     <p className="font-medium text-foreground">图表 SQL 说明</p>
-                    <p>查询须返回多行数据，每行包含 X 轴字段和数值字段（对应上方"X 轴字段"和"数值字段"配置）。</p>
+                    <p>查询须返回多行数据，每行包含 X 轴字段和数值字段（对应上方“X 轴字段”和“数值字段”配置）。</p>
                     {editingWidget.chart_type === 'pie' ? (
                       <>
                         <p>饼图示例（name 为分类，value 为数值）：</p>
@@ -311,6 +317,6 @@ export default function DashboardWidgetsPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   );
 }

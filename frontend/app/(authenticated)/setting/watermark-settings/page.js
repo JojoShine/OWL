@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner';
 import { Loader, Info } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { PageHeader, PageShell, PageSurface } from '@/components/layout/page-shell';
 
 export default function WatermarkSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -107,14 +108,25 @@ export default function WatermarkSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader className="w-8 h-8 animate-spin" />
-      </div>
+      <PageShell>
+        <PageHeader
+          title="水印设置"
+          description="配置水印内容、显示样式并预览浅色与深色背景效果。"
+        />
+        <PageSurface className="flex min-h-48 items-center justify-center p-5">
+          <Loader className="h-8 w-8 animate-spin" />
+        </PageSurface>
+      </PageShell>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 auto-rows-max">
+    <PageShell>
+      <PageHeader
+        title="水印设置"
+        description="配置水印内容、显示样式并预览浅色与深色背景效果。"
+      />
+      <div className="grid auto-rows-max gap-5 lg:grid-cols-2">
       {/* 配置表单 */}
       <div className="flex">
         <Card className="w-full">
@@ -131,7 +143,7 @@ export default function WatermarkSettingsPage() {
                     checked={config.enabled}
                     onCheckedChange={(checked) => setConfig({ ...config, enabled: checked })}
                   />
-                  <span className="text-sm text-gray-600">{config.enabled ? '已启用' : '已禁用'}</span>
+                  <span className="text-sm text-muted-foreground">{config.enabled ? '已启用' : '已禁用'}</span>
                 </div>
               </div>
 
@@ -238,7 +250,7 @@ export default function WatermarkSettingsPage() {
       </div>
 
       {/* 水印行配置和预览 */}
-      <div className="space-y-6">
+      <div className="space-y-5">
         {/* 行配置 */}
         <Card>
             <CardHeader>
@@ -250,8 +262,12 @@ export default function WatermarkSettingsPage() {
                 <h3 className="text-sm font-medium">水印行</h3>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors">
-                      <Info className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    <button
+                      type="button"
+                      className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      aria-label="查看水印变量说明"
+                    >
+                      <Info className="h-4 w-4" />
                     </button>
                   </PopoverTrigger>
                   <PopoverContent className="w-80">
@@ -259,19 +275,19 @@ export default function WatermarkSettingsPage() {
                       <div>
                         <p className="font-medium text-sm mb-2">支持的用户变量：</p>
                         <ul className="space-y-1 text-xs">
-                          <li><code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">{'{{user:username}}'}</code> - 账号</li>
-                          <li><code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">{'{{user:realName}}'}</code> - 真实姓名</li>
-                          <li><code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">{'{{user:department}}'}</code> - 部门</li>
-                          <li><code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">{'{{user:email}}'}</code> - 邮箱</li>
-                          <li><code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">{'{{user:phone}}'}</code> - 电话</li>
+                          <li><code className="rounded bg-muted px-1.5 py-0.5">{'{{user:username}}'}</code> - 账号</li>
+                          <li><code className="rounded bg-muted px-1.5 py-0.5">{'{{user:realName}}'}</code> - 真实姓名</li>
+                          <li><code className="rounded bg-muted px-1.5 py-0.5">{'{{user:department}}'}</code> - 部门</li>
+                          <li><code className="rounded bg-muted px-1.5 py-0.5">{'{{user:email}}'}</code> - 邮箱</li>
+                          <li><code className="rounded bg-muted px-1.5 py-0.5">{'{{user:phone}}'}</code> - 电话</li>
                         </ul>
                       </div>
                       <div className="border-t pt-2">
                         <p className="font-medium text-sm mb-2">脱敏示例：</p>
                         <ul className="space-y-1 text-xs">
-                          <li><code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">{'{{user:username|mask:hide:3}}'}</code> - 隐藏前3个字符</li>
-                          <li><code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">{'{{user:phone|mask:mask_middle:2}}'}</code> - 显示首尾各2个字符</li>
-                          <li><code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">{'{{user:email|mask:hide_last:4}}'}</code> - 隐藏后4个字符</li>
+                          <li><code className="rounded bg-muted px-1.5 py-0.5">{'{{user:username|mask:hide:3}}'}</code> - 隐藏前3个字符</li>
+                          <li><code className="rounded bg-muted px-1.5 py-0.5">{'{{user:phone|mask:mask_middle:2}}'}</code> - 显示首尾各2个字符</li>
+                          <li><code className="rounded bg-muted px-1.5 py-0.5">{'{{user:email|mask:hide_last:4}}'}</code> - 隐藏后4个字符</li>
                         </ul>
                       </div>
                     </div>
@@ -312,11 +328,14 @@ export default function WatermarkSettingsPage() {
               <CardDescription>水印渲染效果预览</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {/* 浅色模式预览 */}
                 <div>
                   <p className="text-sm font-medium mb-2">浅色模式预览</p>
-                  <div className="relative w-full h-80 bg-white border border-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                  <div
+                    className="relative flex h-80 w-full items-center justify-center overflow-hidden rounded-lg border"
+                    style={{ backgroundColor: '#ffffff', borderColor: '#e3e5e8' }}
+                  >
                     <div
                       style={{
                         fontSize: `${config.font_size}px`,
@@ -336,7 +355,10 @@ export default function WatermarkSettingsPage() {
                 {/* 暗黑模式预览 */}
                 <div>
                   <p className="text-sm font-medium mb-2">暗黑模式预览</p>
-                  <div className="relative w-full h-80 bg-gray-950 border border-gray-700 rounded-lg overflow-hidden flex items-center justify-center">
+                  <div
+                    className="relative flex h-80 w-full items-center justify-center overflow-hidden rounded-lg border"
+                    style={{ backgroundColor: '#17191d', borderColor: '#34383f' }}
+                  >
                     <div
                       style={{
                         fontSize: `${config.font_size}px`,
@@ -356,6 +378,7 @@ export default function WatermarkSettingsPage() {
             </CardContent>
           </Card>
       </div>
-    </div>
+      </div>
+    </PageShell>
   );
 }

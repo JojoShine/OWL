@@ -25,10 +25,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import ZabbixInstallGuide from '@/components/zabbix/ZabbixInstallGuide';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 
 export default function ZabbixPage() {
   const [instances, setInstances] = useState([]);
@@ -227,8 +227,8 @@ export default function ZabbixPage() {
   // 状态徽章
   const getStatusBadge = (status) => {
     const statusMap = {
-      active: { label: '启用', variant: 'default' },
-      inactive: { label: '禁用', variant: 'secondary' },
+      active: { label: '启用', variant: 'success' },
+      inactive: { label: '禁用', variant: 'neutral' },
     };
     const config = statusMap[status] || statusMap.active;
     return <Badge variant={config.variant}>{config.label}</Badge>;
@@ -273,14 +273,12 @@ export default function ZabbixPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <CardTitle>Zabbix 实例管理</CardTitle>
-            <CardDescription>管理 Zabbix Server 连接配置，支持系统指标和中间件监控</CardDescription>
-          </div>
-          <div className="flex gap-2">
+    <PageShell>
+      <PageHeader
+        title="Zabbix 实例管理"
+        description="管理 Zabbix Server 连接配置，支持系统指标和中间件监控。"
+        actions={(
+          <>
             <Button variant="outline" onClick={() => setInstallGuideOpen(true)}>
               <BookOpen className="h-4 w-4 mr-2" />
               安装引导
@@ -289,67 +287,77 @@ export default function ZabbixPage() {
               <Plus className="h-4 w-4 mr-2" />
               添加实例
             </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <SearchFilter
-            fields={searchFields}
-            values={searchValues}
-            onChange={setSearchValues}
-            onSearch={handleSearch}
-            onReset={handleReset}
-          />
+          </>
+        )}
+      />
+      <PageToolbar>
+        <SearchFilter
+          variant="toolbar"
+          fields={searchFields}
+          values={searchValues}
+          onChange={setSearchValues}
+          onSearch={handleSearch}
+          onReset={handleReset}
+        />
+      </PageToolbar>
 
-          <DataTable
-            columns={columns}
-            data={instances}
-            loading={isLoading}
-            pagination={pagination}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            actions={(row) => (
-              <div className="flex justify-end gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleTestConnection(row)}
-                  title="测试连接"
-                >
-                  <TestTube className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleSync(row)}
-                  title="手动同步"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-                <Switch
-                  checked={row.status === 'active'}
-                  onCheckedChange={() => handleToggleStatus(row)}
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleEdit(row)}
-                  title="编辑"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(row)}
-                  title="删除"
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
-            )}
-          />
-        </CardContent>
-      </Card>
+      <PageSurface className="p-5">
+        <DataTable
+          variant="workspace"
+          density="compact"
+          columns={columns}
+          data={instances}
+          loading={isLoading}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          actions={(row) => (
+            <div className="flex justify-end gap-1">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => handleTestConnection(row)}
+                aria-label={`测试 ${row.name} 连接`}
+                title="测试连接"
+              >
+                <TestTube className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => handleSync(row)}
+                aria-label={`同步 ${row.name}`}
+                title="手动同步"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Switch
+                checked={row.status === 'active'}
+                onCheckedChange={() => handleToggleStatus(row)}
+                aria-label={`切换 ${row.name} 状态`}
+              />
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => handleEdit(row)}
+                aria-label={`编辑 ${row.name}`}
+                title="编辑"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => handleDelete(row)}
+                aria-label={`删除 ${row.name}`}
+                title="删除"
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          )}
+        />
+      </PageSurface>
 
       {/* 新增/编辑弹窗 */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -449,6 +457,6 @@ export default function ZabbixPage() {
 
       {/* 安装引导弹窗 */}
       <ZabbixInstallGuide open={installGuideOpen} onOpenChange={setInstallGuideOpen} />
-    </div>
+    </PageShell>
   );
 }
