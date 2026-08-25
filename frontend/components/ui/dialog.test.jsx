@@ -22,7 +22,10 @@ describe('DialogContent overlayClassName', () => {
       </Dialog>
     );
 
-    expect(document.querySelector('[data-slot="dialog-overlay"]')).toHaveClass('bg-black/50');
+    expect(document.querySelector('[data-slot="dialog-overlay"]')).toHaveClass(
+      'bg-slate-950/35',
+      'backdrop-blur-[1px]'
+    );
 
     rerender(
       <Dialog open>
