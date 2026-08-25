@@ -8,7 +8,32 @@ vi.mock('@/lib/utils', () => ({
   cn: (...inputs) => inputs.filter(Boolean).join(' '),
 }));
 
+Object.defineProperties(HTMLElement.prototype, {
+  hasPointerCapture: { configurable: true, value: () => false },
+  releasePointerCapture: { configurable: true, value: () => {} },
+  scrollIntoView: { configurable: true, value: () => {} },
+});
+
 describe('DataTable workspace variant', () => {
+  it('keeps the prior page-size reset callback order for implicit-default callers', async () => {
+    const interaction = userEvent.setup();
+    const calls = [];
+    render(
+      <DataTable
+        columns={[{ key: 'name', label: '名称' }]}
+        data={[{ id: 1, name: '用户' }]}
+        pagination={{ page: 2, pageSize: 10, total: 80 }}
+        onPageChange={(page) => calls.push(`page:${page}`)}
+        onPageSizeChange={(pageSize) => calls.push(`size:${pageSize}`)}
+      />
+    );
+
+    await interaction.click(screen.getByRole('combobox'));
+    await interaction.click(screen.getByRole('option', { name: '20' }));
+
+    expect(calls).toEqual(['size:20', 'page:1']);
+  });
+
   it('uses the mature workspace treatment by default', () => {
     render(
       <DataTable

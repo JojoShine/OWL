@@ -220,7 +220,6 @@ export function DataTable({
             pageSize={pagination.pageSize}
             onPageChange={onPageChange}
             onPageSizeChange={onPageSizeChange}
-            resetPageOnPageSizeChange={!isWorkspace}
             className={
               isWorkspace
                 ? 'flex-col items-start sm:flex-row sm:items-center [&>nav]:max-w-full [&>nav]:overflow-x-auto'
