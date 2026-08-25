@@ -10,7 +10,7 @@ describe('admin shell design contract', () => {
     expect(css).toContain('--background: #f4f7fb');
     expect(css).toContain('--foreground: #182230');
     expect(css).toContain('--primary: #2563eb');
-    expect(css).toContain('--sidebar: #f8fafd');
+    expect(css).toContain('--sidebar: #ffffff');
     expect(css).toContain('--sidebar-accent: #eef4ff');
   });
 
