@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/utils', () => ({
@@ -148,5 +149,21 @@ describe('neutral UI primitive contract', () => {
     expect(screen.getByText('信息')).toHaveClass('bg-blue-50');
     expect(screen.getByText('危险')).toHaveClass('bg-destructive');
     expect(screen.getByText('中性')).toHaveClass('bg-muted');
+  });
+
+  it('keeps the password visibility toggle in the keyboard tab order with visible focus', async () => {
+    const user = userEvent.setup();
+
+    render(h(PasswordInput, { 'aria-label': '密码' }));
+
+    const password = screen.getByLabelText('密码');
+    const toggle = screen.getByRole('button');
+
+    await user.tab();
+    expect(password).toHaveFocus();
+
+    await user.tab();
+    expect(toggle).toHaveFocus();
+    expect(toggle).toHaveClass('focus-visible:ring-2', 'focus-visible:ring-ring/50');
   });
 });
