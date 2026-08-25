@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { userApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +9,6 @@ import { Switch } from '@/components/ui/switch';
 import UserFormDialog from '@/components/users/user-form-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { usePermission } from '@/lib/hooks/usePermission';
@@ -20,21 +19,27 @@ export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchValues, setSearchValues] = useState({});
+  const [appliedSearch, setAppliedSearch] = useState('');
+  const [queryVersion, setQueryVersion] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 0 });
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const latestRequestId = useRef(0);
 
   // 获取用户列表
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async ({
+    search = appliedSearch,
+    page = pagination.page,
+    limit = pagination.pageSize,
+  } = {}) => {
+    const requestId = ++latestRequestId.current;
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const response = await userApi.getUsers({
-        search: searchValues.keyword || '',
-        page: pagination.page,
-        limit: pagination.pageSize
-      });
+      const response = await userApi.getUsers({ search, page, limit });
+      if (requestId !== latestRequestId.current) return;
+
       const usersData = response.data?.items || response.data || [];
       setUsers(Array.isArray(usersData) ? usersData : []);
 
@@ -46,29 +51,35 @@ export default function UsersPage() {
         }));
       }
     } catch (error) {
+      if (requestId !== latestRequestId.current) return;
       console.error('获取用户列表失败:', error);
       setUsers([]);
     } finally {
-      setIsLoading(false);
+      if (requestId === latestRequestId.current) setIsLoading(false);
     }
-  };
+  }, [appliedSearch, pagination.page, pagination.pageSize]);
 
   useEffect(() => {
-    fetchUsers();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.page, pagination.pageSize]);
+    fetchUsers({
+      search: appliedSearch,
+      page: pagination.page,
+      limit: pagination.pageSize,
+    });
+  }, [appliedSearch, fetchUsers, pagination.page, pagination.pageSize, queryVersion]);
 
   // 搜索
   const handleSearch = () => {
-    setPagination(prev => ({ ...prev, page: 1 })); // 重置到第一页
-    setTimeout(() => fetchUsers(), 0);
+    setAppliedSearch(searchValues.keyword?.trim() || '');
+    setPagination(prev => ({ ...prev, page: 1 }));
+    setQueryVersion(current => current + 1);
   };
 
   // 重置
   const handleReset = () => {
     setSearchValues({});
+    setAppliedSearch('');
     setPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchUsers(), 0);
+    setQueryVersion(current => current + 1);
   };
 
   // 分页变化
@@ -136,9 +147,9 @@ export default function UsersPage() {
   // 状态徽章颜色
   const getStatusBadge = (status) => {
     const statusMap = {
-      active: { label: '正常', variant: 'default' },
-      inactive: { label: '禁用', variant: 'secondary' },
-      banned: { label: '封禁', variant: 'destructive' },
+      active: { label: '正常', variant: 'success' },
+      inactive: { label: '禁用', variant: 'neutral' },
+      banned: { label: '封禁', variant: 'warning' },
     };
     const config = statusMap[status] || statusMap.active;
     return <Badge variant={config.variant}>{config.label}</Badge>;
@@ -177,13 +188,15 @@ export default function UsersPage() {
   const columns = [
     {
       key: 'username',
-      label: '用户名',
-      cellClassName: 'font-medium'
-    },
-    {
-      key: 'real_name',
-      label: '真实姓名',
-      render: (value) => value || '-'
+      label: '用户',
+      render: (value, record) => (
+        <div className="flex flex-col gap-0.5">
+          <span className="font-medium">{value || '-'}</span>
+          {record.real_name && (
+            <span className="text-xs text-muted-foreground">{record.real_name}</span>
+          )}
+        </div>
+      )
     },
     {
       key: 'email',
@@ -223,11 +236,15 @@ export default function UsersPage() {
       key: 'status',
       label: '状态',
       render: (value, row) => (
-        <Switch
-          checked={value === 'active'}
-          onCheckedChange={() => handleToggleStatus(row)}
-          disabled={!canUpdate('user')}
-        />
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={value === 'active'}
+            onCheckedChange={() => handleToggleStatus(row)}
+            disabled={!canUpdate('user')}
+            aria-label={`切换用户 ${row.username} 状态`}
+          />
+          {getStatusBadge(value)}
+        </div>
       )
     },
     {
@@ -237,64 +254,75 @@ export default function UsersPage() {
     }
   ];
 
+  const renderUserActions = (user) => (
+    <>
+      {canUpdate('user') && (
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => handleEdit(user)}
+          aria-label={`编辑用户 ${user.username}`}
+          title="编辑用户"
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
+      )}
+      {canDelete('user') && (
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => handleDelete(user)}
+          aria-label={`删除用户 ${user.username}`}
+          title="删除用户"
+        >
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
+      )}
+    </>
+  );
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <CardTitle>用户列表</CardTitle>
-            <CardDescription>查看和搜索系统用户列表</CardDescription>
+    <>
+      <section className="overflow-hidden rounded-lg border bg-card shadow-[0_1px_2px_rgba(16,24,40,0.03)]">
+        <header className="flex flex-col gap-4 border-b px-5 py-5 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-semibold tracking-tight">用户管理</h1>
+              <span className="text-sm text-muted-foreground">共 {pagination.total} 位用户</span>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">管理系统用户账号、访问状态与数据权限。</p>
           </div>
           {canCreate('user') && (
-            <Button onClick={handleAdd} className="sm:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
+            <Button onClick={handleAdd}>
+              <Plus className="h-4 w-4" />
               新增用户
             </Button>
           )}
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* 搜索栏 */}
+        </header>
+        <div className="border-b px-5 py-4">
           <SearchFilter
+            variant="toolbar"
             fields={searchFields}
             values={searchValues}
             onChange={setSearchValues}
             onSearch={handleSearch}
             onReset={handleReset}
           />
-
-          {/* 数据表格 */}
+        </div>
+        <div className="p-5 pt-4">
           <DataTable
+            variant="workspace"
+            density="compact"
             columns={columns}
             data={users}
             loading={isLoading}
             pagination={pagination}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
-            actions={(user) => (
-              <>
-                {canUpdate('user') && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(user)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                )}
-                {canDelete('user') && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(user)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                )}
-              </>
-            )}
+            actions={renderUserActions}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {/* 用户表单弹窗 */}
       <UserFormDialog
@@ -319,6 +347,6 @@ export default function UsersPage() {
         cancelText="取消"
         variant="destructive"
       />
-    </div>
+    </>
   );
 }
