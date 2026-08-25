@@ -46,7 +46,7 @@ export function SensitiveInput({
     <div className="space-y-2">
       <Label htmlFor={name}>
         {label}
-        {required && <span className="text-red-500"> *</span>}
+        {required && <span className="text-destructive"> *</span>}
       </Label>
       <div className="flex gap-2">
         <Input
@@ -70,7 +70,7 @@ export function SensitiveInput({
         )}
       </div>
       {errors[name] && (
-        <p className="text-sm text-red-500">{errors[name].message}</p>
+        <p className="text-sm text-destructive">{errors[name].message}</p>
       )}
     </div>
   );

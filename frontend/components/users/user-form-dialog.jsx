@@ -27,6 +27,52 @@ import { toast } from 'sonner';
 import { SensitiveInput } from '@/components/form/SensitiveInput';
 import { userSchema, filterMaskedFields } from '@/lib/schemas';
 
+const EMPTY_USER_FORM = {
+  username: '',
+  email: '',
+  password: '',
+  real_name: '',
+  phone: '',
+  department_id: '',
+  status: 'active',
+  role_ids: [],
+  access_level: 'SELF',
+};
+
+export function mapUserToForm(user) {
+  if (!user) {
+    return { ...EMPTY_USER_FORM, role_ids: [] };
+  }
+
+  return {
+    username: user.username || '',
+    email: user.email || '',
+    password: '',
+    real_name: user.real_name || '',
+    phone: user.phone || '',
+    department_id: user.department_id || '',
+    status: user.status || 'active',
+    role_ids: user.roles?.map((role) => role.id.toString()) || [],
+    access_level: user.access_level || 'SELF',
+  };
+}
+
+export function buildUserPayload(data, isEdit) {
+  const submitData = { ...data };
+
+  if (isEdit && !submitData.password) {
+    delete submitData.password;
+  }
+  if (submitData.department_id === '') {
+    submitData.department_id = null;
+  }
+  if (!submitData.role_ids) {
+    submitData.role_ids = [];
+  }
+
+  return isEdit ? filterMaskedFields(submitData) : submitData;
+}
+
 export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) {
   const isEdit = !!user;
   const [departments, setDepartments] = useState([]);
@@ -41,17 +87,7 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(userSchema),
-    defaultValues: {
-      username: '',
-      email: '',
-      password: '',
-      real_name: '',
-      phone: '',
-      department_id: '',
-      status: 'active',
-      role_ids: [],
-      access_level: 'SELF',
-    },
+    defaultValues: mapUserToForm(null),
   });
 
   // 获取部门列表和角色列表
@@ -86,37 +122,11 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
     }
   }, [open]);
 
-  // 当user变化或弹窗打开/关闭时，更新表单
+  // 每次打开弹窗或切换当前用户时，恢复对应的初始值
   useEffect(() => {
-    if (user) {
-      // 提取用户的角色ID列表
-      const userRoleIds = user.roles?.map(role => role.id.toString()) || [];
-
-      reset({
-        username: user.username || '',
-        email: user.email || '',
-        password: '',
-        real_name: user.real_name || '',
-        phone: user.phone || '',
-        department_id: user.department_id || '',
-        status: user.status || 'active',
-        role_ids: userRoleIds,
-        access_level: user.access_level || 'SELF',
-      });
-    } else {
-      reset({
-        username: '',
-        email: '',
-        password: '',
-        real_name: '',
-        phone: '',
-        department_id: '',
-        status: 'active',
-        role_ids: [],
-        access_level: 'SELF',
-      });
-    }
-  }, [user, reset]);
+    if (!open) return;
+    reset(mapUserToForm(user));
+  }, [open, user, reset]);
 
   // 将部门树展平为列表（用于下拉选择）
   const flattenDepartments = (deptList, level = 0) => {
@@ -132,27 +142,12 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
 
   const onSubmit = async (data) => {
     try {
-      // 如果是编辑且密码为空，则不传递密码字段
-      const submitData = { ...data };
-      if (isEdit && !submitData.password) {
-        delete submitData.password;
-      }
-      // 如果 department_id 为空字符串，转换为 null
-      if (submitData.department_id === '') {
-        submitData.department_id = null;
-      }
-      // role_ids 保持为字符串数组（不转换为数字）
-      if (!submitData.role_ids || submitData.role_ids.length === 0) {
-        submitData.role_ids = [];
-      }
-
-      // 移除所有包含脱敏标记的字段（编辑模式下）
-      const finalData = isEdit ? filterMaskedFields(submitData) : submitData;
+      const submitData = buildUserPayload(data, isEdit);
 
       if (isEdit) {
-        await userApi.updateUser(user.id, finalData);
+        await userApi.updateUser(user.id, submitData);
       } else {
-        await userApi.createUser(finalData);
+        await userApi.createUser(submitData);
       }
 
       toast.success(user ? '更新用户成功' : '创建用户成功');
@@ -176,180 +171,188 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent
+        overlayClassName="bg-slate-950/35 backdrop-blur-[1px]"
+        className="flex max-h-[85vh] max-w-3xl flex-col gap-0 overflow-hidden p-0"
+      >
+        <DialogHeader className="shrink-0 border-b px-6 py-5">
           <DialogTitle>{isEdit ? '编辑用户' : '新增用户'}</DialogTitle>
           <DialogDescription>
-            {isEdit ? '修改用户信息' : '填写新用户信息'}
+            {isEdit ? '修改用户信息与权限配置' : '创建用户并配置组织与权限'}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* 用户名 */}
-          <div className="space-y-2">
-            <Label htmlFor="username">
-              用户名 <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="username"
-              {...register('username')}
-              placeholder="请输入用户名"
-              disabled={isEdit}
-            />
-            {errors.username && (
-              <p className="text-sm text-red-500">{errors.username.message}</p>
-            )}
-          </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-5">
+            <section aria-labelledby="basic-user-fields">
+              <h3 id="basic-user-fields" className="mb-4 text-sm font-semibold text-foreground">
+                基本信息
+              </h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="username">
+                    用户名 <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="username"
+                    {...register('username')}
+                    placeholder="请输入用户名"
+                    disabled={isEdit}
+                  />
+                  {errors.username && (
+                    <p className="text-sm text-destructive">{errors.username.message}</p>
+                  )}
+                </div>
 
-          {/* 邮箱 */}
-          <SensitiveInput
-            name="email"
-            label="邮箱"
-            value={emailValue}
-            isEdit={isEdit}
-            required={true}
-            type="email"
-            placeholder="请输入邮箱"
-            register={register}
-            setValue={setValue}
-            errors={errors}
-          />
+                <SensitiveInput
+                  name="email"
+                  label="邮箱"
+                  value={emailValue}
+                  isEdit={isEdit}
+                  required
+                  type="email"
+                  placeholder="请输入邮箱"
+                  register={register}
+                  setValue={setValue}
+                  errors={errors}
+                />
 
-          {/* 密码 */}
-          <div className="space-y-2">
-            <Label htmlFor="password">
-              密码 {!isEdit && <span className="text-red-500">*</span>}
-              {isEdit && <span className="text-muted-foreground text-xs">（留空则不修改）</span>}
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              {...register('password')}
-              placeholder={isEdit ? '留空则不修改密码' : '请输入密码'}
-            />
-            {errors.password && (
-              <p className="text-sm text-red-500">{errors.password.message}</p>
-            )}
-          </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">
+                    密码 {!isEdit && <span className="text-destructive">*</span>}
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    {...register('password')}
+                    placeholder={isEdit ? '留空则不修改密码' : '请输入密码'}
+                  />
+                  {errors.password && (
+                    <p className="text-sm text-destructive">{errors.password.message}</p>
+                  )}
+                </div>
 
-          {/* 真实姓名 */}
-          <SensitiveInput
-            name="real_name"
-            label="真实姓名"
-            value={realNameValue}
-            isEdit={isEdit}
-            placeholder="请输入真实姓名"
-            register={register}
-            setValue={setValue}
-            errors={errors}
-          />
+                <SensitiveInput
+                  name="real_name"
+                  label="真实姓名"
+                  value={realNameValue}
+                  isEdit={isEdit}
+                  placeholder="请输入真实姓名"
+                  register={register}
+                  setValue={setValue}
+                  errors={errors}
+                />
 
-          {/* 手机号 */}
-          <SensitiveInput
-            name="phone"
-            label="手机号"
-            value={phoneValue}
-            isEdit={isEdit}
-            placeholder="请输入手机号（11位中国手机号）"
-            register={register}
-            setValue={setValue}
-            errors={errors}
-          />
+                <SensitiveInput
+                  name="phone"
+                  label="手机号"
+                  value={phoneValue}
+                  isEdit={isEdit}
+                  placeholder="请输入手机号（11位中国手机号）"
+                  register={register}
+                  setValue={setValue}
+                  errors={errors}
+                />
+              </div>
+            </section>
 
-          {/* 所属部门 */}
-          <div className="space-y-2">
-            <Label>所属部门</Label>
-            <Select
-              value={departmentIdValue || 'none'}
-              onValueChange={(value) => setValue('department_id', value === 'none' ? '' : value)}
-            >
-              <SelectTrigger className="!h-10">
-                <SelectValue placeholder="选择部门" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">无</SelectItem>
-                {flattenDepartments(departments).map((dept) => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    {'　'.repeat(dept.level)}{dept.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            <section aria-labelledby="user-access-fields">
+              <h3 id="user-access-fields" className="mb-4 text-sm font-semibold text-foreground">
+                组织与权限
+              </h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>所属部门</Label>
+                  <Select
+                    value={departmentIdValue || 'none'}
+                    onValueChange={(value) =>
+                      setValue('department_id', value === 'none' ? '' : value)
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="选择部门" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">无</SelectItem>
+                      {flattenDepartments(departments).map((department) => (
+                        <SelectItem key={department.id} value={department.id}>
+                          {'　'.repeat(department.level)}{department.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          {/* 数据查询权限 */}
-          <div className="space-y-2">
-            <Label>数据查询权限</Label>
-            <Select
-              value={accessLevelValue}
-              onValueChange={(value) => setValue('access_level', value)}
-            >
-              <SelectTrigger className="!h-10">
-                <SelectValue placeholder="选择数据查询权限" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="SELF">只能查看本人数据</SelectItem>
-                <SelectItem value="DEPARTMENT">可查看本部门及下级数据</SelectItem>
-                <SelectItem value="ALL">可查看所有数据</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+                <div className="space-y-2">
+                  <Label>数据查询权限</Label>
+                  <Select
+                    value={accessLevelValue}
+                    onValueChange={(value) => setValue('access_level', value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="选择数据查询权限" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="SELF">只能查看本人数据</SelectItem>
+                      <SelectItem value="DEPARTMENT">可查看本部门及下级数据</SelectItem>
+                      <SelectItem value="ALL">可查看所有数据</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          {/* 角色分配 */}
-          <div className="space-y-2">
-            <Label>角色分配</Label>
-            <div className="border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto">
-              {roles.length === 0 ? (
-                <p className="text-sm text-muted-foreground">暂无可用角色</p>
-              ) : (
-                roles.map((role) => (
-                  <div key={role.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`role-${role.id}`}
-                      checked={roleIdsValue.includes(role.id.toString())}
-                      onCheckedChange={(checked) => {
-                        const newRoleIds = checked
-                          ? [...roleIdsValue, role.id.toString()]
-                          : roleIdsValue.filter((id) => id !== role.id.toString());
-                        setValue('role_ids', newRoleIds);
-                      }}
-                    />
-                    <label
-                      htmlFor={`role-${role.id}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      {role.name}
-                      {role.description && (
-                        <span className="text-muted-foreground ml-2">
-                          ({role.description})
-                        </span>
-                      )}
-                    </label>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>角色分配</Label>
+                  <div className="max-h-40 space-y-2 overflow-y-auto rounded-md border bg-muted/20 p-3">
+                    {roles.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">暂无可用角色</p>
+                    ) : (
+                      roles.map((role) => (
+                        <div key={role.id} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`role-${role.id}`}
+                            checked={roleIdsValue.includes(role.id.toString())}
+                            onCheckedChange={(checked) =>
+                              setValue(
+                                'role_ids',
+                                checked
+                                  ? [...roleIdsValue, role.id.toString()]
+                                  : roleIdsValue.filter((id) => id !== role.id.toString())
+                              )
+                            }
+                          />
+                          <Label
+                            htmlFor={`role-${role.id}`}
+                            className="cursor-pointer font-normal"
+                          >
+                            {role.name}
+                          </Label>
+                        </div>
+                      ))
+                    )}
                   </div>
-                ))
-              )}
-            </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>状态</Label>
+                  <Select
+                    value={statusValue}
+                    onValueChange={(value) => setValue('status', value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="选择状态" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">正常</SelectItem>
+                      <SelectItem value="inactive">禁用</SelectItem>
+                      <SelectItem value="banned">封禁</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </section>
           </div>
 
-          {/* 状态 */}
-          <div className="space-y-2">
-            <Label>状态</Label>
-            <Select
-              value={statusValue}
-              onValueChange={(value) => setValue('status', value)}
-            >
-              <SelectTrigger className="!h-10">
-                <SelectValue placeholder="选择状态" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">正常</SelectItem>
-                <SelectItem value="inactive">禁用</SelectItem>
-                <SelectItem value="banned">封禁</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <DialogFooter>
+          <DialogFooter className="shrink-0 border-t bg-muted/30 px-6 py-4">
             <Button
               type="button"
               variant="outline"
