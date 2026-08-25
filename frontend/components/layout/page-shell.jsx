@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/lib/utils';
 
 export function PageShell({ className, ...props }) {
   return <section className={cn('mx-auto w-full max-w-[1600px] space-y-5', className)} {...props} />;

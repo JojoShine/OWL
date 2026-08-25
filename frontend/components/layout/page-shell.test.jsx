@@ -1,7 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { PageHeader, PageShell, PageSurface, PageToolbar } from './page-shell';
+
+vi.mock('@/lib/utils', () => ({
+  cn: (...classNames) => classNames.filter(Boolean).join(' '),
+}));
 
 describe('admin page shell', () => {
   it('exposes the approved page hierarchy without owning business state', () => {
