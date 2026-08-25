@@ -64,12 +64,16 @@ function getUsersResponse(searchParams) {
   const search = searchParams.get('search')?.trim().toLocaleLowerCase() || '';
   const page = Math.max(1, Number.parseInt(searchParams.get('page') || '1', 10) || 1);
   const limit = Math.max(1, Number.parseInt(searchParams.get('limit') || '10', 10) || 10);
-  const items = previewUsersResponse.data.items.filter((user) => {
+  const matches = previewUsersResponse.data.items.filter((user) => {
     if (!search) return true;
     return [user.username, user.real_name, user.email, user.phone]
       .some((value) => value.toLocaleLowerCase().includes(search));
-  }).slice(0, limit);
-  const total = search ? items.length : previewUsersResponse.data.pagination.total;
+  });
+  const total = search ? matches.length : previewUsersResponse.data.pagination.total;
+  // The unfiltered route is the fixed page-one visual sample with a fixed total of 128.
+  // Search results come only from that exact sample and therefore use coherent real slices.
+  const start = search ? (page - 1) * limit : 0;
+  const items = matches.slice(start, start + limit);
 
   return {
     success: true,

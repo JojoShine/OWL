@@ -40,16 +40,14 @@ describe('admin shell design contract', () => {
 
   it('bootstraps the fixed QA identity only for an explicit local development preview', () => {
     const auth = read('lib/utils/auth.js');
-    const bootstrapIndex = auth.indexOf("localStorage.setItem('__platform_id', 'ui-preview')");
+    const syncIndex = auth.indexOf('syncUiPreviewAuth({');
     const tokenReadIndex = auth.indexOf("localStorage.getItem(getStorageKey('token'))");
 
-    expect(auth).toContain("process.env.NODE_ENV !== 'production'");
-    expect(auth).toContain("process.env.NEXT_PUBLIC_UI_PREVIEW === 'true'");
-    expect(auth).toContain("['localhost', '127.0.0.1'].includes(window.location.hostname)");
-    expect(auth).toContain("localStorage.setItem('ui-preview__token', 'preview-only')");
-    expect(auth).toContain("email: 'preview@example.invalid'");
-    expect(auth).toContain("roles: [{ code: 'super_admin' }]");
-    expect(bootstrapIndex).toBeGreaterThan(-1);
-    expect(bootstrapIndex).toBeLessThan(tokenReadIndex);
+    expect(auth).toContain("import { syncUiPreviewAuth } from './ui-preview-auth';");
+    expect(auth).toContain('nodeEnv: process.env.NODE_ENV');
+    expect(auth).toContain('previewEnabled: process.env.NEXT_PUBLIC_UI_PREVIEW');
+    expect(auth).toContain('hostname: window.location.hostname');
+    expect(syncIndex).toBeGreaterThan(-1);
+    expect(syncIndex).toBeLessThan(tokenReadIndex);
   });
 });

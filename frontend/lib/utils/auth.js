@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { authApi } from '../api';
 import { getStorageKey } from './storage-key';
+import { syncUiPreviewAuth } from './ui-preview-auth';
 
 // 创建认证Context
 const AuthContext = createContext({});
@@ -28,22 +29,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = () => {
       try {
-        const isLocalUiPreview =
-          process.env.NODE_ENV !== 'production' &&
-          process.env.NEXT_PUBLIC_UI_PREVIEW === 'true' &&
-          ['localhost', '127.0.0.1'].includes(window.location.hostname);
-
-        if (isLocalUiPreview) {
-          localStorage.setItem('__platform_id', 'ui-preview');
-          localStorage.setItem('ui-preview__token', 'preview-only');
-          localStorage.setItem('ui-preview__user', JSON.stringify({
-            id: 'preview',
-            username: 'preview',
-            real_name: 'UI Preview',
-            email: 'preview@example.invalid',
-            roles: [{ code: 'super_admin' }],
-          }));
-        }
+        syncUiPreviewAuth({
+          storage: localStorage,
+          nodeEnv: process.env.NODE_ENV,
+          previewEnabled: process.env.NEXT_PUBLIC_UI_PREVIEW,
+          hostname: window.location.hostname,
+        });
 
         const token = localStorage.getItem(getStorageKey('token'));
         const userStr = localStorage.getItem(getStorageKey('user'));
