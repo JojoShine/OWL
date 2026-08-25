@@ -70,6 +70,7 @@ temp/
 *.tmp
 
 # 计划和工作文件
+.worktrees/
 projectplan.md
 ProjectPlan.md
 claude.md
