@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 /**
  * 统一的 Loading 组件
  * 用于在全系统统一 loading 样式

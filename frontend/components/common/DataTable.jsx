@@ -16,6 +16,12 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+function TableFrame({ workspace, children }) {
+  if (workspace) return children;
+
+  return <div className="overflow-hidden rounded-lg">{children}</div>;
+}
+
 /**
  * 数据表格组件 - 通用的数据展示表格
  *
@@ -60,8 +66,8 @@ export function DataTable({
   loading = false,
   actions,
   actionsLabel = '操作',
-  variant = 'default',
-  density = 'default',
+  variant = 'workspace',
+  density = 'compact',
   emptyText = '暂无数据',
   pagination,
   onPageChange,
@@ -101,7 +107,7 @@ export function DataTable({
       {...rest}
     >
       {/* 表格 */}
-      <div className={cn(!isWorkspace && 'overflow-hidden rounded-lg')}>
+      <TableFrame workspace={isWorkspace}>
         <Table>
           <TableHeader className={isWorkspace ? 'bg-muted/60' : undefined}>
             <TableRow className={isWorkspace ? 'hover:bg-muted/60' : undefined}>
@@ -171,6 +177,7 @@ export function DataTable({
                           className={cn(
                             isWorkspace && 'px-4',
                             isCompact && 'h-[50px] py-2',
+                            column.numeric && 'tabular-data',
                             column.cellClassName
                           )}
                         >
@@ -202,7 +209,7 @@ export function DataTable({
             )}
           </TableBody>
         </Table>
-      </div>
+      </TableFrame>
 
       {/* 分页 */}
       {pagination && (

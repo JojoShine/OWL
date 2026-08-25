@@ -103,6 +103,7 @@ describe('SearchFilter', () => {
     expect(controls.every((control) => control.className.includes('h-10'))).toBe(true);
     expect(screen.getByRole('button', { name: '查询' })).toHaveClass('h-10');
     expect(screen.getByRole('button', { name: '重置' })).toHaveClass('h-10');
+    expect(rangeField.parentElement).toHaveClass('flex', 'flex-wrap', 'items-end', 'gap-3');
     expect(rangeField).toHaveClass('flex-1', 'min-w-0', 'sm:min-w-[360px]');
     expect(rangeField).not.toHaveClass('min-w-[360px]');
   });

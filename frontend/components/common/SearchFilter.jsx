@@ -196,7 +196,7 @@ export function SearchFilter({
 
   return (
     <div className="bg-card rounded-lg" data-variant={variant} onKeyDown={handleKeyDown}>
-      <div className="flex flex-wrap items-end gap-2">
+      <div className="flex flex-wrap items-end gap-3">
         {/* 渲染所有搜索字段 */}
         {fields.map((field) => (
           <SearchField

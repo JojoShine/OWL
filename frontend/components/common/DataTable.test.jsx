@@ -9,6 +9,48 @@ vi.mock('@/lib/utils', () => ({
 }));
 
 describe('DataTable workspace variant', () => {
+  it('uses the mature workspace treatment by default', () => {
+    render(
+      <DataTable
+        columns={[{ key: 'name', label: '名称' }]}
+        data={[]}
+        pagination={{ page: 1, pageSize: 10, total: 0 }}
+        onPageChange={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText('暂无数据').closest('[data-slot="table-cell"]')).toHaveClass('py-12');
+    expect(screen.getByRole('table').parentElement.parentElement).toHaveClass('overflow-hidden', 'rounded-lg', 'border', 'bg-card');
+    expect(screen.getByText('共 0 条记录').parentElement.parentElement.parentElement).toHaveClass('border-t', 'px-4', 'py-3');
+  });
+
+  it('applies tabular data alignment to numeric columns', () => {
+    render(
+      <DataTable
+        columns={[{ key: 'createdAt', label: '创建时间', numeric: true }]}
+        data={[{ id: 1, createdAt: '2026-08-25 10:30:00' }]}
+      />
+    );
+
+    expect(screen.getByText('2026-08-25 10:30:00').closest('[data-slot="table-cell"]')).toHaveClass('tabular-data');
+  });
+
+  it('keeps loading rows aligned to the loaded column geometry', () => {
+    const columns = [
+      { key: 'name', label: '名称' },
+      { key: 'createdAt', label: '创建时间', numeric: true },
+    ];
+    const actions = () => <button>编辑</button>;
+    const { rerender } = render(
+      <DataTable columns={columns} data={[{ id: 1, name: '用户', createdAt: '2026-08-25' }]} actions={actions} />
+    );
+
+    expect(screen.getAllByRole('cell')).toHaveLength(3);
+
+    rerender(<DataTable columns={columns} data={[]} actions={actions} loading />);
+    expect(screen.getByText('加载中...').closest('[data-slot="table-cell"]')).toHaveAttribute('colspan', '3');
+  });
+
   it('uses a zero row key and exposes the expand control name', async () => {
     const interaction = userEvent.setup();
     const rows = [{ id: 8, name: '八号用户' }, { id: 0, name: '零号用户' }];

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Loading } from '@/components/ui/loading';
 
