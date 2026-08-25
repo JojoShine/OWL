@@ -111,7 +111,7 @@ export default function ApiMonitorDetailDialog({ open, onOpenChange, monitor }) 
               <CardTitle className="text-base">配置信息</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <span className="text-muted-foreground">URL：</span>
                   <span className="font-mono break-all">{monitor.url}</span>

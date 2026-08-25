@@ -356,6 +356,7 @@ export default function ServerMonitorPage() {
                   variant="ghost"
                   onClick={() => handleManageServices(row)}
                   title="管理服务"
+                  aria-label={`管理 ${row.name} 的服务`}
                 >
                   <Server className="h-4 w-4" />
                 </Button>
@@ -363,6 +364,7 @@ export default function ServerMonitorPage() {
                   size="sm"
                   variant="ghost"
                   onClick={() => handleTriggerCheck(row)}
+                  aria-label={`立即检查 ${row.name}`}
                 >
                   <Play className="h-4 w-4" />
                 </Button>
@@ -370,6 +372,7 @@ export default function ServerMonitorPage() {
                   size="sm"
                   variant="ghost"
                   onClick={() => handleViewLogs(row)}
+                  aria-label={`查看 ${row.name} 的监控历史`}
                 >
                   <Activity className="h-4 w-4" />
                 </Button>
@@ -377,6 +380,7 @@ export default function ServerMonitorPage() {
                   size="sm"
                   variant="ghost"
                   onClick={() => handleEdit(row)}
+                  aria-label={`编辑 ${row.name}`}
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
@@ -384,6 +388,7 @@ export default function ServerMonitorPage() {
                   size="sm"
                   variant="ghost"
                   onClick={() => handleDelete(row)}
+                  aria-label={`删除 ${row.name}`}
                 >
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>

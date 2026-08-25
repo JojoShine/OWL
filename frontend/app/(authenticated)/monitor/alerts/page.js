@@ -717,7 +717,7 @@ export default function AlertsPage() {
             </div>
 
             {/* 告警条件和阈值 */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>条件</Label>
                 <Select
