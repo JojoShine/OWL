@@ -111,7 +111,7 @@ export default function BroadcastNotificationDialog({ open, onOpenChange, onSucc
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Radio className="h-5 w-5" />
@@ -151,7 +151,7 @@ export default function BroadcastNotificationDialog({ open, onOpenChange, onSucc
               </SelectContent>
             </Select>
             {errors.type && (
-              <p className="text-sm text-red-500">{errors.type}</p>
+              <p className="text-sm text-destructive">{errors.type}</p>
             )}
           </div>
 
@@ -169,7 +169,7 @@ export default function BroadcastNotificationDialog({ open, onOpenChange, onSucc
               className={errors.title ? 'border-red-500' : ''}
             />
             {errors.title && (
-              <p className="text-sm text-red-500">{errors.title}</p>
+              <p className="text-sm text-destructive">{errors.title}</p>
             )}
             <p className="text-xs text-muted-foreground">
               {formData.title.length}/255
@@ -190,7 +190,7 @@ export default function BroadcastNotificationDialog({ open, onOpenChange, onSucc
               className={errors.content ? 'border-red-500' : ''}
             />
             {errors.content && (
-              <p className="text-sm text-red-500">{errors.content}</p>
+              <p className="text-sm text-destructive">{errors.content}</p>
             )}
           </div>
 
@@ -209,7 +209,7 @@ export default function BroadcastNotificationDialog({ open, onOpenChange, onSucc
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="border-t pt-4">
           <Button
             variant="outline"
             onClick={() => handleOpenChange(false)}

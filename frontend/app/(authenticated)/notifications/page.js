@@ -21,6 +21,7 @@ import { useSocket } from '@/contexts/SocketContext';
 import { useAuth } from '@/lib/utils/auth';
 import { notificationApi } from '@/lib/api';
 import { toast } from 'sonner';
+import { PageHeader, PageShell, PageToolbar } from '@/components/layout/page-shell';
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -333,33 +334,33 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex gap-2">
+    <PageShell>
+      <PageHeader
+        title="通知中心"
+        description="查看个人通知并执行发送与广播操作。"
+        actions={<>
           {isAdmin && (
             <>
-              <Button size="lg" onClick={() => setSendDialogOpen(true)}>
+              <Button onClick={() => setSendDialogOpen(true)}>
                 <Send className="h-4 w-4 mr-2" />
                 发送通知
               </Button>
-              <Button size="lg" variant="outline" onClick={() => setBroadcastDialogOpen(true)}>
+              <Button variant="outline" onClick={() => setBroadcastDialogOpen(true)}>
                 <Radio className="h-4 w-4 mr-2" />
                 广播通知
               </Button>
             </>
           )}
-        </div>
-        <div className="flex gap-2">
-          <Button size="lg" variant="outline" onClick={handleMarkAllAsRead}>
+          <Button variant="outline" onClick={handleMarkAllAsRead}>
             <Check className="h-4 w-4 mr-2" />
             全部已读
           </Button>
-          <Button size="lg" variant="outline" onClick={handleClearRead}>
+          <Button variant="outline" onClick={handleClearRead}>
             <Trash2 className="h-4 w-4 mr-2 text-destructive" />
             清空已读
           </Button>
-        </div>
-      </div>
+        </>}
+      />
 
       {/* 统计卡片 */}
       <div className="grid gap-4 md:grid-cols-3">
@@ -369,7 +370,7 @@ export default function NotificationsPage() {
             <Bell className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{total}</div>
+            <div className="tabular-data text-2xl font-semibold">{total}</div>
             <p className="text-xs text-muted-foreground">
               当前筛选条件下的通知总数
             </p>
@@ -387,10 +388,12 @@ export default function NotificationsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* 筛选器 */}
-          <NotificationFilter
-            filters={filters}
-            onChange={handleFiltersChange}
-          />
+          <PageToolbar className="border-0 bg-muted/30 p-4">
+            <NotificationFilter
+              filters={filters}
+              onChange={handleFiltersChange}
+            />
+          </PageToolbar>
 
           {/* 表格 */}
           <div className="border rounded-lg overflow-hidden">
@@ -425,6 +428,6 @@ export default function NotificationsPage() {
         onOpenChange={setBroadcastDialogOpen}
         onSuccess={handleBroadcastNotification}
       />
-    </div>
+    </PageShell>
   );
 }

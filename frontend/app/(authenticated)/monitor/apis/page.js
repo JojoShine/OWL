@@ -45,6 +45,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { PageHeader, PageShell } from '@/components/layout/page-shell';
 
 export default function ApiMonitorPage() {
   const [loading, setLoading] = useState(false);
@@ -461,13 +462,13 @@ export default function ApiMonitorPage() {
    */
   const getStatusBadge = (status) => {
     const statusConfig = {
-      success: { label: '成功', className: 'bg-green-500' },
-      failed: { label: '失败', className: 'bg-red-500' },
-      timeout: { label: '超时', className: 'bg-yellow-500' },
+      success: { label: '成功', variant: 'success' },
+      failed: { label: '失败', variant: 'destructive' },
+      timeout: { label: '超时', variant: 'warning' },
     };
 
-    const config = statusConfig[status] || { label: '未知', className: 'bg-gray-500' };
-    return <Badge className={config.className}>{config.label}</Badge>;
+    const config = statusConfig[status] || { label: '未知', variant: 'neutral' };
+    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
   /**
@@ -484,17 +485,21 @@ export default function ApiMonitorPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <Button onClick={loadMonitors} variant="outline" disabled={loading}>
-          <RefreshCwIcon className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          刷新
-        </Button>
-        <Button onClick={handleAdd}>
-          <PlusIcon className="h-4 w-4 mr-2" />
-          添加监控
-        </Button>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="API 监控"
+        description="管理接口可用性检查并查看响应性能。"
+        actions={<>
+          <Button onClick={loadMonitors} variant="outline" disabled={loading}>
+            <RefreshCwIcon className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            刷新
+          </Button>
+          <Button onClick={handleAdd}>
+            <PlusIcon className="h-4 w-4 mr-2" />
+            添加监控
+          </Button>
+        </>}
+      />
 
       {/* 监控列表 */}
       <Card>
@@ -547,7 +552,7 @@ export default function ApiMonitorPage() {
                     </TableCell>
                     <TableCell>
                       {monitor.lastLog ? (
-                        <span className="text-sm">
+                        <span className="tabular-data text-sm">
                           {formatDateTime(monitor.lastLog.createdAt)}
                         </span>
                       ) : (
@@ -556,15 +561,15 @@ export default function ApiMonitorPage() {
                     </TableCell>
                     <TableCell>
                       {monitor.lastLog?.response_time ? (
-                        <span className="text-sm">{monitor.lastLog.response_time} ms</span>
+                        <span className="tabular-data text-sm">{monitor.lastLog.response_time} ms</span>
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
-                    <TableCell>{monitor.interval}s</TableCell>
+                    <TableCell className="tabular-data">{monitor.interval}s</TableCell>
                     <TableCell>
                       {monitor.enabled ? (
-                        <Badge className="bg-green-500">启用</Badge>
+                        <Badge variant="success">启用</Badge>
                       ) : (
                         <Badge variant="secondary">禁用</Badge>
                       )}
@@ -883,7 +888,7 @@ export default function ApiMonitorPage() {
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="border-t pt-4">
             <Button variant="outline" onClick={() => setFormOpen(false)}>
               取消
             </Button>
@@ -1027,6 +1032,6 @@ export default function ApiMonitorPage() {
         cancelText="取消"
         variant="destructive"
       />
-    </div>
+    </PageShell>
   );
 }

@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { PageHeader, PageShell } from '@/components/layout/page-shell';
 
 export default function MonitorPage() {
   const [loading, setLoading] = useState(false);
@@ -89,13 +90,15 @@ export default function MonitorPage() {
       : '-';
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <Button onClick={loadMetrics} variant="outline" size="sm" disabled={loading}>
+    <PageShell className="[&_.text-2xl]:tabular-data [&_.text-sm.font-medium]:tabular-data">
+      <PageHeader
+        title="系统监控"
+        description="集中查看系统资源、应用、数据库与缓存运行状态。"
+        actions={<Button onClick={loadMetrics} variant="outline" disabled={loading}>
           <RefreshCwIcon className={loading ? 'animate-spin' : ''} />
           刷新数据
-        </Button>
-      </div>
+        </Button>}
+      />
 
       {/* 趋势图表区域 */}
       {metrics && historyData.cpu.length > 0 && (
@@ -503,6 +506,6 @@ export default function MonitorPage() {
           加载监控数据中...
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

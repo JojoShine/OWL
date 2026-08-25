@@ -19,33 +19,23 @@ import { zhCN } from 'date-fns/locale';
 // 通知类型配置
 const notificationTypeConfig = {
   info: {
-    color: 'bg-blue-500',
-    textColor: 'text-blue-500',
-    bgColor: 'bg-blue-50 dark:bg-blue-950',
+    variant: 'info',
     label: '信息',
   },
   system: {
-    color: 'bg-gray-500',
-    textColor: 'text-gray-500',
-    bgColor: 'bg-gray-50 dark:bg-gray-950',
+    variant: 'neutral',
     label: '系统',
   },
   warning: {
-    color: 'bg-yellow-500',
-    textColor: 'text-yellow-500',
-    bgColor: 'bg-yellow-50 dark:bg-yellow-950',
+    variant: 'warning',
     label: '警告',
   },
   error: {
-    color: 'bg-red-500',
-    textColor: 'text-red-500',
-    bgColor: 'bg-red-50 dark:bg-red-950',
+    variant: 'destructive',
     label: '错误',
   },
   success: {
-    color: 'bg-green-500',
-    textColor: 'text-green-500',
-    bgColor: 'bg-green-50 dark:bg-green-950',
+    variant: 'success',
     label: '成功',
   },
 };
@@ -115,11 +105,11 @@ export default function NotificationList({
               {/* 类型列 */}
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant={typeConfig.variant} className="text-xs">
                     {typeConfig.label}
                   </Badge>
                   {isUnread && (
-                    <span className="h-2 w-2 bg-blue-500 rounded-full" title="未读" />
+                    <span className="h-2 w-2 rounded-full bg-primary" title="未读" />
                   )}
                 </div>
               </TableCell>
@@ -137,7 +127,7 @@ export default function NotificationList({
               </TableCell>
 
               {/* 时间列 */}
-              <TableCell className="text-sm text-muted-foreground">
+              <TableCell className="tabular-data text-sm text-muted-foreground">
                 {notification.created_at ? formatDistanceToNow(new Date(notification.created_at), {
                   addSuffix: true,
                   locale: zhCN,
@@ -153,6 +143,7 @@ export default function NotificationList({
                       size="sm"
                       onClick={() => handleNotificationClick(notification)}
                       title="查看详情"
+                      aria-label={`查看通知 ${notification.title}`}
                     >
                       <ExternalLink className="h-4 w-4" />
                     </Button>
@@ -164,6 +155,7 @@ export default function NotificationList({
                       size="sm"
                       onClick={() => onMarkAsRead(notification.id)}
                       title="标记为已读"
+                      aria-label={`标记通知 ${notification.title} 为已读`}
                     >
                       <Check className="h-4 w-4" />
                     </Button>
@@ -175,6 +167,7 @@ export default function NotificationList({
                       size="sm"
                       onClick={() => onDelete(notification.id)}
                       title="删除"
+                      aria-label={`删除通知 ${notification.title}`}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>

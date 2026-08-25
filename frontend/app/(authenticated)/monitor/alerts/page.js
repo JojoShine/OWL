@@ -53,6 +53,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { PageHeader, PageShell, PageToolbar } from '@/components/layout/page-shell';
 
 export default function AlertsPage() {
   const [loading, setLoading] = useState(false);
@@ -350,7 +351,7 @@ export default function AlertsPage() {
     return status === 'pending' ? (
       <Badge variant="destructive">待处理</Badge>
     ) : (
-      <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">已解决</Badge>
+      <Badge variant="success">已解决</Badge>
     );
   };
 
@@ -447,26 +448,11 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-4">
-        {stats && (
-          <>
-            <div className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm">
-              <BellIcon className="w-4 h-4 text-muted-foreground" />
-              <span className="font-medium text-foreground">{stats.pending} 待处理</span>
-              <span className="text-muted-foreground">/ {stats.total} 总计</span>
-            </div>
-
-            {/* 告警检查频率提示 */}
-            <div className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm bg-blue-50 dark:bg-blue-950">
-              <ClockIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-blue-700 dark:text-blue-300">
-                告警检查频率：每 1 分钟
-              </span>
-            </div>
-          </>
-        )}
-        <div className="ml-auto flex items-center gap-2">
+    <PageShell>
+      <PageHeader
+        title="告警监控"
+        description="管理告警规则并跟踪告警处理记录。"
+        actions={<>
           {activeTab === 'rules' && (
             <Button onClick={handleAdd}>
               <PlusIcon className="w-4 h-4 mr-2" />
@@ -477,8 +463,27 @@ export default function AlertsPage() {
             <RefreshCwIcon className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             刷新
           </Button>
-        </div>
-      </div>
+        </>}
+      />
+      <PageToolbar className="flex flex-wrap items-center gap-4">
+        {stats && (
+          <>
+            <div className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm">
+              <BellIcon className="w-4 h-4 text-muted-foreground" />
+              <span className="font-medium text-foreground">{stats.pending} 待处理</span>
+              <span className="text-muted-foreground">/ {stats.total} 总计</span>
+            </div>
+
+            {/* 告警检查频率提示 */}
+            <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-sm">
+              <ClockIcon className="w-4 h-4 text-muted-foreground" />
+              <span className="text-muted-foreground">
+                告警检查频率：每 1 分钟
+              </span>
+            </div>
+          </>
+        )}
+      </PageToolbar>
 
       {/* 标签页 */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -531,7 +536,7 @@ export default function AlertsPage() {
                         <TableCell>{getLevelBadge(rule.level)}</TableCell>
                         <TableCell>
                           {rule.enabled ? (
-                            <Badge className="bg-green-500">启用</Badge>
+                            <Badge variant="success">启用</Badge>
                           ) : (
                             <Badge variant="secondary">禁用</Badge>
                           )}
@@ -591,7 +596,7 @@ export default function AlertsPage() {
                   <TableBody>
                     {history.map((alert) => (
                       <TableRow key={alert.id}>
-                        <TableCell className="text-sm max-w-xs">
+                        <TableCell className="tabular-data text-sm max-w-xs">
                           {new Date(alert.created_at).toLocaleString('zh-CN')}
                         </TableCell>
                         <TableCell className="font-medium">{alert.rule?.name || '-'}</TableCell>
@@ -900,7 +905,7 @@ export default function AlertsPage() {
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="border-t pt-4">
             <Button variant="outline" onClick={() => setFormOpen(false)}>
               取消
             </Button>
@@ -922,6 +927,6 @@ export default function AlertsPage() {
         cancelText="取消"
         variant="destructive"
       />
-    </div>
+    </PageShell>
   );
 }

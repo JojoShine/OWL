@@ -133,7 +133,7 @@ export default function ServerFormDialog({ open, onOpenChange, server, onSuccess
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{server ? '编辑服务器' : '添加服务器'}</DialogTitle>
           <DialogDescription>
@@ -148,7 +148,7 @@ export default function ServerFormDialog({ open, onOpenChange, server, onSuccess
           </TabsList>
 
           <TabsContent value="basic" className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name">服务器名称 *</Label>
                 <Input
@@ -169,7 +169,7 @@ export default function ServerFormDialog({ open, onOpenChange, server, onSuccess
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="port">SSH端口</Label>
                 <Input
@@ -235,7 +235,7 @@ export default function ServerFormDialog({ open, onOpenChange, server, onSuccess
           </TabsContent>
 
           <TabsContent value="monitoring" className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 rounded-md border bg-muted/30 p-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="interval">采集间隔（秒）</Label>
                 <Input
@@ -260,7 +260,7 @@ export default function ServerFormDialog({ open, onOpenChange, server, onSuccess
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid gap-4 rounded-md border bg-muted/30 p-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="cpu_threshold">CPU告警阈值%</Label>
                 <Input
@@ -357,7 +357,7 @@ export default function ServerFormDialog({ open, onOpenChange, server, onSuccess
           </TabsContent>
         </Tabs>
 
-        <DialogFooter className="mt-6">
+        <DialogFooter className="mt-6 border-t pt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>

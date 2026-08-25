@@ -8,12 +8,13 @@ import { Plus, Edit, Trash2, Play, Activity, Server, RefreshCw } from 'lucide-re
 import { Switch } from '@/components/ui/switch';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import ServerFormDialog from './server-form-dialog';
 import ServerLogsDialog from './server-logs-dialog';
 import ServerServicesDialog from './server-services-dialog';
+import { PageHeader, PageShell, PageToolbar } from '@/components/layout/page-shell';
 
 export default function ServerMonitorPage() {
   const [servers, setServers] = useState([]);
@@ -313,34 +314,35 @@ export default function ServerMonitorPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <PageShell>
+      <PageHeader
+        title="服务器监控"
+        description="管理服务器监控配置与服务健康状态。"
+        actions={<>
+          <Button variant="outline" onClick={fetchServers} disabled={isLoading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            刷新
+          </Button>
+          <Button onClick={handleAdd} className="sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" />
+            添加服务器
+          </Button>
+        </>}
+      />
       {/* 主卡片 */}
       <Card>
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <CardTitle>服务器监控</CardTitle>
-            <CardDescription>管理所有被监控的服务器配置</CardDescription>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={fetchServers} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              刷新
-            </Button>
-            <Button onClick={handleAdd} className="sm:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
-              添加服务器
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-5">
           {/* 搜索栏 */}
-          <SearchFilter
-            fields={searchFields}
-            values={searchValues}
-            onChange={setSearchValues}
-            onSearch={handleSearch}
-            onReset={handleReset}
-          />
+          <PageToolbar className="border-0 bg-muted/30 p-4">
+            <SearchFilter
+              fields={searchFields}
+              values={searchValues}
+              onChange={setSearchValues}
+              onSearch={handleSearch}
+              onReset={handleReset}
+              variant="toolbar"
+            />
+          </PageToolbar>
 
           {/* 数据表格 */}
           <DataTable
@@ -426,6 +428,6 @@ export default function ServerMonitorPage() {
         confirmText="删除"
         variant="destructive"
       />
-    </div>
+    </PageShell>
   );
 }

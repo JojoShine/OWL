@@ -83,7 +83,7 @@ export default function ServerLogsDialog({ open, onOpenChange, server }) {
     }
     
     return (
-      <Badge variant="default" className="gap-1">
+      <Badge variant="success" className="gap-1">
         <CheckCircle className="h-3 w-3" />
         正常
       </Badge>
@@ -96,18 +96,21 @@ export default function ServerLogsDialog({ open, onOpenChange, server }) {
       key: 'checked_at',
       label: '检查时间',
       width: '180px',
+      cellClassName: 'tabular-data',
       render: (value) => value ? new Date(value).toLocaleString('zh-CN') : '-'
     },
     {
       key: 'cpu_usage',
       label: 'CPU使用率',
       width: '100px',
+      cellClassName: 'tabular-data',
       render: (value) => value !== null && value !== undefined ? `${value}%` : '-'
     },
     {
       key: 'memory_usage',
       label: '内存使用率',
       width: '120px',
+      cellClassName: 'tabular-data',
       render: (value, record) => {
         if (value === null || value === undefined) return '-';
         const usedMb = parseFloat(record.memory_used_mb) || 0;
@@ -126,6 +129,7 @@ export default function ServerLogsDialog({ open, onOpenChange, server }) {
       key: 'disk_usage',
       label: '磁盘使用率',
       width: '120px',
+      cellClassName: 'tabular-data',
       render: (value, record) => {
         if (value === null || value === undefined) return '-';
         const usedGb = parseFloat(record.disk_used_gb) || 0;
@@ -144,6 +148,7 @@ export default function ServerLogsDialog({ open, onOpenChange, server }) {
       key: 'load_avg_1m',
       label: '系统负载',
       width: '140px',
+      cellClassName: 'tabular-data',
       render: (value, record) => {
         if (value === null || value === undefined) return '-';
         const load5m = parseFloat(record.load_avg_5m) || 0;
@@ -173,14 +178,14 @@ export default function ServerLogsDialog({ open, onOpenChange, server }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[80vh] overflow-hidden flex flex-col">
+      <DialogContent className="flex max-h-[90vh] max-w-6xl flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>
             {server?.name} - 监控历史
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto mt-4">
+        <div className="mt-4 flex-1 overflow-auto rounded-lg border">
           <DataTable
             columns={columns}
             data={logs}

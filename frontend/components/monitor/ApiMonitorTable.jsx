@@ -43,20 +43,17 @@ export default function ApiMonitorTable({
     const statusConfig = {
       success: {
         icon: CheckCircle2,
-        variant: 'default',
-        className: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+        variant: 'success',
         label: '成功'
       },
       failed: {
         icon: XCircle,
         variant: 'destructive',
-        className: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
         label: '失败'
       },
       timeout: {
         icon: Clock,
-        variant: 'secondary',
-        className: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
+        variant: 'warning',
         label: '超时'
       }
     };
@@ -65,7 +62,7 @@ export default function ApiMonitorTable({
     const Icon = config.icon;
 
     return (
-      <Badge className={config.className}>
+      <Badge variant={config.variant}>
         <Icon className="w-3 h-3 mr-1" />
         {config.label}
       </Badge>
@@ -85,7 +82,7 @@ export default function ApiMonitorTable({
     };
 
     return (
-      <Badge className={colors[method] || 'bg-gray-100 text-gray-700'}>
+      <Badge className={colors[method]} variant={colors[method] ? 'outline' : 'neutral'}>
         {method}
       </Badge>
     );
@@ -126,7 +123,7 @@ export default function ApiMonitorTable({
   }
 
   return (
-    <div className="border rounded-lg">
+    <div className="overflow-hidden rounded-lg border">
       <Table>
         <TableHeader className="sticky top-0 bg-background z-10">
           <TableRow>
@@ -146,16 +143,16 @@ export default function ApiMonitorTable({
               <TableCell className="text-sm text-muted-foreground">
                 {truncateUrl(monitor.url)}
               </TableCell>
-              <TableCell>
+              <TableCell className="tabular-data">
                 {renderMethodBadge(monitor.method)}
               </TableCell>
               <TableCell>
                 {renderStatusBadge(monitor.lastLog?.status, monitor.enabled)}
               </TableCell>
-              <TableCell>
+              <TableCell className="tabular-data">
                 {formatResponseTime(monitor.lastLog?.response_time)}
               </TableCell>
-              <TableCell className="text-sm">
+              <TableCell className="tabular-data text-sm">
                 {monitor.lastLog?.created_at ? formatDateTime(monitor.lastLog.created_at) : '-'}
               </TableCell>
               <TableCell>
@@ -166,6 +163,7 @@ export default function ApiMonitorTable({
                     onClick={() => onTest?.(monitor)}
                     disabled={!monitor.enabled}
                     title="立即测试"
+                    aria-label={`立即测试 ${monitor.name}`}
                   >
                     <Play className="w-4 h-4" />
                   </Button>
@@ -174,6 +172,7 @@ export default function ApiMonitorTable({
                     size="sm"
                     onClick={() => onEdit?.(monitor)}
                     title="编辑"
+                    aria-label={`编辑 ${monitor.name}`}
                   >
                     <Pencil className="w-4 h-4" />
                   </Button>
@@ -182,6 +181,7 @@ export default function ApiMonitorTable({
                     size="sm"
                     onClick={() => onViewDetails?.(monitor)}
                     title="查看详情"
+                    aria-label={`查看 ${monitor.name} 详情`}
                   >
                     <Eye className="w-4 h-4" />
                   </Button>
@@ -191,6 +191,7 @@ export default function ApiMonitorTable({
                     onClick={() => onDelete?.(monitor)}
                     className="text-destructive hover:text-destructive"
                     title="删除"
+                    aria-label={`删除 ${monitor.name}`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>

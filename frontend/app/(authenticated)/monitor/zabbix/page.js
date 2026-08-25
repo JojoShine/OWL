@@ -30,6 +30,7 @@ import {
   Server, RefreshCw, AlertTriangle, Activity, Eye,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PageHeader, PageShell, PageToolbar } from '@/components/layout/page-shell';
 
 // 严重级别映射
 const SEVERITY_MAP = {
@@ -43,7 +44,7 @@ const SEVERITY_MAP = {
 
 // 主机状态映射
 const HOST_STATUS_MAP = {
-  available: { label: '可用', variant: 'default' },
+  available: { label: '可用', variant: 'success' },
   unavailable: { label: '不可用', variant: 'destructive' },
   unknown: { label: '未知', variant: 'outline' },
 };
@@ -207,6 +208,7 @@ export default function ZabbixMonitorPage() {
     {
       key: 'last_sync_at',
       label: '同步时间',
+      cellClassName: 'tabular-data',
       render: (value) => value ? new Date(value).toLocaleString('zh-CN') : '-',
     },
   ];
@@ -214,27 +216,17 @@ export default function ZabbixMonitorPage() {
   const selectedInstance = instances.find(i => i.id === selectedInstanceId);
 
   return (
-    <div className="space-y-6">
+    <PageShell>
       {/* 顶部：实例选择 + 刷新 */}
-      <Card>
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <CardTitle className="flex items-center gap-2">
-              <Server className="h-5 w-5" />
-              Zabbix 监控概览
-            </CardTitle>
-            {selectedInstance && (
-              <p className="text-sm text-muted-foreground">
-                实例：{selectedInstance.name}
-                {selectedInstance.last_sync_at && (
-                  <span className="ml-2">
-                    · 最后同步：{new Date(selectedInstance.last_sync_at).toLocaleString('zh-CN')}
-                  </span>
-                )}
-              </p>
-            )}
-          </div>
-          <div className="flex gap-3 items-center">
+      <PageHeader
+        title="Zabbix 监控概览"
+        description={selectedInstance ? `实例：${selectedInstance.name}` : '查看同步主机、监控项与实时告警。'}
+        meta={selectedInstance?.last_sync_at ? (
+          <span className="tabular-data text-xs text-muted-foreground">
+            最后同步：{new Date(selectedInstance.last_sync_at).toLocaleString('zh-CN')}
+          </span>
+        ) : null}
+        actions={<>
             <Select value={selectedInstanceId} onValueChange={setSelectedInstanceId}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="选择实例" />
@@ -245,13 +237,12 @@ export default function ZabbixMonitorPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <Button variant="outline" onClick={handleRefresh}>
               <RefreshCw className="h-4 w-4 mr-1" />
               刷新
             </Button>
-          </div>
-        </CardHeader>
-      </Card>
+        </>}
+      />
 
       {/* 统计卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -261,7 +252,7 @@ export default function ZabbixMonitorPage() {
             <Server className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{hostsPagination.total}</div>
+            <div className="tabular-data text-2xl font-semibold">{hostsPagination.total}</div>
             <p className="text-xs text-muted-foreground mt-1">已同步主机数量</p>
           </CardContent>
         </Card>
@@ -272,7 +263,7 @@ export default function ZabbixMonitorPage() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{problems.length}</div>
+            <div className="tabular-data text-2xl font-semibold">{problems.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {problems.filter(p => parseInt(p.severity) >= 3).length} 个高严重级别
             </p>
@@ -285,7 +276,7 @@ export default function ZabbixMonitorPage() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="tabular-data text-2xl font-semibold">
               {hosts.filter(h => h.status === 'available').length}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -304,13 +295,16 @@ export default function ZabbixMonitorPage() {
               <CardTitle>主机列表</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <SearchFilter
-                fields={searchFields}
-                values={hostSearch}
-                onChange={setHostSearch}
-                onSearch={handleHostSearch}
-                onReset={handleHostReset}
-              />
+              <PageToolbar className="border-0 bg-muted/30 p-4">
+                <SearchFilter
+                  fields={searchFields}
+                  values={hostSearch}
+                  onChange={setHostSearch}
+                  onSearch={handleHostSearch}
+                  onReset={handleHostReset}
+                  variant="toolbar"
+                />
+              </PageToolbar>
               <DataTable
                 columns={hostColumns}
                 data={hosts}
@@ -456,6 +450,6 @@ export default function ZabbixMonitorPage() {
           ) : null}
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   );
 }

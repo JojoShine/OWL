@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LogTable from '@/components/logs/LogTable';
 import LogFilters from '@/components/logs/LogFilters';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader, PageShell, PageToolbar } from '@/components/layout/page-shell';
 
 const TAB_CONFIGS = [
   {
@@ -226,7 +227,8 @@ export default function LogsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <PageShell>
+      <PageHeader title="日志中心" description="检索、审阅并导出系统各类审计日志。" />
       {/* 日志列表 */}
       <Tabs
         value={activeTab}
@@ -291,11 +293,13 @@ export default function LogsPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <LogFilters
-                    type={tab.value}
-                    filters={filters}
-                    onChange={handleFiltersChange}
-                  />
+                  <PageToolbar className="border-0 bg-muted/30 p-4">
+                    <LogFilters
+                      type={tab.value}
+                      filters={filters}
+                      onChange={handleFiltersChange}
+                    />
+                  </PageToolbar>
                   <LogTable
                     type={tab.value}
                     logs={tab.value === activeTab ? logs : []}
@@ -310,6 +314,6 @@ export default function LogsPage() {
           );
         })}
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

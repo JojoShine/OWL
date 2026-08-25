@@ -60,17 +60,17 @@ export default function ApiMonitorDetailDialog({ open, onOpenChange, monitor }) 
     const statusConfig = {
       success: {
         icon: CheckCircle2,
-        className: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+        variant: 'success',
         label: '成功'
       },
       failed: {
         icon: XCircle,
-        className: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+        variant: 'destructive',
         label: '失败'
       },
       timeout: {
         icon: Clock,
-        className: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
+        variant: 'warning',
         label: '超时'
       }
     };
@@ -79,7 +79,7 @@ export default function ApiMonitorDetailDialog({ open, onOpenChange, monitor }) 
     const Icon = config.icon;
 
     return (
-      <Badge className={config.className}>
+      <Badge variant={config.variant}>
         <Icon className="w-3 h-3 mr-1" />
         {config.label}
       </Badge>
@@ -99,14 +99,14 @@ export default function ApiMonitorDetailDialog({ open, onOpenChange, monitor }) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[1200px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[1200px]">
         <DialogHeader>
           <DialogTitle>监控详情 - {monitor.name}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* 基本信息 */}
-          <Card>
+          <Card className="bg-muted/30 shadow-none">
             <CardHeader>
               <CardTitle className="text-base">配置信息</CardTitle>
             </CardHeader>
@@ -122,15 +122,15 @@ export default function ApiMonitorDetailDialog({ open, onOpenChange, monitor }) 
                 </div>
                 <div>
                   <span className="text-muted-foreground">检测间隔：</span>
-                  <span>{monitor.interval}秒</span>
+                  <span className="tabular-data">{monitor.interval}秒</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">超时时间：</span>
-                  <span>{monitor.timeout}秒</span>
+                  <span className="tabular-data">{monitor.timeout}秒</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">期望状态码：</span>
-                  <span>{monitor.expect_status}</span>
+                  <span className="tabular-data">{monitor.expect_status}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">状态：</span>
@@ -159,7 +159,7 @@ export default function ApiMonitorDetailDialog({ open, onOpenChange, monitor }) 
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="tabular-data text-2xl font-semibold">
                     {stats.availability !== undefined
                       ? `${stats.availability.toFixed(2)}%`
                       : '-'}
@@ -175,7 +175,7 @@ export default function ApiMonitorDetailDialog({ open, onOpenChange, monitor }) 
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="tabular-data text-2xl font-semibold">
                     {formatResponseTime(stats.avgResponseTime)}
                   </div>
                 </CardContent>
@@ -189,7 +189,7 @@ export default function ApiMonitorDetailDialog({ open, onOpenChange, monitor }) 
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="tabular-data text-2xl font-semibold">
                     {stats.totalChecks || 0}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
@@ -227,16 +227,16 @@ export default function ApiMonitorDetailDialog({ open, onOpenChange, monitor }) 
                     <TableBody>
                       {logs.map((log) => (
                         <TableRow key={log.id}>
-                          <TableCell className="text-sm">
+                          <TableCell className="tabular-data text-sm">
                             {formatDateTime(log.created_at)}
                           </TableCell>
                           <TableCell>
                             {renderStatusBadge(log.status)}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="tabular-data">
                             {log.status_code || '-'}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="tabular-data">
                             {formatResponseTime(log.response_time)}
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">

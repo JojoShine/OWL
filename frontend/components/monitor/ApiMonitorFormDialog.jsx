@@ -142,7 +142,7 @@ export default function ApiMonitorFormDialog({ open, onOpenChange, monitor, onSu
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-hidden">
         <DialogHeader>
           <DialogTitle>{isEdit ? '编辑监控配置' : '新增监控配置'}</DialogTitle>
           <DialogDescription>
@@ -150,7 +150,7 @@ export default function ApiMonitorFormDialog({ open, onOpenChange, monitor, onSu
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="max-h-[72vh] space-y-4 overflow-y-auto pr-1">
           {/* 监控名称 */}
           <div className="space-y-2">
             <Label htmlFor="name">
@@ -235,7 +235,7 @@ export default function ApiMonitorFormDialog({ open, onOpenChange, monitor, onSu
           </div>
 
           {/* 检测间隔和超时时间（两列布局） */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 rounded-md border bg-muted/30 p-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="interval">检测间隔（秒）</Label>
               <Input
@@ -300,7 +300,7 @@ export default function ApiMonitorFormDialog({ open, onOpenChange, monitor, onSu
             />
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="sticky bottom-0 border-t bg-background pt-4">
             <Button
               type="button"
               variant="outline"

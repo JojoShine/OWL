@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -145,7 +146,7 @@ export default function EmailTaskDialog({ open, onOpenChange, task, onSave }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{task ? '编辑邮件任务' : '新建邮件任务'}</DialogTitle>
           <DialogDescription>
@@ -254,7 +255,7 @@ export default function EmailTaskDialog({ open, onOpenChange, task, onSave }) {
           </div>
 
           {/* 按钮组 */}
-          <div className="flex justify-end gap-2 pt-6">
+          <DialogFooter className="border-t pt-4">
             <Button
               type="button"
               variant="outline"
@@ -266,7 +267,7 @@ export default function EmailTaskDialog({ open, onOpenChange, task, onSave }) {
             <Button type="submit" disabled={isSaving}>
               {isSaving ? '保存中...' : '保存'}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

@@ -333,7 +333,7 @@ function DashboardCard({
   // 检查数据是否为空
   if (!data || (Array.isArray(data) && data.length === 0)) {
     return (
-      <Card>
+      <Card className="shadow-none">
         {!hideTitle && (
           <CardHeader>
             <CardTitle className="text-lg">{title}</CardTitle>
@@ -352,7 +352,7 @@ function DashboardCard({
   }
 
   return (
-    <Card>
+    <Card className="shadow-none">
       {!hideTitle && (
         <CardHeader>
           <CardTitle className="text-lg">{title}</CardTitle>

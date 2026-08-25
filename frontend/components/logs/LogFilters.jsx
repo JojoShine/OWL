@@ -178,6 +178,7 @@ export default function LogFilters({ type, filters, onChange }) {
       onChange={setLocalFilters}
       onSearch={handleApply}
       onReset={handleReset}
+      variant="toolbar"
     />
   );
 }

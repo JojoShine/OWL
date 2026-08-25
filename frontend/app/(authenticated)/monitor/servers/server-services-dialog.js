@@ -108,7 +108,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {server?.name} - 服务管理
@@ -129,8 +129,8 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
 
           {/* 添加服务表单 */}
           {showAddForm && (
-            <div className="space-y-3 p-4 border rounded-lg">
-              <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+              <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="port">端口号 *</Label>
                   <Input
@@ -156,7 +156,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
                     id="protocol"
                     value={newService.protocol}
                     onChange={(e) => setNewService({ ...newService, protocol: e.target.value })}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="tcp">TCP</option>
                     <option value="udp">UDP</option>
@@ -202,7 +202,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
               ) : (
                 services.map((port) => (
                   <TableRow key={port.id}>
-                    <TableCell className="font-medium">{port.port}</TableCell>
+                    <TableCell className="tabular-data font-medium">{port.port}</TableCell>
                     <TableCell>{port.service_name || '-'}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{port.protocol?.toUpperCase()}</Badge>
@@ -215,7 +215,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
                     </TableCell>
                     <TableCell>
                       {port.last_check_status === 'open' ? (
-                        <Badge variant="default" className="gap-1">
+                        <Badge variant="success" className="gap-1">
                           <CheckCircle className="h-3 w-3" />
                           <span className="text-xs">畅通</span>
                         </Badge>
@@ -225,7 +225,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
                           <span className="text-xs">不通</span>
                         </Badge>
                       ) : port.last_check_status === 'timeout' ? (
-                        <Badge variant="secondary" className="gap-1">
+                        <Badge variant="warning" className="gap-1">
                           <span className="text-xs">超时</span>
                         </Badge>
                       ) : (
@@ -234,7 +234,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
                         </Badge>
                       )}
                       {port.last_checked_at && (
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className="tabular-data text-xs text-muted-foreground mt-1">
                           {new Date(port.last_checked_at).toLocaleString('zh-CN')}
                         </div>
                       )}
@@ -244,6 +244,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleDeleteService(port.id)}
+                        aria-label={`删除端口 ${port.port}`}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -255,7 +256,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
           </Table>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="border-t pt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             关闭
           </Button>

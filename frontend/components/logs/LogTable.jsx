@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { EyeIcon } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils/date';
 import { DataTable } from '@/components/common/DataTable';
+import { Badge } from '@/components/ui/badge';
 
 export default function LogTable({ type, logs, loading, pagination, onPageChange, onPageSizeChange }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -33,6 +34,7 @@ export default function LogTable({ type, logs, loading, pagination, onPageChange
       {
         key: 'timestamp',
         label: '时间',
+        cellClassName: 'tabular-data',
         render: (value) => formatDateTime(value)
       },
     ];
@@ -51,9 +53,9 @@ export default function LogTable({ type, logs, loading, pagination, onPageChange
               DELETE: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
             };
             return (
-              <span className={`px-2 py-1 rounded text-xs font-medium ${colors[value] || ''}`}>
+              <Badge className={colors[value] || ''} variant={colors[value] ? 'outline' : 'neutral'}>
                 {value}
-              </span>
+              </Badge>
             );
           }
         },
@@ -71,15 +73,9 @@ export default function LogTable({ type, logs, loading, pagination, onPageChange
           key: 'status',
           label: '状态',
           render: (value) => (
-            <span
-              className={`px-2 py-1 rounded text-xs font-medium ${
-                value === 'success'
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                  : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-              }`}
-            >
+            <Badge variant={value === 'success' ? 'success' : 'destructive'}>
               {value === 'success' ? '成功' : '失败'}
-            </span>
+            </Badge>
           )
         },
         { key: 'ip', label: 'IP地址' },
@@ -101,9 +97,9 @@ export default function LogTable({ type, logs, loading, pagination, onPageChange
               DELETE: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
             };
             return (
-              <span className={`px-2 py-1 rounded text-xs font-medium ${colors[value] || ''}`}>
+              <Badge className={colors[value] || ''} variant={colors[value] ? 'outline' : 'neutral'}>
                 {value}
-              </span>
+              </Badge>
             );
           }
         },
@@ -126,9 +122,9 @@ export default function LogTable({ type, logs, loading, pagination, onPageChange
             };
             const label = value === 'redis' ? 'Redis' : value === 'postgresql' ? 'PostgreSQL' : value === 'sensitive_data_access' ? '敏感数据访问' : value;
             return (
-              <span className={`px-2 py-1 rounded text-xs font-medium ${colors[value] || ''}`}>
+              <Badge className={colors[value] || ''} variant={colors[value] ? 'outline' : 'neutral'}>
                 {label}
-              </span>
+              </Badge>
             );
           }
         },
@@ -211,6 +207,7 @@ export default function LogTable({ type, logs, loading, pagination, onPageChange
             variant="ghost"
             size="sm"
             onClick={() => handleViewDetails(log)}
+            aria-label="查看日志详情"
           >
             <EyeIcon className="w-4 h-4" />
           </Button>
@@ -218,11 +215,11 @@ export default function LogTable({ type, logs, loading, pagination, onPageChange
       />
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-hidden">
           <DialogHeader>
             <DialogTitle>日志详情</DialogTitle>
           </DialogHeader>
-          <div className="max-h-[600px] overflow-y-auto space-y-4">
+          <div className="max-h-[70vh] space-y-4 overflow-y-auto rounded-md bg-muted/30 p-4">
             {/* 基本信息 */}
             {selectedLog && (
               <div className="space-y-2">
@@ -237,7 +234,7 @@ export default function LogTable({ type, logs, loading, pagination, onPageChange
                   </div>
                   <div>
                     <span className="text-muted-foreground">时间:</span>
-                    <span className="ml-2 font-medium">{formatDateTime(selectedLog.timestamp)}</span>
+                    <span className="tabular-data ml-2 font-medium">{formatDateTime(selectedLog.timestamp)}</span>
                   </div>
                   {selectedLog.timing && (
                     <div>

@@ -55,7 +55,7 @@ export default function NotificationFilter({ filters, onChange }) {
   };
 
   return (
-    <div className="bg-card border rounded-lg p-4">
+    <div>
       <div className="flex flex-wrap items-end gap-4">
         {/* 阅读状态 */}
         <div className="flex-shrink-0">
@@ -103,11 +103,11 @@ export default function NotificationFilter({ filters, onChange }) {
 
         {/* 操作按钮 */}
         <div className="flex-shrink-0 flex gap-2">
-          <Button onClick={handleApply} size="lg">
+          <Button onClick={handleApply}>
             <SearchIcon className="w-4 h-4 mr-2" />
             查询
           </Button>
-          <Button onClick={handleReset} variant="outline" size="lg">
+          <Button onClick={handleReset} variant="outline">
             <XIcon className="w-4 h-4 mr-2" />
             重置
           </Button>

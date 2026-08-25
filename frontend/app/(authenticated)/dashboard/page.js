@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardCard from '@/components/dashboard/DashboardCard';
 import { dashboardWidgetApi, menuApi } from '@/lib/api';
+import { PageHeader, PageShell } from '@/components/layout/page-shell';
 
 function hasPath(menus, targetPath) {
   for (const menu of menus) {
@@ -53,7 +54,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <PageShell>
+        <PageHeader title="仪表盘" description="查看关键业务指标与数据趋势。" />
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="bg-card border rounded-lg p-6 animate-pulse">
@@ -70,7 +72,7 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
-      </div>
+      </PageShell>
     );
   }
 
@@ -79,16 +81,17 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <PageShell>
+      <PageHeader title="仪表盘" description="查看关键业务指标与数据趋势。" />
       {/* 数字指标行 */}
       {metricWidgets.length > 0 && (
         <div className={`grid ${getMetricCols(metricWidgets.length)} gap-4`}>
           {metricWidgets.map(({ widget, data, error }) => {
             const value = data?.[0]?.[widget.data_key] ?? '-';
             return (
-              <div key={widget.id} className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow">
+              <div key={widget.id} className="rounded-lg border bg-card p-5">
                 <p className="text-sm text-muted-foreground mb-1">{widget.title}</p>
-                <h3 className="text-3xl font-bold">
+                <h3 className="tabular-data text-3xl font-semibold tracking-tight">
                   {value}
                   {widget.unit && (
                     <span className="text-base font-normal ml-1 text-muted-foreground">{widget.unit}</span>
@@ -117,6 +120,6 @@ export default function DashboardPage() {
           ))}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }
