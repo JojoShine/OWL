@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { getMenuIcon } from '@/lib/config/menu-icons';
@@ -17,7 +16,14 @@ import { getApiBaseUrl } from '@/lib/utils/http-client';
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 // 单个菜单项组件 - 使用React.memo优化
-const MenuItemComponent = ({ item, level = 0, expandedMenus, toggleMenu, pathname }) => {
+const MenuItemComponent = ({
+  item,
+  level = 0,
+  expandedMenus,
+  toggleMenu,
+  pathname,
+  onNavigate,
+}) => {
   const Icon = getMenuIcon(item.icon);
   const isActive = pathname === item.path;
   const hasChildren = item.children && item.children.length > 0;
@@ -28,11 +34,11 @@ const MenuItemComponent = ({ item, level = 0, expandedMenus, toggleMenu, pathnam
     <div key={item.id}>
       <div
         className={cn(
-          'flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
+          'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
           level > 0 && 'ml-4',
           isActive
-            ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+            ? 'relative bg-sidebar-accent text-sidebar-primary font-medium before:absolute before:left-0 before:top-1/2 before:h-5 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-sidebar-primary'
+            : 'text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground',
           hasChildren && !hasValidPath && 'cursor-pointer'
         )}
         onClick={hasChildren && !hasValidPath ? () => toggleMenu(item.id) : undefined}
@@ -41,6 +47,7 @@ const MenuItemComponent = ({ item, level = 0, expandedMenus, toggleMenu, pathnam
           <Link
             href={item.path}
             className="flex items-center gap-2 flex-1"
+            onClick={onNavigate}
           >
             <Icon className="h-4 w-4" />
             <span className="flex-1">{item.name}</span>
@@ -94,6 +101,7 @@ const MenuItemComponent = ({ item, level = 0, expandedMenus, toggleMenu, pathnam
               expandedMenus={expandedMenus}
               toggleMenu={toggleMenu}
               pathname={pathname}
+              onNavigate={onNavigate}
             />
           ))}
         </div>
@@ -102,7 +110,7 @@ const MenuItemComponent = ({ item, level = 0, expandedMenus, toggleMenu, pathnam
   );
 };
 
-export default function Sidebar() {
+export default function Sidebar({ onNavigate }) {
   const pathname = usePathname();
   const [businessMenus, setBusinessMenus] = useState([]);
   const [systemMenus, setSystemMenus] = useState([]);
@@ -156,14 +164,16 @@ export default function Sidebar() {
     fetchUserMenus();
     fetchSystemConfig();
     setExpandedMenus(new Set());
+    // 两个请求仅在挂载时执行；主题 hook 返回的应用函数当前不是稳定引用。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 监听WebSocket菜单更新事件
   useEffect(() => {
     if (!socket || !isConnected) return;
 
-    const handleMenuUpdated = (data) => {
-      console.log('Menu updated event received:', data);
+    const handleMenuUpdated = () => {
+      console.log('Menu updated event received');
       fetchUserMenus();
     };
 
@@ -187,21 +197,37 @@ export default function Sidebar() {
     });
   }, []);
 
-  // 合并菜单列表
-  const allMenus = useMemo(() => {
-    const menus = [...businessMenus];
-    if (businessMenus.length > 0 && systemMenus.length > 0) {
-      menus.push({ id: '__divider__', isDivider: true });
-    }
-    menus.push(...systemMenus);
-    return menus;
-  }, [businessMenus, systemMenus]);
+  const renderMenuGroup = (title, menus) => {
+    if (menus.length === 0) return null;
+
+    return (
+      <section>
+        <h2 className="mb-2 px-3 text-xs font-medium tracking-wide text-sidebar-foreground/55">
+          {title}
+        </h2>
+        <div className="space-y-1">
+          {menus.map((item) => (
+            <MenuItemComponent
+              key={item.id}
+              item={item}
+              expandedMenus={expandedMenus}
+              toggleMenu={toggleMenu}
+              pathname={pathname}
+              onNavigate={onNavigate}
+            />
+          ))}
+        </div>
+      </section>
+    );
+  };
 
   return (
-    <div className="flex flex-col h-full border-r bg-card">
+    <div className="flex h-full flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
       {/* Logo区域 */}
-      <div className="h-16 flex items-center gap-3 px-6 border-b">
+      <div className="flex h-14 items-center gap-3 border-b border-sidebar-border px-5">
         {logoUrl ? (
+          // 系统 Logo 可由后端配置为任意资源地址，无法预先加入 Next Image 域名白名单。
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={logoUrl}
             alt="Logo"
@@ -212,30 +238,17 @@ export default function Sidebar() {
       </div>
 
       {/* 菜单区域 */}
-      <nav className="flex-1 overflow-y-auto p-4">
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
         {loading ? (
           <Loading size="sm" variant="pulse" />
-        ) : allMenus.length === 0 ? (
-          <div className="text-center text-sm text-muted-foreground py-4">
+        ) : businessMenus.length === 0 && systemMenus.length === 0 ? (
+          <div className="py-4 text-center text-sm text-sidebar-foreground/60">
             暂无可用菜单
           </div>
         ) : (
-          <div className="space-y-1">
-            {allMenus.map(item =>
-              item.isDivider ? (
-                <div key={item.id} className="my-4 px-2">
-                  <div className="h-px bg-border" />
-                </div>
-              ) : (
-                <MenuItemComponent
-                  key={item.id}
-                  item={item}
-                  expandedMenus={expandedMenus}
-                  toggleMenu={toggleMenu}
-                  pathname={pathname}
-                />
-              )
-            )}
+          <div className="space-y-6">
+            {renderMenuGroup('业务应用', businessMenus)}
+            {renderMenuGroup('系统管理', systemMenus)}
           </div>
         )}
       </nav>
