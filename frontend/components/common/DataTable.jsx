@@ -14,6 +14,7 @@ import { TableLoading } from '@/components/ui/table-loading';
 import { Pagination } from '@/components/ui/pagination';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 /**
  * 数据表格组件 - 通用的数据展示表格
@@ -58,12 +59,17 @@ export function DataTable({
   data = [],
   loading = false,
   actions,
+  actionsLabel = '操作',
+  variant = 'default',
+  density = 'default',
   emptyText = '暂无数据',
   pagination,
   onPageChange,
   onPageSizeChange,
   rowKey = 'id',
-  renderSubRow
+  renderSubRow,
+  className,
+  ...rest
 }) {
   const [expandedRows, setExpandedRows] = useState(new Set());
 
@@ -83,56 +89,73 @@ export function DataTable({
   // 计算总列数（包括操作列）
   const hasExpandable = !!renderSubRow;
   const totalColumns = columns.length + (actions ? 1 : 0) + (hasExpandable ? 1 : 0);
+  const isWorkspace = variant === 'workspace';
+  const isCompact = density === 'compact';
 
   return (
-    <div className="space-y-4">
+    <div
+      className={cn(
+        isWorkspace ? 'overflow-hidden rounded-lg border bg-card' : 'space-y-4',
+        className
+      )}
+      {...rest}
+    >
       {/* 表格 */}
-      <div className="rounded-lg overflow-hidden">
+      <div className={cn(!isWorkspace && 'overflow-hidden rounded-lg')}>
         <Table>
-          <TableHeader>
-            <TableRow>
-              {hasExpandable && <TableHead className="w-10"></TableHead>}
+          <TableHeader className={isWorkspace ? 'bg-muted/60' : undefined}>
+            <TableRow className={isWorkspace ? 'hover:bg-muted/60' : undefined}>
+              {hasExpandable && (
+                <TableHead className={cn('w-10', isWorkspace && 'px-4')}></TableHead>
+              )}
               {columns.map((column) => (
                 <TableHead
                   key={column.key}
-                  className={column.headerClassName}
+                  className={cn(isWorkspace && 'px-4', column.headerClassName)}
                   style={column.width ? { width: column.width } : undefined}
                 >
                   {column.label}
                 </TableHead>
               ))}
               {actions && (
-                <TableHead className="text-right">操作</TableHead>
+                <TableHead className={cn('text-right', isWorkspace && 'px-4')}>
+                  {actionsLabel}
+                </TableHead>
               )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableLoading colSpan={totalColumns} />
+              <TableLoading colSpan={totalColumns} variant={isWorkspace ? 'workspace' : 'default'} />
             ) : data.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={totalColumns}
-                  className="text-center py-8 text-muted-foreground"
+                  className={cn(
+                    'text-center py-8 text-muted-foreground',
+                    isWorkspace && 'py-12'
+                  )}
                 >
                   {emptyText}
                 </TableCell>
               </TableRow>
             ) : (
               data.map((row, index) => {
-                const rowId = row[rowKey] || index;
+                const rowId = row[rowKey] ?? index;
+                const rowLabel = row.name || row.username || rowId;
                 const isExpanded = expandedRows.has(rowId);
-                
+
                 return (
                   <React.Fragment key={rowId}>
-                    <TableRow>
+                    <TableRow className={isWorkspace ? 'hover:bg-muted/30' : undefined}>
                       {hasExpandable && (
-                        <TableCell className="w-10">
+                        <TableCell className={cn('w-10', isWorkspace && 'px-4', isCompact && 'h-[50px] py-2')}>
                           <Button
                             variant="ghost"
                             size="sm"
                             className="h-8 w-8 p-0"
                             onClick={() => toggleRow(rowId)}
+                            aria-label={isExpanded ? `收起${rowLabel}` : `展开${rowLabel}`}
                           >
                             {isExpanded ? (
                               <ChevronDown className="h-4 w-4" />
@@ -145,7 +168,11 @@ export function DataTable({
                       {columns.map((column) => (
                         <TableCell
                           key={column.key}
-                          className={column.cellClassName}
+                          className={cn(
+                            isWorkspace && 'px-4',
+                            isCompact && 'h-[50px] py-2',
+                            column.cellClassName
+                          )}
                         >
                           {column.render
                             ? column.render(row[column.key], row)
@@ -153,7 +180,7 @@ export function DataTable({
                         </TableCell>
                       ))}
                       {actions && (
-                        <TableCell className="text-right">
+                        <TableCell className={cn('text-right', isWorkspace && 'px-4', isCompact && 'h-[50px] py-2')}>
                           <div className="flex justify-end gap-2">
                             {actions(row)}
                           </div>
@@ -179,13 +206,16 @@ export function DataTable({
 
       {/* 分页 */}
       {pagination && (
-        <Pagination
-          page={pagination.page}
-          total={pagination.total}
-          pageSize={pagination.pageSize}
-          onPageChange={onPageChange}
-          onPageSizeChange={onPageSizeChange}
-        />
+        <div className={isWorkspace ? 'border-t px-4 py-3' : undefined}>
+          <Pagination
+            page={pagination.page}
+            total={pagination.total}
+            pageSize={pagination.pageSize}
+            onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+            resetPageOnPageSizeChange={!isWorkspace}
+          />
+        </div>
       )}
     </div>
   );

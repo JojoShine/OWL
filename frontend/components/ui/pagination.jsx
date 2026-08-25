@@ -25,6 +25,7 @@ function Pagination({
   pageSize = 10,
   onPageChange,
   onPageSizeChange,
+  resetPageOnPageSizeChange = true,
   ...props
 }) {
   // 如果传入了分页参数，渲染完整的分页组件
@@ -35,6 +36,7 @@ function Pagination({
       pageSize={pageSize}
       onPageChange={onPageChange}
       onPageSizeChange={onPageSizeChange}
+      resetPageOnPageSizeChange={resetPageOnPageSizeChange}
       className={className}
     />;
   }
@@ -51,7 +53,15 @@ function Pagination({
 }
 
 // 完整的分页组件实现
-const CompletePagination = React.memo(function CompletePagination({ page, total, pageSize, onPageChange, onPageSizeChange, className }) {
+const CompletePagination = React.memo(function CompletePagination({
+  page,
+  total,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+  resetPageOnPageSizeChange,
+  className,
+}) {
   // 计算总页数 - 使用 useMemo 缓存
   const totalPages = React.useMemo(() => {
     return Math.ceil(total / pageSize);
@@ -114,15 +124,12 @@ const CompletePagination = React.memo(function CompletePagination({ page, total,
     const newPageSize = parseInt(value, 10);
     if (onPageSizeChange) {
       onPageSizeChange(newPageSize);
-      // 切换每页条数后，重置到第一页
-      onPageChange(1);
+      if (resetPageOnPageSizeChange) {
+        // 切换每页条数后，重置到第一页
+        onPageChange(1);
+      }
     }
-  }, [onPageSizeChange, onPageChange]);
-
-  // 如果只有一页或没有数据，不显示分页
-  if (totalPages <= 1) {
-    return null;
-  }
+  }, [onPageSizeChange, onPageChange, resetPageOnPageSizeChange]);
 
   return (
     <div className={cn("flex items-center justify-between w-full gap-4", className)}>
@@ -148,50 +155,53 @@ const CompletePagination = React.memo(function CompletePagination({ page, total,
       </div>
 
       {/* 右侧：分页控件 */}
-      <nav role="navigation" aria-label="pagination">
-        <ul className="flex flex-row items-center gap-1">
+      {totalPages > 1 && (
+        <nav role="navigation" aria-label="pagination">
+          <ul className="flex flex-row items-center gap-1">
           {/* 上一页 */}
-          <li>
-            <PaginationPrevious
-              onClick={handlePrevious}
-              className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-            />
-          </li>
+            <li>
+              <PaginationPrevious
+                onClick={handlePrevious}
+                disabled={page === 1}
+              />
+            </li>
 
           {/* 页码 */}
-          {pageNumbers.map((pageNum, idx) => {
-            if (typeof pageNum === 'string') {
-              // 省略号
+            {pageNumbers.map((pageNum) => {
+              if (typeof pageNum === 'string') {
+                // 省略号
+                return (
+                  <li key={pageNum}>
+                    <PaginationEllipsis />
+                  </li>
+                );
+              }
+
+              // 页码按钮
               return (
                 <li key={pageNum}>
-                  <PaginationEllipsis />
+                  <PaginationLink
+                    onClick={() => onPageChange(pageNum)}
+                    isActive={pageNum === page}
+                    aria-label={`第 ${pageNum} 页`}
+                    className="cursor-pointer"
+                  >
+                    {pageNum}
+                  </PaginationLink>
                 </li>
               );
-            }
-
-            // 页码按钮
-            return (
-              <li key={pageNum}>
-                <PaginationLink
-                  onClick={() => onPageChange(pageNum)}
-                  isActive={pageNum === page}
-                  className="cursor-pointer"
-                >
-                  {pageNum}
-                </PaginationLink>
-              </li>
-            );
-          })}
+            })}
 
           {/* 下一页 */}
-          <li>
-            <PaginationNext
-              onClick={handleNext}
-              className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-            />
-          </li>
-        </ul>
-      </nav>
+            <li>
+              <PaginationNext
+                onClick={handleNext}
+                disabled={page === totalPages}
+              />
+            </li>
+          </ul>
+        </nav>
+      )}
     </div>
   );
 });
@@ -218,21 +228,27 @@ function PaginationItem({
 function PaginationLink({
   className,
   isActive,
-  size = "icon",
+  disabled,
+  size = "icon-sm",
+  children,
   ...props
 }) {
   return (
-    <a
+    <button
+      type="button"
+      disabled={disabled}
       aria-current={isActive ? "page" : undefined}
       className={cn(
         buttonVariants({
-          variant: isActive ? "outline" : "ghost",
+          variant: isActive ? "default" : "ghost",
           size,
         }),
         className
       )}
       {...props}
-    />
+    >
+      {children}
+    </button>
   );
 }
 
