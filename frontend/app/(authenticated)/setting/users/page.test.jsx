@@ -27,7 +27,9 @@ vi.mock('@/lib/hooks/usePermission', () => ({
 }));
 vi.mock('@/components/users/user-form-dialog', () => ({ default: () => null }));
 vi.mock('@/components/ui/confirm-dialog', () => ({ ConfirmDialog: () => null }));
-vi.mock('@/components/sensitive-fields/plain-access-button', () => ({ default: () => null }));
+vi.mock('@/components/sensitive-fields/plain-access-button', () => ({
+  default: ({ recordId }) => <span data-testid="plain-access-record">{recordId.substring(0, 8)}</span>,
+}));
 
 const deferred = () => {
   let resolve;
@@ -71,6 +73,19 @@ describe('UsersPage queries', () => {
     render(<UsersPage />);
     expect(await screen.findByText('正常')).toBeInTheDocument();
     expect(screen.getByRole('switch', { name: '切换用户 alice 状态' })).toBeInTheDocument();
+  });
+
+  it('normalizes numeric record IDs before rendering masked-field actions', async () => {
+    userApi.getUsers.mockResolvedValueOnce({
+      data: {
+        items: [{ id: 1, username: 'alice', email: 'ali***@example.com', status: 'active' }],
+        pagination: { total: 1 },
+      },
+    });
+
+    render(<UsersPage />);
+
+    expect(await screen.findByTestId('plain-access-record')).toHaveTextContent('1');
   });
 
   it('runs an identical query again and ignores an older slow response', async () => {

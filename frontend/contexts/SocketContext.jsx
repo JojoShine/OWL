@@ -32,6 +32,8 @@ export const SocketProvider = ({ children }) => {
 
   // 连接Socket.io服务器
   const connectSocket = useCallback(() => {
+    if (process.env.NEXT_PUBLIC_DISABLE_SOCKET === 'true') return null;
+
     const token = getToken();
 
     if (!token) {

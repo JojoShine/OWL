@@ -24,4 +24,18 @@ describe('DataTable workspace variant', () => {
     render(<DataTable columns={[{ key: 'name', label: '名称' }]} data={[{ id: 1, name: '用户' }]} pagination={{ page: 1, pageSize: 10, total: 1 }} onPageChange={vi.fn()} variant="workspace" />);
     expect(screen.getByText('共 1 条记录')).toBeInTheDocument();
   });
+
+  it('keeps workspace pagination inside the mobile surface', () => {
+    render(<DataTable columns={[{ key: 'name', label: '名称' }]} data={[{ id: 1, name: '用户' }]} pagination={{ page: 1, pageSize: 10, total: 128 }} onPageChange={vi.fn()} variant="workspace" />);
+    const paginationRoot = screen.getByText('共 128 条记录').parentElement.parentElement;
+
+    expect(paginationRoot).toHaveClass(
+      'flex-col',
+      'items-start',
+      'sm:flex-row',
+      'sm:items-center',
+      '[&>nav]:max-w-full',
+      '[&>nav]:overflow-x-auto'
+    );
+  });
 });

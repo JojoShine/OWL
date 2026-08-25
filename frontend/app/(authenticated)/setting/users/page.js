@@ -208,7 +208,7 @@ export default function UsersPage() {
             <PlainAccessButton 
               tableName="owl_users" 
               fieldName="email"
-              recordId={record.id}
+              recordId={String(record.id)}
               onSuccess={fetchUsers}
             />
           )}
@@ -225,7 +225,7 @@ export default function UsersPage() {
             <PlainAccessButton 
               tableName="owl_users" 
               fieldName="phone"
-              recordId={record.id}
+              recordId={String(record.id)}
               onSuccess={fetchUsers}
             />
           )}
