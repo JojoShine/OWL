@@ -121,6 +121,10 @@
   }
 }
 
+@utility tabular-data {
+  font-variant-numeric: tabular-nums;
+}
+
 /* react-day-picker 自定义样式 */
 .rdp {
   --rdp-accent-color: transparent !important;
