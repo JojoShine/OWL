@@ -193,7 +193,7 @@ describe('admin shell design contract', () => {
 创建 `frontend/components/layout/header.test.jsx`，mock `useAuth`、`NotificationIcon` 与系统配置 API，覆盖移动菜单入口和主题开关契约：
 
 ```jsx
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import Header from './header';
 import { systemConfigApi } from '@/lib/api';
@@ -622,7 +622,7 @@ git commit -m "feat: add mature data workspace styling"
 在 `page.test.jsx` 中 mock `userApi`、权限 hook 和非目标 Dialog，保留真实 SearchFilter/DataTable：
 
 ```jsx
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import UsersPage from './page';
