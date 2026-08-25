@@ -119,12 +119,14 @@ function SearchField({ field, value, onChange, variant = 'default' }) {
               value={value?.start}
               onChange={(e) => handleChange({ ...value, start: e.target.value })}
               placeholder="开始日期"
+              className={controlClassName}
             />
             <span className="text-muted-foreground">-</span>
             <DatePicker
               value={value?.end}
               onChange={(e) => handleChange({ ...value, end: e.target.value })}
               placeholder="结束日期"
+              className={controlClassName}
             />
           </div>
         </div>

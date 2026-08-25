@@ -8,7 +8,11 @@ vi.mock('@/lib/utils', () => ({
   cn: (...inputs) => inputs.filter(Boolean).join(' '),
 }));
 
-vi.mock('@/components/ui/date-picker', () => ({ DatePicker: () => null }));
+vi.mock('@/components/ui/date-picker', () => ({
+  DatePicker: ({ className, placeholder }) => (
+    <button data-testid="date-picker" className={className}>{placeholder}</button>
+  ),
+}));
 vi.mock('@/components/ui/combobox', () => ({ Combobox: () => null }));
 
 const fields = [{ type: 'text', name: 'keyword', placeholder: '搜索用户' }];
@@ -37,5 +41,20 @@ describe('SearchFilter', () => {
   it('renders right-side actions in toolbar mode', () => {
     render(<SearchFilter fields={fields} values={{}} onChange={vi.fn()} onSearch={vi.fn()} onReset={vi.fn()} variant="toolbar" rightActions={<button>导出</button>} />);
     expect(screen.getByRole('button', { name: '导出' })).toBeInTheDocument();
+  });
+
+  it('renders both date range controls at 36px in toolbar mode', () => {
+    render(
+      <SearchFilter
+        fields={[{ type: 'dateRange', name: 'createdAt' }]}
+        values={{}}
+        onChange={vi.fn()}
+        onSearch={vi.fn()}
+        onReset={vi.fn()}
+        variant="toolbar"
+      />
+    );
+    expect(screen.getAllByTestId('date-picker')).toHaveLength(2);
+    expect(screen.getAllByTestId('date-picker').every((control) => control.className.includes('h-9'))).toBe(true);
   });
 });
