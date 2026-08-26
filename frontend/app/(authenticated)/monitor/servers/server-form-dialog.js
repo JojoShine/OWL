@@ -142,7 +142,7 @@ export default function ServerFormDialog({ open, onOpenChange, server, onSuccess
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="mt-4">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList stretch>
             <TabsTrigger value="basic">基本信息</TabsTrigger>
             <TabsTrigger value="monitoring">监控设置</TabsTrigger>
           </TabsList>

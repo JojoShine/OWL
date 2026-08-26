@@ -387,39 +387,39 @@ export default function EmailManagementPage() {
       />
       <PageWorkspace>
         <PageToolbar>
-        <Tabs value={activeView} onValueChange={setActiveView} className="space-y-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <TabsList>
-              <TabsTrigger value="tasks">发送任务</TabsTrigger>
-              <TabsTrigger value="templates">邮件模板</TabsTrigger>
-            </TabsList>
+          <Tabs value={activeView} onValueChange={setActiveView} className="w-full gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <TabsList>
+                <TabsTrigger value="tasks">发送任务</TabsTrigger>
+                <TabsTrigger value="templates">邮件模板</TabsTrigger>
+              </TabsList>
+              {activeView === 'tasks' ? (
+                <Button onClick={handleAddTask}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  新建任务
+                </Button>
+              ) : null}
+            </div>
             {activeView === 'tasks' ? (
-              <Button onClick={handleAddTask}>
-                <Plus className="h-4 w-4 mr-2" />
-                新建任务
-              </Button>
-            ) : null}
-          </div>
-          {activeView === 'tasks' ? (
-            <SearchFilter
-              variant="toolbar"
-              fields={taskSearchFields}
-              values={taskSearchValues}
-              onChange={setTaskSearchValues}
-              onSearch={handleTaskSearch}
-              onReset={handleTaskReset}
-            />
-          ) : (
-            <SearchFilter
-              variant="toolbar"
-              fields={templateSearchFields}
-              values={templateSearchValues}
-              onChange={setTemplateSearchValues}
-              onSearch={handleTemplateSearch}
-              onReset={handleTemplateReset}
-            />
-          )}
-        </Tabs>
+              <SearchFilter
+                variant="toolbar"
+                fields={taskSearchFields}
+                values={taskSearchValues}
+                onChange={setTaskSearchValues}
+                onSearch={handleTaskSearch}
+                onReset={handleTaskReset}
+              />
+            ) : (
+              <SearchFilter
+                variant="toolbar"
+                fields={templateSearchFields}
+                values={templateSearchValues}
+                onChange={setTemplateSearchValues}
+                onSearch={handleTemplateSearch}
+                onReset={handleTemplateReset}
+              />
+            )}
+          </Tabs>
         </PageToolbar>
         <PageSurface className="p-0">
         {activeView === 'tasks' ? (

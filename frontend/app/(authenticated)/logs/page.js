@@ -269,11 +269,11 @@ export default function LogsPage() {
         }}
         className="flex-1 gap-4"
       >
-        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 sm:w-fit">
+        <TabsList wrap>
           {TAB_CONFIGS.map((tab) => {
             const Icon = tab.icon;
             return (
-              <TabsTrigger key={tab.value} value={tab.value} className="flex-none px-3">
+              <TabsTrigger key={tab.value} value={tab.value}>
                 <Icon className="h-4 w-4" />
                 {tab.label}
               </TabsTrigger>

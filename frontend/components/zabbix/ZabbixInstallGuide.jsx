@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Check, Copy, Server, Monitor, HardDrive, Settings, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -111,51 +111,36 @@ export default function ZabbixInstallGuide({ open, onOpenChange }) {
           </DialogDescription>
         </DialogHeader>
 
-        {/* 分类按钮组 */}
-        <div className="grid w-full flex-none grid-cols-3 gap-1 rounded-lg bg-muted p-1">
-          {CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            return (
-              <button
-                key={cat.key}
-                onClick={() => handleCategoryChange(cat.key)}
-                className={cn(
-                  'flex min-w-0 items-center justify-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium transition-colors sm:px-3',
-                  category === cat.key
-                    ? 'border border-border bg-background text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span className="min-w-0 truncate">{cat.label}</span>
-              </button>
-            );
-          })}
-        </div>
+        {/* 分类标签 */}
+        <Tabs value={category} onValueChange={handleCategoryChange} className="w-full flex-none">
+          <TabsList stretch>
+            {CATEGORIES.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <TabsTrigger key={cat.key} value={cat.key}>
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="min-w-0 truncate">{cat.label}</span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </Tabs>
 
         {/* 子Tab（Server/Agent 分类显示） */}
         {category !== 'middleware' && SUB_TABS[category] && (
-          <div className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-muted/50 p-1">
-            {SUB_TABS[category].map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.value;
-              return (
-                <button
-                  key={tab.value}
-                  onClick={() => setActiveTab(tab.value)}
-                  className={cn(
-                    'inline-flex items-center justify-center gap-1.5 flex-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap transition-all',
-                    isActive
-                      ? 'border border-border bg-background text-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-none">
+            <TabsList stretch>
+              {SUB_TABS[category].map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <TabsTrigger key={tab.value} value={tab.value}>
+                    <Icon className="h-3.5 w-3.5" />
+                    {tab.label}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </Tabs>
         )}
 
         {/* 内容区域 */}

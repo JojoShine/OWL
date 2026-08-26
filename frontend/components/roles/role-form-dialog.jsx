@@ -236,7 +236,7 @@ export default function RoleFormDialog({ open, onOpenChange, role, onSuccess }) 
         ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList stretch>
               <TabsTrigger value="basic">基本信息</TabsTrigger>
               <TabsTrigger value="permissions">权限配置</TabsTrigger>
               <TabsTrigger value="menus">菜单配置</TabsTrigger>

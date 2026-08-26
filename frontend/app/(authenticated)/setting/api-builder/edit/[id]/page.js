@@ -312,7 +312,7 @@ export default function ApiBuilderEditPage() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList stretch>
               <TabsTrigger value="basic">1. 基本信息</TabsTrigger>
               <TabsTrigger value="sql">2. SQL查询</TabsTrigger>
               <TabsTrigger value="review">3. 确认保存</TabsTrigger>

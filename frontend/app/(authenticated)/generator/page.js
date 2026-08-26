@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   DatabaseIcon,
   Settings2Icon,
@@ -64,6 +64,9 @@ export default function GeneratorPage() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [tableSearchValues, setTableSearchValues] = useState({});
+  const [tableQueryVersion, setTableQueryVersion] = useState(0);
+  const latestTableRequestId = useRef(0);
 
   // 数据库表分页状态
   const [tablePagination, setTablePagination] = useState({
@@ -113,6 +116,7 @@ export default function GeneratorPage() {
    * 加载数据库表列表
    */
   const loadTables = useCallback(async () => {
+    const requestId = ++latestTableRequestId.current;
     if (activeTab !== 'tables') return;
 
     try {
@@ -122,6 +126,8 @@ export default function GeneratorPage() {
         page: tablePagination.page,
         limit: tablePagination.pageSize
       });
+
+      if (requestId !== latestTableRequestId.current) return;
 
       // 处理分页响应
       if (response.data?.items) {
@@ -135,10 +141,11 @@ export default function GeneratorPage() {
         }
       }
     } catch (error) {
+      if (requestId !== latestTableRequestId.current) return;
       console.error('Failed to load tables:', error);
       toast.error('加载表列表失败');
     } finally {
-      setLoading(false);
+      if (requestId === latestTableRequestId.current) setLoading(false);
     }
   }, [activeTab, searchTerm, tablePagination.page, tablePagination.pageSize]);
 
@@ -216,36 +223,8 @@ export default function GeneratorPage() {
 
   // 数据库表列表加载
   useEffect(() => {
-    if (activeTab !== 'tables') return;
-
-    const fetchTables = async () => {
-      try {
-        setLoading(true);
-        const response = await generatorApi.getTables({
-          search: searchTerm,
-          page: tablePagination.page,
-          limit: tablePagination.pageSize
-        });
-
-        if (response.data?.items) {
-          setTables(response.data.items || []);
-          if (response.data.pagination) {
-            setTablePagination(prev => ({
-              ...prev,
-              total: response.data.pagination.total || 0,
-            }));
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load tables:', error);
-        toast.error('加载表列表失败');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTables();
-  }, [activeTab, tablePagination.page, tablePagination.pageSize, searchTerm]);
+    loadTables();
+  }, [loadTables, tableQueryVersion]);
 
   // 模块配置列表加载
   useEffect(() => {
@@ -572,6 +551,23 @@ export default function GeneratorPage() {
     setTablePagination(prev => ({ ...prev, page: newPage }));
   };
 
+  const handleTablePageSizeChange = (newPageSize) => {
+    setTablePagination(prev => ({ ...prev, pageSize: newPageSize, page: 1 }));
+  };
+
+  const handleTableSearch = () => {
+    setSearchTerm(tableSearchValues.keyword?.trim() || '');
+    setTablePagination(prev => ({ ...prev, page: 1 }));
+    setTableQueryVersion(version => version + 1);
+  };
+
+  const handleTableSearchReset = () => {
+    setTableSearchValues({});
+    setSearchTerm('');
+    setTablePagination(prev => ({ ...prev, page: 1 }));
+    setTableQueryVersion(version => version + 1);
+  };
+
   /**
    * 处理模块配置分页变化
    */
@@ -601,7 +597,7 @@ export default function GeneratorPage() {
       />
       {/* 标签页 */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList wrap>
           <TabsTrigger value="tables">
             <DatabaseIcon className="w-4 h-4 mr-2" />
             数据库表
@@ -617,22 +613,25 @@ export default function GeneratorPage() {
         </TabsList>
 
         {/* 数据库表列表 */}
-        <TabsContent value="tables" className="space-y-4">
+        <TabsContent value="tables">
           <TablesSection
             tables={tables}
             loading={loading && activeTab === 'tables'}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
+            searchValues={tableSearchValues}
+            onSearchValuesChange={setTableSearchValues}
+            onSearch={handleTableSearch}
+            onReset={handleTableSearchReset}
             onRefresh={loadTables}
             onInitialize={handleInitializeConfig}
             onCheckAudit={handleCheckAndAddAuditFields}
             pagination={tablePagination}
             onPageChange={handleTablePageChange}
+            onPageSizeChange={handleTablePageSizeChange}
           />
         </TabsContent>
 
         {/* 模块配置列表 */}
-        <TabsContent value="configs" className="space-y-4">
+        <TabsContent value="configs">
           <Card>
             <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
@@ -658,7 +657,7 @@ export default function GeneratorPage() {
         </TabsContent>
 
         {/* 生成历史 */}
-        <TabsContent value="history" className="space-y-4">
+        <TabsContent value="history">
           <Card>
             <CardHeader>
               <CardTitle>生成历史</CardTitle>

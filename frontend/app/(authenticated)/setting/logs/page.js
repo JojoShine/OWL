@@ -135,9 +135,9 @@ export default function LogsPage() {
         meta={<span className="text-sm text-muted-foreground">共 {pagination.total} 条记录</span>}
       />
       <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
-        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 sm:w-fit">
+        <TabsList wrap>
           {LOG_TYPES.map((type) => (
-            <TabsTrigger key={type.value} value={type.value} className="flex-none px-3">
+            <TabsTrigger key={type.value} value={type.value}>
               {type.label}
             </TabsTrigger>
           ))}

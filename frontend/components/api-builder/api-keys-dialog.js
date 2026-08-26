@@ -186,7 +186,7 @@ export default function ApiKeysDialog({ open, onOpenChange, interface_ }) {
 
             {interface_.require_auth ? (
               <Tabs defaultValue="step1" className="w-full">
-                <TabsList className="mb-5 grid w-full grid-cols-2">
+                <TabsList stretch className="mb-5">
                   <TabsTrigger value="step1">步骤 1：获取令牌</TabsTrigger>
                   <TabsTrigger value="step2">步骤 2：调用接口</TabsTrigger>
                 </TabsList>

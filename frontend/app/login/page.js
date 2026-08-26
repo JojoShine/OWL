@@ -171,7 +171,7 @@ function LoginForm() {
         <Tabs value={loginTab} onValueChange={setLoginTab} className="w-full">
           {/* 根据配置显示Tab */}
           {loginMethod === 'both' && (
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsList stretch className="mb-6">
               <TabsTrigger value="sms">短信登录</TabsTrigger>
               <TabsTrigger value="password">密码登录</TabsTrigger>
             </TabsList>

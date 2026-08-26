@@ -86,13 +86,40 @@ describe('neutral UI primitive contract', () => {
 
     const tabsList = screen.getByRole('tablist');
     const activeTab = screen.getByRole('tab', { name: '第一项' });
-    expect(tabsList).toHaveClass('bg-muted', 'h-10', 'rounded-lg');
+    expect(tabsList).toHaveClass('bg-muted', 'h-10', 'rounded-lg', 'border-border');
     expect(activeTab).toHaveClass(
       'data-[state=active]:bg-background',
       'data-[state=active]:text-foreground',
-      'data-[state=active]:shadow-[0_1px_2px_rgba(16,24,40,0.06)]'
+      'data-[state=active]:shadow-[0_1px_2px_rgba(15,23,42,0.10),inset_0_0_0_1px_rgba(15,23,42,0.06)]'
     );
     expect(activeTab).not.toHaveClass('data-[state=active]:bg-primary');
+  });
+
+  it('keeps full-width and wrapped tab layouts safe at narrow widths', () => {
+    render(
+      h(
+        Tabs,
+        { defaultValue: 'first' },
+        h(
+          TabsList,
+          { stretch: true, wrap: true },
+          h(TabsTrigger, { value: 'first' }, '第一项'),
+          h(TabsTrigger, { value: 'second' }, '第二项')
+        )
+      )
+    );
+
+    expect(screen.getByRole('tablist')).toHaveClass(
+      'w-full',
+      'flex-wrap',
+      '[&>[data-slot=tabs-trigger]]:min-w-0',
+      '[&>[data-slot=tabs-trigger]]:flex-1'
+    );
+    expect(screen.getByRole('tab', { name: '第一项' })).toHaveClass(
+      'min-w-0',
+      'overflow-hidden',
+      'text-ellipsis'
+    );
   });
 
   it('uses the softened overlay while preserving non-input focus affordances', () => {

@@ -58,11 +58,9 @@ export function DatePicker({ value, onChange, placeholder = '选择日期', clas
           {...props}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {dateValue ? (
-            format(dateValue, 'PPP', { locale: zhCN })
-          ) : (
-            <span>{placeholder}</span>
-          )}
+          <span className="min-w-0 truncate">
+            {dateValue ? format(dateValue, 'PPP', { locale: zhCN }) : placeholder}
+          </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-3 bg-white dark:bg-popover" align="start">

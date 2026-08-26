@@ -113,21 +113,21 @@ function SearchField({ field, value, onChange, variant = 'default' }) {
 
     case 'dateRange':
       return (
-        <div className="flex-1 min-w-0 sm:min-w-[360px]">
+        <div className="min-w-0 basis-full flex-1 sm:min-w-[360px] sm:basis-auto">
           {renderLabel()}
-          <div className="flex gap-2 items-center">
+          <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
             <DatePicker
               value={value?.start}
               onChange={(e) => handleChange({ ...value, start: e.target.value })}
               placeholder="开始日期"
-              className={controlClassName}
+              className={`${controlClassName || ''} min-w-0 overflow-hidden`}
             />
-            <span className="text-muted-foreground">-</span>
+            <span className="hidden text-muted-foreground sm:inline">-</span>
             <DatePicker
               value={value?.end}
               onChange={(e) => handleChange({ ...value, end: e.target.value })}
               placeholder="结束日期"
-              className={controlClassName}
+              className={`${controlClassName || ''} min-w-0 overflow-hidden`}
             />
           </div>
         </div>
@@ -195,8 +195,8 @@ export function SearchFilter({
   };
 
   return (
-    <div className="bg-card rounded-lg" data-variant={variant} onKeyDown={handleKeyDown}>
-      <div className="flex flex-wrap items-end gap-3">
+    <div className="min-w-0 rounded-lg bg-card" data-variant={variant} onKeyDown={handleKeyDown}>
+      <div className="flex w-full min-w-0 flex-wrap items-end gap-3">
         {/* 渲染所有搜索字段 */}
         {fields.map((field) => (
           <SearchField
@@ -209,7 +209,7 @@ export function SearchFilter({
         ))}
 
         {/* 按钮区域 */}
-        <div className="flex-shrink-0 flex gap-2">
+        <div className="flex min-w-fit flex-shrink-0 flex-wrap gap-2">
           <Button className={toolbarControlClassName} onClick={onSearch} size={variant === 'toolbar' ? 'default' : 'lg'}>
             <Search className="h-4 w-4 mr-2" />
             查询
