@@ -58,6 +58,13 @@ vi.mock('@/lib/utils/theme', () => ({
   useColorTheme: () => ({ applySystemConfigTheme: stableMocks.applySystemConfigTheme }),
 }));
 
+vi.mock('@/lib/utils/auth', () => ({
+  useAuth: () => ({
+    user: { username: 'tester', real_name: '测试用户', email: 'tester@example.com' },
+    logout: vi.fn(),
+  }),
+}));
+
 vi.mock('@/lib/utils/http-client', () => ({
   getApiBaseUrl: () => 'http://localhost:3000',
 }));

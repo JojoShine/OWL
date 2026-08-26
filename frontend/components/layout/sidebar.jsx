@@ -7,13 +7,88 @@ import { cn } from '@/lib/utils';
 import { getMenuIcon } from '@/lib/config/menu-icons';
 import { Loading } from '@/components/ui/loading';
 import { menuApi } from '@/lib/api';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown, ChevronRight, ChevronsUpDown, LogOut, User } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { useColorTheme } from '@/lib/utils/theme';
+import { useAuth } from '@/lib/utils/auth';
 import { systemConfigApi } from '@/lib/api';
 import { getApiBaseUrl } from '@/lib/utils/http-client';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
+function SidebarUserMenu() {
+  const { user, logout } = useAuth();
+  const displayName = user?.real_name || user?.username || '用户';
+  const secondaryText = user?.email || (user?.username ? `@${user.username}` : '当前账号');
+  const initials = (user?.username || displayName).charAt(0).toUpperCase();
+
+  return (
+    <div className="border-t border-sidebar-border p-3">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="h-auto w-full justify-start gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          >
+            <Avatar className="h-9 w-9 shrink-0">
+              <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium text-sidebar-accent-foreground">
+                {displayName}
+              </span>
+              <span className="mt-0.5 block truncate text-xs font-normal text-sidebar-foreground/60">
+                {secondaryText}
+              </span>
+            </span>
+            <ChevronsUpDown className="h-4 w-4 shrink-0 text-sidebar-foreground/45" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          side="top"
+          align="start"
+          sideOffset={8}
+          className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-0"
+          forceMount
+        >
+          <DropdownMenuLabel className="font-normal">
+            <div className="space-y-1">
+              <p className="truncate text-sm font-medium leading-none">{displayName}</p>
+              {user?.username ? (
+                <p className="truncate text-xs leading-none text-muted-foreground">@{user.username}</p>
+              ) : null}
+              {user?.email ? (
+                <p className="truncate text-xs leading-none text-muted-foreground">{user.email}</p>
+              ) : null}
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>
+            <User className="h-4 w-4" />
+            <span>个人信息</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={logout}>
+            <LogOut className="h-4 w-4" />
+            <span>退出登录</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
 
 // 单个菜单项组件 - 使用React.memo优化
 const MenuItemComponent = ({
@@ -252,6 +327,8 @@ export default function Sidebar({ onNavigate }) {
           </div>
         )}
       </nav>
+
+      <SidebarUserMenu />
     </div>
   );
 }
