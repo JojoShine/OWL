@@ -3,6 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Loading } from '@/components/ui/loading';
 import { Settings2Icon, CodeIcon, TrashIcon, Trash2Icon } from 'lucide-react';
 
 export default function ConfigsSection({
@@ -14,29 +16,18 @@ export default function ConfigsSection({
   onDeleteConfig,
 }) {
   if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader className="space-y-2">
-              <div className="h-4 bg-muted rounded w-3/4"></div>
-              <div className="h-3 bg-muted rounded w-1/2"></div>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="h-3 bg-muted rounded"></div>
-              <div className="h-3 bg-muted rounded w-4/5"></div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
+    return <Loading size="md" text="正在加载模块配置..." fullHeight />;
   }
 
   if (configs.length === 0) {
     return (
       <Card className="border-dashed bg-muted/20">
-        <CardContent className="py-12 text-center text-sm text-muted-foreground">
-          暂无模块配置，请先从"数据库表"标签页初始化配置
+        <CardContent>
+          <EmptyState
+            icon={Settings2Icon}
+            title="暂无模块配置"
+            description="请先从“数据库表”标签页初始化配置"
+          />
         </CardContent>
       </Card>
     );

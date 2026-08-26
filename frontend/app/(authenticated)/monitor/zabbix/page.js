@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTable } from '@/components/common/DataTable';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Loading } from '@/components/ui/loading';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import {
   Dialog,
@@ -341,9 +343,9 @@ export default function ZabbixMonitorPage() {
             </CardHeader>
             <CardContent>
               {problemsLoading ? (
-                <div className="text-center py-8 text-muted-foreground text-sm">加载中...</div>
+                <Loading size="sm" text="正在加载告警..." className="py-8" />
               ) : problems.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground text-sm">暂无告警</div>
+                <EmptyState icon={AlertTriangle} title="暂无告警" compact />
               ) : (
                 <div className="space-y-3 max-h-[500px] overflow-y-auto">
                   {problems.map((problem) => {
@@ -400,7 +402,7 @@ export default function ZabbixMonitorPage() {
           </DialogHeader>
 
           {hostDetailLoading ? (
-            <div className="text-center py-8 text-muted-foreground">加载中...</div>
+            <Loading size="md" text="正在加载主机详情..." className="py-8" />
           ) : hostDetail ? (
             <div className="space-y-4">
               {/* 主机组 */}
@@ -446,7 +448,7 @@ export default function ZabbixMonitorPage() {
                     </table>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">暂无监控项</p>
+                  <EmptyState icon={Activity} title="暂无监控项" compact />
                 )}
               </div>
             </div>

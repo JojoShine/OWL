@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { EmptyState } from "@/components/ui/empty-state"
 import {
   Popover,
   PopoverContent,
@@ -92,9 +93,7 @@ export function Combobox({
           <ScrollArea className="max-h-[300px]">
             <div className="p-1">
               {filteredOptions.length === 0 ? (
-                <div className="py-6 text-center text-sm text-muted-foreground">
-                  {emptyText}
-                </div>
+                <EmptyState title={emptyText} compact className="py-6" />
               ) : (
                 filteredOptions.map((option) => (
                   <div

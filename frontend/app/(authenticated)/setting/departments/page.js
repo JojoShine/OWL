@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { departmentApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/ui/loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Plus } from 'lucide-react';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { TreeView } from '@/components/common/TreeView';
@@ -247,15 +248,16 @@ export default function DepartmentsPage() {
             <Loading size="md" variant="pulse" />
           </div>
         ) : filteredDepartments.length === 0 ? (
-          <div className="py-12 text-center text-muted-foreground">
-            <p>{searchValues.keyword || searchValues.status !== 'all' ? '未找到匹配的部门' : '暂无部门'}</p>
-            {canCreate('department') && (
-              <Button onClick={() => handleAdd()} variant="outline" className="mt-4">
+          <EmptyState
+            title={searchValues.keyword || searchValues.status !== 'all' ? '未找到匹配的部门' : '暂无部门'}
+            description={searchValues.keyword || searchValues.status !== 'all' ? '请调整检索条件后重试' : '创建部门后会显示在这里'}
+            action={canCreate('department') ? (
+              <Button onClick={() => handleAdd()} variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
                 创建第一个部门
               </Button>
-            )}
-          </div>
+            ) : null}
+          />
         ) : (
           <TreeView
             data={filteredDepartments}

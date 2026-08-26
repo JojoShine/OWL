@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { LoaderCircleIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 /**
  * 统一的 Loading 组件
@@ -33,26 +35,28 @@ export function Loading({
   };
 
   const heightClass = fullHeight ? 'h-64 md:h-96 lg:h-[500px]' : '';
-
-  if (variant === 'pulse') {
-    return (
-      <div
-        className={`flex items-center justify-center ${heightClass} animate-pulse text-muted-foreground ${className}`}
-      >
-        <span className={textSizeClasses[size]}>{text}</span>
-      </div>
-    );
-  }
+  const isCompact = size === 'sm';
 
   return (
     <div
-      className={`flex items-center justify-center ${heightClass} text-muted-foreground ${className}`}
+      role="status"
+      aria-live="polite"
+      className={cn('flex items-center justify-center text-muted-foreground', heightClass, className)}
     >
-      <div className="flex flex-col items-center gap-3">
-        <div
-          className={`rounded-full border-4 border-muted border-t-primary animate-spin ${sizeClasses[size]}`}
-        />
-        {text && <span className={`font-medium ${textSizeClasses[size]}`}>{text}</span>}
+      <div className={cn('flex items-center', isCompact ? 'gap-2' : 'flex-col gap-3')}>
+        <span className={cn(
+          'relative flex items-center justify-center rounded-full bg-muted/70 ring-1 ring-border/60',
+          isCompact ? 'h-7 w-7' : size === 'lg' ? 'h-14 w-14' : 'h-11 w-11',
+          variant === 'pulse' && 'animate-pulse'
+        )}>
+          <LoaderCircleIcon
+            className={cn('animate-spin text-foreground/75', sizeClasses[size])}
+            strokeWidth={1.8}
+          />
+        </span>
+        {text ? (
+          <span className={cn('font-medium tracking-wide', textSizeClasses[size])}>{text}</span>
+        ) : null}
       </div>
     </div>
   );

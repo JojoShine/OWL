@@ -10,6 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { TableLoading } from '@/components/ui/table-loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -230,7 +231,7 @@ export function DataTable({
                     isWorkspace && 'py-12'
                   )}
                 >
-                  {emptyText}
+                  <EmptyState title={emptyText} compact />
                 </TableCell>
               </TableRow>
             ) : (

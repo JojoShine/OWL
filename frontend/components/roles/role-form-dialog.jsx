@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loading } from '@/components/ui/loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import { roleApi, permissionApi, menuApi } from '@/lib/api';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
@@ -318,7 +319,7 @@ export default function RoleFormDialog({ open, onOpenChange, role, onSuccess }) 
             <TabsContent value="permissions" className="mt-4">
               <ScrollArea className="h-[400px] pr-4">
                 {Object.keys(groupedPermissions).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">暂无权限</p>
+                  <EmptyState title="暂无权限" compact />
                 ) : (
                   <div className="space-y-6">
                     {Object.entries(groupedPermissions).map(([category, perms]) => (
@@ -355,7 +356,7 @@ export default function RoleFormDialog({ open, onOpenChange, role, onSuccess }) 
             <TabsContent value="menus" className="mt-4">
               <ScrollArea className="h-[400px] pr-4">
                 {menus.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">暂无菜单</p>
+                  <EmptyState title="暂无菜单" compact />
                 ) : (
                   <div className="space-y-2">
                     {renderMenuTree(menus)}

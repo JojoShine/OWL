@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Loading } from '@/components/ui/loading';
 import { Plus, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import {
   Dialog,
@@ -190,13 +192,13 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
-                    加载中...
+                    <Loading size="sm" text="正在加载服务..." />
                   </TableCell>
                 </TableRow>
               ) : services.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
-                    暂无服务配置
+                    <EmptyState title="暂无服务配置" compact />
                   </TableCell>
                 </TableRow>
               ) : (

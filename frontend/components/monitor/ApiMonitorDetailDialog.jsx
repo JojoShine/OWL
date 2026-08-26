@@ -18,6 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loading } from '@/components/ui/loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import { CheckCircle2, XCircle, Clock, TrendingUp, Activity } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils/date';
 import { apiMonitorApi } from '@/lib/api';
@@ -209,9 +210,7 @@ export default function ApiMonitorDetailDialog({ open, onOpenChange, monitor }) 
               {loading ? (
                 <Loading size="sm" variant="pulse" />
               ) : logs.length === 0 ? (
-                <div className="flex items-center justify-center h-32">
-                  <div className="text-muted-foreground">暂无检测记录</div>
-                </div>
+                <EmptyState icon={Activity} title="暂无检测记录" compact className="h-32" />
               ) : (
                 <div className="border rounded-lg">
                   <Table>

@@ -12,6 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { TableLoading } from '@/components/ui/table-loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Edit, Trash2, Eye } from 'lucide-react';
@@ -176,7 +177,7 @@ export function DynamicTable({
   if (data.length === 0) {
     return (
       <div className="rounded-lg p-8">
-        <div className="text-center text-muted-foreground">暂无数据</div>
+        <EmptyState title="暂无数据" description="当前条件下没有可展示的记录" />
       </div>
     );
   }

@@ -15,6 +15,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Loading } from '@/components/ui/loading';
 import { ArrowLeft, Plus, Copy, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -213,13 +215,13 @@ export default function ApiKeyManagementPage() {
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      加载中...
+                      <Loading size="sm" text="正在加载密钥..." />
                     </TableCell>
                   </TableRow>
                 ) : keys.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      暂无密钥
+                      <EmptyState title="暂无密钥" compact />
                     </TableCell>
                   </TableRow>
                 ) : (

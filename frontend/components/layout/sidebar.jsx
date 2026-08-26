@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { getMenuIcon } from '@/lib/config/menu-icons';
 import { Loading } from '@/components/ui/loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import { menuApi } from '@/lib/api';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -311,9 +312,7 @@ export default function Sidebar({ onNavigate }) {
         {loading ? (
           <Loading size="sm" variant="pulse" />
         ) : businessMenus.length === 0 && systemMenus.length === 0 ? (
-          <div className="py-4 text-center text-sm text-sidebar-foreground/60">
-            暂无可用菜单
-          </div>
+          <EmptyState title="暂无可用菜单" compact className="py-4" />
         ) : (
           <div className="space-y-6">
             {renderMenuGroup('业务应用', businessMenus)}

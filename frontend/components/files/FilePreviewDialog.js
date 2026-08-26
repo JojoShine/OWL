@@ -6,6 +6,7 @@ import { fileApi } from '@/lib/api';
 import { formatFileSize, formatDate, isImage, isVideo, isPDF, canPreview } from '@/lib/utils/file';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Loading } from '@/components/ui/loading';
 import {
   Dialog,
   DialogContent,
@@ -140,9 +141,7 @@ export default function FilePreviewDialog({ open, onClose, file, onShare }) {
         {/* 预览内容 */}
         <div className="min-h-[360px] flex-1 overflow-auto bg-muted p-6">
           {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-muted-foreground">加载中...</div>
-            </div>
+            <Loading size="md" text="正在加载文件预览..." className="h-full" />
           ) : fileCanPreview && previewUrl ? (
             <div className="flex items-center justify-center h-full">
               {isImage(file.original_name, file.mime_type) && (

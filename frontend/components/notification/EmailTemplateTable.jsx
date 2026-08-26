@@ -14,6 +14,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export default function EmailTemplateTable({
   templates = [],
@@ -49,8 +50,8 @@ export default function EmailTemplateTable({
 
   if (templates.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center border rounded-lg">
-        <p className="text-sm text-muted-foreground">暂无邮件模板</p>
+      <div className="rounded-lg border">
+        <EmptyState title="暂无邮件模板" description="创建模板后会显示在这里" />
       </div>
     );
   }

@@ -21,6 +21,8 @@ import {
 import { toast } from 'sonner';
 import { ArrowLeft, CheckCircle2, Play, Wand2 } from 'lucide-react';
 import { PageHeader, PageShell } from '@/components/layout/page-shell';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Loading } from '@/components/ui/loading';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-sql';
 import 'ace-builds/src-noconflict/theme-textmate';
@@ -278,7 +280,7 @@ export default function ApiBuilderEditPage() {
   if (isLoading) {
     return (
       <PageShell>
-        <PageHeader title="加载中..." description="正在读取接口配置" />
+        <Loading size="lg" text="正在读取接口配置..." fullHeight />
       </PageShell>
     );
   }
@@ -431,7 +433,7 @@ export default function ApiBuilderEditPage() {
                     </SelectContent>
                   </Select>
                   {apiKeys.length === 0 && (
-                    <p className="text-sm text-muted-foreground mt-1">暂无可用的API密钥，请先在密钥管理中创建</p>
+                    <EmptyState title="暂无可用的 API 密钥" description="请先在密钥管理中创建" compact />
                   )}
                 </div>
               )}
@@ -558,8 +560,8 @@ export default function ApiBuilderEditPage() {
                               </table>
                             </div>
                           ) : (
-                            <div className="mt-3 flex min-h-[280px] items-center justify-center rounded bg-card p-3">
-                              <p className="text-sm text-muted-foreground">暂无数据记录</p>
+                            <div className="mt-3 min-h-[280px] rounded bg-card p-3">
+                              <EmptyState title="暂无数据记录" compact className="min-h-[256px]" />
                             </div>
                           )}
                         </>

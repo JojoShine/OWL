@@ -15,8 +15,10 @@ import {
   LockIcon
 } from 'lucide-react';
 import { Loading } from '@/components/ui/loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import { usePermission } from '@/lib/hooks/usePermission';
 import { formatFileSize, formatDate, getFileIcon, getFileCategoryColor } from '@/lib/utils/file';
+import { cn } from '@/lib/utils';
 
 /**
  * 面包屑导航组件
@@ -67,22 +69,34 @@ function GridItem({ item, isFolder, onItemClick, onAction }) {
     <div className="relative group">
       <div
         onClick={() => onItemClick(item, isFolder)}
-        className="
-          flex flex-col items-center p-4 rounded-lg border border-border bg-card
-          hover:border-primary/50 hover:bg-accent cursor-pointer
-          transition-all
-        "
+        className={cn(
+          'flex cursor-pointer flex-col rounded-lg border transition-all duration-200 active:scale-[0.99]',
+          isFolder
+            ? 'min-h-32 items-start border-border/70 bg-muted/20 p-3.5 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-muted/45'
+            : 'items-center border-border bg-card p-4 hover:border-primary/50 hover:bg-accent'
+        )}
       >
-        {/* 图标 */}
-        <FileIconComponent className="w-12 h-12 text-muted-foreground mb-2" />
+        {isFolder ? (
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-background text-foreground/75 ring-1 ring-border/70">
+            <FileIconComponent className="h-5 w-5 fill-current" strokeWidth={1.5} />
+          </div>
+        ) : (
+          <FileIconComponent className="mb-2 h-12 w-12 text-muted-foreground" />
+        )}
 
         {/* 名称 */}
-        <p className="text-sm font-medium text-foreground text-center truncate w-full px-2">
+        <p className={cn(
+          'w-full truncate text-sm font-medium text-foreground',
+          isFolder ? 'text-left' : 'px-2 text-center'
+        )}>
           {isFolder ? item.name : item.original_name}
         </p>
 
         {/* 元信息 */}
-        <div className="flex flex-col items-center gap-1 mt-1 h-[44px] justify-center">
+        <div className={cn(
+          'mt-1 flex flex-col gap-1',
+          isFolder ? 'h-auto items-start' : 'h-[44px] items-center justify-center'
+        )}>
           {!isFolder && (
             <>
               <span className="text-xs text-muted-foreground">
@@ -96,7 +110,7 @@ function GridItem({ item, isFolder, onItemClick, onAction }) {
             </>
           )}
           {isFolder && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs tabular-nums text-muted-foreground">
               {item.fileCount !== undefined ? `${item.fileCount} 项` : '文件夹'}
             </span>
           )}
@@ -398,11 +412,12 @@ export default function FileList({
           <Loading size="md" variant="pulse" />
         ) : isEmpty ? (
           /* 空状态 */
-          <div className="flex flex-col items-center justify-center h-64 text-muted-foreground animate-in fade-in duration-300">
-            <FolderIcon className="w-16 h-16 mb-4" />
-            <p className="text-lg font-medium text-foreground">此文件夹为空</p>
-            <p className="text-sm mt-1">上传文件或创建新文件夹</p>
-          </div>
+          <EmptyState
+            icon={FolderIcon}
+            title="此文件夹为空"
+            description="上传文件或创建新文件夹后，内容会显示在这里"
+            className="h-64 animate-in fade-in duration-300"
+          />
         ) : (
           /* 文件列表 */
           <div className="animate-in fade-in duration-300">

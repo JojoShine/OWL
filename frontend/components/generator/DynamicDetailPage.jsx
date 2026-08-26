@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Loading } from '@/components/ui/loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -116,8 +117,8 @@ export default function DynamicDetailPage({
 
   if (!record || !pageConfig) {
     return (
-      <div className="rounded-lg border border-dashed bg-card p-12 text-center text-sm text-muted-foreground">
-        暂无数据
+      <div className="rounded-lg border border-dashed bg-card">
+        <EmptyState title="暂无详情数据" description="当前记录不存在或已被删除" />
       </div>
     );
   }

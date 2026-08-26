@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { menuApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/ui/loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Plus } from 'lucide-react';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { TreeView } from '@/components/common/TreeView';
@@ -251,15 +252,16 @@ export default function MenusPage() {
             <Loading size="md" variant="pulse" />
           </div>
         ) : filteredMenus.length === 0 ? (
-          <div className="py-12 text-center text-muted-foreground">
-            <p>{searchValues.keyword || searchValues.type !== 'all' || searchValues.status !== 'all' ? '未找到匹配的菜单' : '暂无菜单'}</p>
-            {canCreate('menu') && (
-              <Button onClick={() => handleAdd()} variant="outline" className="mt-4">
+          <EmptyState
+            title={searchValues.keyword || searchValues.type !== 'all' || searchValues.status !== 'all' ? '未找到匹配的菜单' : '暂无菜单'}
+            description={searchValues.keyword || searchValues.type !== 'all' || searchValues.status !== 'all' ? '请调整检索条件后重试' : '创建菜单后会显示在这里'}
+            action={canCreate('menu') ? (
+              <Button onClick={() => handleAdd()} variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
                 创建第一个菜单
               </Button>
-            )}
-          </div>
+            ) : null}
+          />
         ) : (
           <TreeView
             data={filteredMenus}

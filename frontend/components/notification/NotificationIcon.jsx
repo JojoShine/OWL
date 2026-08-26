@@ -6,6 +6,7 @@ import { Bell, Check, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/ui/loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -236,9 +237,7 @@ export default function NotificationIcon() {
             <Loading size="sm" variant="pulse" />
           </div>
         ) : notifications.length === 0 ? (
-          <div className="py-6 text-center text-sm text-muted-foreground">
-            暂无未读通知
-          </div>
+          <EmptyState icon={Bell} title="暂无未读通知" compact className="py-6" />
         ) : (
           <ScrollArea className="max-h-[400px]">
             {notifications.map((notification) => (

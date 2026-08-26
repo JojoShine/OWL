@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   Card,
   CardContent,
@@ -69,9 +70,8 @@ export default function VariableSchemaEditor({ value = [], onChange }) {
       </div>
 
       {value.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground border border-dashed rounded-lg">
-          <p>暂无变量定义</p>
-          <p className="text-sm mt-1">点击上方"添加变量"按钮开始定义</p>
+        <div className="rounded-lg border border-dashed">
+          <EmptyState title="暂无变量定义" description="点击上方“添加变量”按钮开始定义" />
         </div>
       ) : (
         <div className="space-y-4">

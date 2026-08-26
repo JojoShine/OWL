@@ -45,6 +45,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Loading } from '@/components/ui/loading';
 import { PageHeader, PageShell } from '@/components/layout/page-shell';
 
 export default function ApiMonitorPage() {
@@ -508,13 +510,9 @@ export default function ApiMonitorPage() {
         </CardHeader>
         <CardContent>
           {loading && monitors.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              加载中...
-            </div>
+            <Loading size="md" text="正在加载监控配置..." className="py-12" />
           ) : monitors.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              暂无监控配置，点击&ldquo;添加监控&rdquo;创建第一个监控
-            </div>
+            <EmptyState title="暂无监控配置" description="点击“添加监控”创建第一个监控" />
           ) : (
             <Table>
               <TableHeader>
@@ -798,9 +796,7 @@ export default function ApiMonitorPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {emailTemplates.length === 0 ? (
-                          <div className="p-2 text-sm text-muted-foreground">
-                            暂无可用模版，请先创建接口监控告警类型的模版
-                          </div>
+                          <EmptyState title="暂无可用模版" description="请先创建接口监控告警类型的模版" compact />
                         ) : (
                           emailTemplates.map((template) => (
                             <SelectItem key={template.id} value={template.id}>
@@ -961,7 +957,7 @@ export default function ApiMonitorPage() {
                   {logs.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center text-muted-foreground">
-                        暂无日志记录
+                        <EmptyState title="暂无日志记录" compact />
                       </TableCell>
                     </TableRow>
                   ) : (

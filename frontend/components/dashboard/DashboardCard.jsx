@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import * as echarts from 'echarts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTheme } from 'next-themes'
+import { EmptyState } from '@/components/ui/empty-state'
 
 const CHART_COLORS = ['--chart-1', '--chart-2', '--chart-3', '--chart-4', '--chart-5']
 let colorContext
@@ -313,11 +314,7 @@ function DashboardCard({
           </CardHeader>
         )}
         <CardContent className={`${hideTitle ? 'px-4 pt-4' : 'px-4'} lg:min-h-0 lg:flex-1`}>
-          <div
-            className="flex h-60 items-center justify-center text-muted-foreground lg:h-full lg:min-h-0"
-          >
-            暂无数据
-          </div>
+          <EmptyState title="暂无图表数据" compact className="h-60 lg:h-full lg:min-h-0" />
         </CardContent>
       </Card>
     )

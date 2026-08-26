@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { FolderIcon, HomeIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/ui/loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import { folderApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
@@ -139,9 +140,7 @@ export default function MoveDialog({ open, onClose, item, isFolder, onSuccess })
                 ))}
 
                 {folders.length === 0 && (
-                  <div className="py-8 text-center text-muted-foreground text-sm">
-                    暂无文件夹
-                  </div>
+                  <EmptyState icon={FolderIcon} title="暂无可选文件夹" compact />
                 )}
               </div>
             )}

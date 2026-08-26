@@ -6,6 +6,7 @@ import { Input } from './input';
 import { Button } from './button';
 import { Label } from './label';
 import { captchaApi } from '@/lib/api';
+import { Loading } from '@/components/ui/loading';
 
 /**
  * 验证码输入组件
@@ -101,7 +102,7 @@ export const CaptchaInput = forwardRef(({ onCaptchaChange, error, disabled, ...p
           title="点击刷新验证码"
         >
           {isLoading ? (
-            <div className="text-xs text-muted-foreground">加载中...</div>
+            <Loading size="sm" text="加载中" />
           ) : captchaSvg ? (
             <img
               src={`data:image/svg+xml,${encodeURIComponent(captchaSvg)}`}

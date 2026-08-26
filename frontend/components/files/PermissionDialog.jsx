@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   Select,
   SelectContent,
@@ -238,7 +239,7 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
           <div className="rounded-lg border p-4">
             <h3 className="font-medium mb-4 text-foreground">当前权限</h3>
             {permissions.length === 0 ? (
-              <p className="text-muted-foreground text-sm">暂无权限设置</p>
+              <EmptyState title="暂无权限设置" description="当前项目尚未配置独立权限" compact />
             ) : (
               <div className="space-y-2">
                 {permissions.map((perm) => (

@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Layers, GripVertical } from 'lucide-react';
 
 /**
@@ -120,8 +121,8 @@ export default function FieldGroupEditor({
   if (!fieldGroups || fieldGroups.length === 0) {
     return (
       <Card className="border-dashed bg-muted/20">
-        <CardContent className="py-12 text-center text-sm text-muted-foreground">
-          暂无字段数据，请先生成字段配置
+        <CardContent>
+          <EmptyState icon={Layers} title="暂无字段数据" description="请先生成字段配置" />
         </CardContent>
       </Card>
     );

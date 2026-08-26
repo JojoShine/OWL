@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loading } from '@/components/ui/loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   Play,
   Pencil,
@@ -115,11 +116,7 @@ export default function ApiMonitorTable({
   }
 
   if (!monitors || monitors.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">暂无监控配置</div>
-      </div>
-    );
+    return <EmptyState icon={Activity} title="暂无监控配置" description="添加监控后会显示在这里" className="h-64" />;
   }
 
   return (

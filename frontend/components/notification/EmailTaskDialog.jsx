@@ -12,6 +12,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Loading } from '@/components/ui/loading';
 import {
   Select,
   SelectContent,
@@ -196,13 +198,9 @@ export default function EmailTaskDialog({ open, onOpenChange, task, onSave }) {
               </SelectTrigger>
               <SelectContent>
                 {isLoadingTemplates ? (
-                  <div className="px-3 py-2 text-sm text-muted-foreground">
-                    加载中...
-                  </div>
+                  <Loading size="sm" text="正在加载模板..." className="px-3 py-2" />
                 ) : templates.length === 0 ? (
-                  <div className="px-3 py-2 text-sm text-muted-foreground">
-                    暂无可用模板
-                  </div>
+                  <EmptyState title="暂无可用模板" compact className="px-3" />
                 ) : (
                   templates.map(template => (
                     <SelectItem key={template.id} value={template.id}>

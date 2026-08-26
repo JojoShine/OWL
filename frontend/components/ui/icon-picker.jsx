@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getMenuIcon, commonIcons } from '@/lib/config/menu-icons';
 import { Search, ExternalLink } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 /**
  * 图标选择器组件
@@ -147,9 +148,7 @@ export function IconPicker({ value, onChange, placeholder = '请选择图标' })
               </Label>
               <ScrollArea className="h-[400px] border rounded-lg p-2">
                 {filteredIcons.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    未找到匹配的图标
-                  </div>
+                  <EmptyState icon={Search} title="未找到匹配的图标" compact />
                 ) : (
                   <div className="grid grid-cols-6 gap-2">
                     {filteredIcons.map((iconName) => {

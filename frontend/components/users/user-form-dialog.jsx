@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { EmptyState } from '@/components/ui/empty-state';
 import { userApi, departmentApi, roleApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { SensitiveInput } from '@/components/form/SensitiveInput';
@@ -304,7 +305,7 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
                   <Label>角色分配</Label>
                   <div className="max-h-40 space-y-2 overflow-y-auto rounded-md border bg-muted/20 p-3">
                     {roles.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">暂无可用角色</p>
+                      <EmptyState title="暂无可用角色" compact />
                     ) : (
                       roles.map((role) => (
                         <div key={role.id} className="flex items-start gap-2">

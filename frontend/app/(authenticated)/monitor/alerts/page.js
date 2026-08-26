@@ -44,6 +44,8 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Loading } from '@/components/ui/loading';
 import {
   Pagination,
   PaginationContent,
@@ -506,11 +508,9 @@ export default function AlertsPage() {
             </CardHeader>
             <CardContent>
               {loading && rules.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">加载中...</div>
+                <Loading size="md" text="正在加载告警规则..." className="py-12" />
               ) : rules.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  暂无告警规则，点击&ldquo;新建规则&rdquo;创建第一个规则
-                </div>
+                <EmptyState title="暂无告警规则" description="点击“新建规则”创建第一个规则" />
               ) : (
                 <Table>
                   <TableHeader>
@@ -578,9 +578,9 @@ export default function AlertsPage() {
             </CardHeader>
             <CardContent>
               {loading && history.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">加载中...</div>
+                <Loading size="md" text="正在加载告警历史..." className="py-12" />
               ) : history.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">暂无告警历史</div>
+                <EmptyState title="暂无告警历史" description="触发告警后会显示在这里" />
               ) : (
                 <Table>
                   <TableHeader>
@@ -822,9 +822,7 @@ export default function AlertsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {emailTemplates.length === 0 ? (
-                          <div className="p-2 text-sm text-muted-foreground">
-                            暂无可用模版，请先创建邮件模版
-                          </div>
+                          <EmptyState title="暂无可用模版" description="请先创建邮件模版" compact />
                         ) : (
                           emailTemplates.map((template) => (
                             <SelectItem key={template.id} value={template.id}>

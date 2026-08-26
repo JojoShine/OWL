@@ -8,6 +8,7 @@ import {
   ChevronDownIcon,
   HomeIcon
 } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 /**
  * 文件夹树节点组件
@@ -193,9 +194,7 @@ export default function FolderTree({
           />
         ))
       ) : (
-        <div className="px-2 py-4 text-sm text-muted-foreground text-center">
-          暂无文件夹
-        </div>
+        <EmptyState icon={FolderIcon} title="暂无文件夹" compact className="px-2" />
       )}
     </div>
   );
