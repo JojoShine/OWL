@@ -7,7 +7,7 @@ module.exports = {
       await queryInterface.sequelize.query('TRUNCATE TABLE owl_api_keys CASCADE', { transaction });
       await queryInterface.sequelize.query('TRUNCATE TABLE owl_third_party_api_keys CASCADE', { transaction });
 
-      const apiKeyColumns = await queryInterface.describeTable('owl_api_keys');
+      const apiKeyColumns = await queryInterface.describeTable('owl_api_keys', { transaction });
       if (apiKeyColumns.interface_id) await queryInterface.removeColumn('owl_api_keys', 'interface_id', { transaction });
       if (apiKeyColumns.app_name) await queryInterface.removeColumn('owl_api_keys', 'app_name', { transaction });
       if (apiKeyColumns.api_key) await queryInterface.removeColumn('owl_api_keys', 'api_key', { transaction });
@@ -25,12 +25,12 @@ module.exports = {
         type: Sequelize.TEXT, allowNull: true,
       }, { transaction });
 
-      const interfaceColumns = await queryInterface.describeTable('owl_api_interfaces');
+      const interfaceColumns = await queryInterface.describeTable('owl_api_interfaces', { transaction });
       if (interfaceColumns.api_key_id) {
         await queryInterface.removeColumn('owl_api_interfaces', 'api_key_id', { transaction });
       }
 
-      const existingTables = (await queryInterface.showAllTables())
+      const existingTables = (await queryInterface.showAllTables({ transaction }))
         .map((table) => (typeof table === 'string' ? table : table.tableName));
       const hasApiKeyInterfaces = existingTables.includes('owl_api_key_interfaces');
       if (!hasApiKeyInterfaces) await queryInterface.createTable('owl_api_key_interfaces', {
@@ -62,7 +62,7 @@ module.exports = {
         name: 'idx_owl_api_key_interfaces_interface_id', transaction,
       });
 
-      const thirdPartyColumns = await queryInterface.describeTable('owl_third_party_api_keys');
+      const thirdPartyColumns = await queryInterface.describeTable('owl_third_party_api_keys', { transaction });
       if (thirdPartyColumns.api_secret) await queryInterface.removeColumn('owl_third_party_api_keys', 'api_secret', { transaction });
       if (!thirdPartyColumns.secret_ciphertext) await queryInterface.addColumn('owl_third_party_api_keys', 'secret_ciphertext', {
         type: Sequelize.TEXT, allowNull: false,
