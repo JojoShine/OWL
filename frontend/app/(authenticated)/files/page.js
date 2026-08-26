@@ -388,7 +388,7 @@ export default function FilesPage() {
       </PageToolbar>
 
       {/* 文件列表 */}
-      <PageSurface className="p-5">
+      <PageSurface className="p-5 lg:p-3">
         <FileList
           folders={filteredFolders}
           files={filteredFiles}

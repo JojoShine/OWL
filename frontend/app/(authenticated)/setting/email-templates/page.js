@@ -420,7 +420,7 @@ export default function EmailManagementPage() {
           )}
         </Tabs>
       </PageToolbar>
-      <PageSurface className="p-5 pt-4">
+      <PageSurface className="p-5 pt-4 lg:p-3">
         {activeView === 'tasks' ? (
           <DataTable
             variant="workspace"

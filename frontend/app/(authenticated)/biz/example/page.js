@@ -102,7 +102,7 @@ export default function ExamplePage() {
             onReset={handleReset}
           />
       </PageToolbar>
-      <PageSurface className="p-5">
+      <PageSurface className="p-5 lg:p-3">
           <DataTable
             columns={columns}
             data={data}

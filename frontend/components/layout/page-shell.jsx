@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 export function PageShell({ className, ...props }) {
-  return <section className={cn('mx-auto w-full max-w-[1600px] space-y-5', className)} {...props} />;
+  return <section className={cn('mx-auto w-full max-w-[1600px] space-y-5 2xl:max-w-none', className)} {...props} />;
 }
 
 export function PageHeader({ title, description, meta, actions, className }) {
@@ -21,7 +21,7 @@ export function PageHeader({ title, description, meta, actions, className }) {
 }
 
 export function PageToolbar({ className, ...props }) {
-  return <div className={cn('rounded-lg border bg-card px-5 py-4', className)} {...props} />;
+  return <div className={cn('rounded-lg border bg-card px-4 py-4', className)} {...props} />;
 }
 
 export function PageSurface({ className, ...props }) {

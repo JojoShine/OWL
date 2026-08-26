@@ -167,7 +167,7 @@ export default function DashboardWidgetsPage() {
           </Button>
         )}
       />
-      <PageSurface className="p-5">
+      <PageSurface className="p-5 lg:p-3">
         <DataTable
           variant="workspace"
           columns={columns}

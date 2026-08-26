@@ -237,7 +237,7 @@ export default function ApiBuilderPage() {
           />
       </PageToolbar>
 
-      <PageSurface className="p-5">
+      <PageSurface className="p-5 lg:p-3">
         {/* 接口列表 */}
           <DataTable
             columns={columns}

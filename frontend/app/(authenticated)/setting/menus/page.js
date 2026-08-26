@@ -211,7 +211,7 @@ export default function MenusPage() {
           onReset={() => setSearchValues({ keyword: '', type: 'all', status: 'all' })}
         />
       </PageToolbar>
-      <PageSurface className="p-5">
+      <PageSurface className="p-5 lg:p-3">
         <div className="grid grid-cols-2 gap-4 border-b pb-5 text-sm md:grid-cols-4">
           <div>
             <p className="text-muted-foreground">菜单总数</p>

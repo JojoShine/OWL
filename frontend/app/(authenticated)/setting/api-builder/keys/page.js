@@ -190,7 +190,7 @@ export default function ApiKeyManagementPage() {
           </>
         }
       />
-      <PageSurface className="p-5">
+      <PageSurface className="p-5 lg:p-3">
         <div className="mb-4">
           <h2 className="font-medium">密钥列表</h2>
           <p className="mt-1 text-sm text-muted-foreground">使用这些密钥通过 app_id 和 app_key 方式登录获取 token</p>

@@ -243,7 +243,7 @@ export default function SensitiveFieldsPage() {
           onReset={handleReset}
         />
       </PageToolbar>
-      <PageSurface className="p-5 pt-4">
+      <PageSurface className="p-5 pt-4 lg:p-3">
         <DataTable
           variant="workspace"
           columns={columns}
