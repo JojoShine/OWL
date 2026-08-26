@@ -17,7 +17,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 
 const TYPE_OPTIONS = [
   ['string', '文本'],
@@ -169,51 +168,67 @@ export default function BusinessTableDialog({ open, onOpenChange, onCreated }) {
               <Button type="button" variant="outline" size="sm" onClick={() => setFields((current) => [...current, createEmptyField()])}><Plus className="h-4 w-4" />添加字段</Button>
             </div>
 
-            <div className="space-y-3">
-              {fields.map((field, index) => (
-                <div key={field.key} className="rounded-lg border p-4">
-                  <div className="grid gap-3 lg:grid-cols-[1.1fr_1.1fr_0.8fr_auto]">
-                    <div className="space-y-1.5"><Label>字段名 *</Label><Input value={field.name} onChange={(event) => updateField(field.key, { name: event.target.value.toLowerCase() })} placeholder="customer_name" /></div>
-                    <div className="space-y-1.5"><Label>字段说明</Label><Input value={field.comment} onChange={(event) => updateField(field.key, { comment: event.target.value })} placeholder="客户名称" /></div>
-                    <div className="space-y-1.5">
-                      <Label>类型 *</Label>
-                      <Select value={field.type} onValueChange={(type) => updateField(field.key, { type, default_value: '', default_current_time: false })}>
-                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                        <SelectContent>{TYPE_OPTIONS.map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent>
-                      </Select>
+            <div className="overflow-x-auto rounded-lg border">
+              <div className="min-w-[1360px]">
+                <div className="grid grid-cols-[190px_190px_130px_180px_240px_64px_64px_64px_110px] items-center gap-3 bg-muted/45 px-3 py-2.5 text-xs font-medium text-muted-foreground">
+                  <span>字段名 *</span>
+                  <span>字段说明</span>
+                  <span>类型 *</span>
+                  <span>类型参数</span>
+                  <span>默认值</span>
+                  <span className="text-center">必填</span>
+                  <span className="text-center">唯一</span>
+                  <span className="text-center">索引</span>
+                  <span className="text-right">操作</span>
+                </div>
+                {fields.map((field, index) => (
+                  <div key={field.key} className="grid grid-cols-[190px_190px_130px_180px_240px_64px_64px_64px_110px] items-center gap-3 border-t px-3 py-2 transition-colors hover:bg-muted/20">
+                    <Input className="h-9" value={field.name} onChange={(event) => updateField(field.key, { name: event.target.value.toLowerCase() })} placeholder="customer_name" aria-label="字段名" />
+                    <Input className="h-9" value={field.comment} onChange={(event) => updateField(field.key, { comment: event.target.value })} placeholder="客户名称" aria-label="字段说明" />
+                    <Select value={field.type} onValueChange={(type) => updateField(field.key, { type, default_value: '', default_current_time: false })}>
+                      <SelectTrigger className="h-9 w-full" aria-label="字段类型"><SelectValue /></SelectTrigger>
+                      <SelectContent>{TYPE_OPTIONS.map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <div className="flex h-9 items-center gap-2">
+                      {field.type === 'string' ? (
+                        <Input className="h-9" type="number" min="1" max="2000" value={field.length} onChange={(event) => updateField(field.key, { length: event.target.value })} placeholder="最大长度" aria-label="最大长度" />
+                      ) : field.type === 'decimal' ? (
+                        <>
+                          <Input className="h-9 min-w-0" type="number" min="1" max="38" value={field.precision} onChange={(event) => updateField(field.key, { precision: event.target.value })} placeholder="精度" aria-label="精度" />
+                          <Input className="h-9 min-w-0" type="number" min="0" max="38" value={field.scale} onChange={(event) => updateField(field.key, { scale: event.target.value })} placeholder="小数位" aria-label="小数位" />
+                        </>
+                      ) : (
+                        <span className="px-3 text-sm text-muted-foreground/60">—</span>
+                      )}
                     </div>
-                    <div className="flex items-end gap-1">
+                    <div className="flex h-9 items-center gap-2">
+                      {field.type === 'boolean' ? (
+                        <Select value={field.default_value || 'none'} onValueChange={(value) => updateField(field.key, { default_value: value === 'none' ? '' : value })}>
+                          <SelectTrigger className="h-9 w-full" aria-label="默认值"><SelectValue /></SelectTrigger>
+                          <SelectContent><SelectItem value="none">无默认值</SelectItem><SelectItem value="true">是</SelectItem><SelectItem value="false">否</SelectItem></SelectContent>
+                        </Select>
+                      ) : field.type === 'datetime' ? (
+                        <>
+                          <label className="flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap text-xs text-muted-foreground">
+                            <Checkbox checked={field.default_current_time} onCheckedChange={(checked) => updateField(field.key, { default_current_time: checked, default_value: checked ? '' : field.default_value })} />当前时间
+                          </label>
+                          {!field.default_current_time ? <Input className="h-9 min-w-0" value={field.default_value} onChange={(event) => updateField(field.key, { default_value: event.target.value })} placeholder="可选" aria-label="默认值" /> : null}
+                        </>
+                      ) : (
+                        <Input className="h-9" value={field.default_value} onChange={(event) => updateField(field.key, { default_value: event.target.value })} placeholder={field.type === 'json' ? '{}' : '可选'} aria-label="默认值" />
+                      )}
+                    </div>
+                    <div className="flex justify-center"><Checkbox checked={!field.nullable} onCheckedChange={(checked) => updateField(field.key, { nullable: !checked })} aria-label="必填" /></div>
+                    <div className="flex justify-center"><Checkbox checked={field.unique} onCheckedChange={(checked) => updateField(field.key, { unique: checked, indexed: checked ? false : field.indexed })} aria-label="唯一" /></div>
+                    <div className="flex justify-center"><Checkbox checked={field.indexed} disabled={field.unique} onCheckedChange={(checked) => updateField(field.key, { indexed: checked })} aria-label="索引" /></div>
+                    <div className="flex items-center justify-end gap-1">
                       <Button type="button" variant="ghost" size="icon-sm" onClick={() => moveField(index, -1)} disabled={index === 0} aria-label="上移字段"><ArrowUp className="h-4 w-4" /></Button>
                       <Button type="button" variant="ghost" size="icon-sm" onClick={() => moveField(index, 1)} disabled={index === fields.length - 1} aria-label="下移字段"><ArrowDown className="h-4 w-4" /></Button>
                       <Button type="button" variant="ghost" size="icon-sm" onClick={() => setFields((current) => current.filter((item) => item.key !== field.key))} disabled={fields.length === 1} aria-label="删除字段"><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
                   </div>
-
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    {field.type === 'string' ? <div className="space-y-1.5"><Label>最大长度</Label><Input type="number" min="1" max="2000" value={field.length} onChange={(event) => updateField(field.key, { length: event.target.value })} /></div> : null}
-                    {field.type === 'decimal' ? <><div className="space-y-1.5"><Label>精度</Label><Input type="number" min="1" max="38" value={field.precision} onChange={(event) => updateField(field.key, { precision: event.target.value })} /></div><div className="space-y-1.5"><Label>小数位</Label><Input type="number" min="0" max="38" value={field.scale} onChange={(event) => updateField(field.key, { scale: event.target.value })} /></div></> : null}
-                    {field.type !== 'datetime' || !field.default_current_time ? (
-                      <div className="space-y-1.5">
-                        <Label>默认值</Label>
-                        {field.type === 'boolean' ? (
-                          <Select value={field.default_value || 'none'} onValueChange={(value) => updateField(field.key, { default_value: value === 'none' ? '' : value })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">无默认值</SelectItem><SelectItem value="true">是</SelectItem><SelectItem value="false">否</SelectItem></SelectContent></Select>
-                        ) : field.type === 'json' ? (
-                          <Textarea className="min-h-10" value={field.default_value} onChange={(event) => updateField(field.key, { default_value: event.target.value })} placeholder="{}" />
-                        ) : (
-                          <Input value={field.default_value} onChange={(event) => updateField(field.key, { default_value: event.target.value })} placeholder="可选" />
-                        )}
-                      </div>
-                    ) : null}
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-                    <label className="flex cursor-pointer items-center gap-2"><Checkbox checked={!field.nullable} onCheckedChange={(checked) => updateField(field.key, { nullable: !checked })} />必填</label>
-                    <label className="flex cursor-pointer items-center gap-2"><Checkbox checked={field.unique} onCheckedChange={(checked) => updateField(field.key, { unique: checked, indexed: checked ? false : field.indexed })} />唯一</label>
-                    <label className="flex cursor-pointer items-center gap-2"><Checkbox checked={field.indexed} disabled={field.unique} onCheckedChange={(checked) => updateField(field.key, { indexed: checked })} />索引</label>
-                    {field.type === 'datetime' ? <label className="flex cursor-pointer items-center gap-2"><Checkbox checked={field.default_current_time} onCheckedChange={(checked) => updateField(field.key, { default_current_time: checked, default_value: checked ? '' : field.default_value })} />默认当前时间</label> : null}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
