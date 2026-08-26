@@ -54,20 +54,20 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <PageShell>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <PageShell className="space-y-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="bg-card border rounded-lg p-6 animate-pulse">
-              <div className="h-4 bg-muted rounded mb-2 w-1/2"></div>
-              <div className="h-8 bg-muted rounded"></div>
+            <div key={i} className="animate-pulse rounded-lg border bg-card p-4">
+              <div className="mb-2 h-4 w-1/2 rounded bg-muted"></div>
+              <div className="h-7 rounded bg-muted"></div>
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-card border rounded-lg p-6 animate-pulse">
-              <div className="h-6 bg-muted rounded mb-4 w-1/3"></div>
-              <div className="h-48 bg-muted rounded"></div>
+            <div key={i} className="animate-pulse rounded-lg border bg-card p-4">
+              <div className="mb-3 h-5 w-1/3 rounded bg-muted"></div>
+              <div className="h-[clamp(180px,24vh,240px)] rounded bg-muted"></div>
             </div>
           ))}
         </div>
@@ -80,16 +80,16 @@ export default function DashboardPage() {
   }
 
   return (
-    <PageShell>
+    <PageShell className="space-y-4">
       {/* 数字指标行 */}
       {metricWidgets.length > 0 && (
-        <div className={`grid ${getMetricCols(metricWidgets.length)} gap-4`}>
+        <div className={`grid ${getMetricCols(metricWidgets.length)} gap-3`}>
           {metricWidgets.map(({ widget, data, error }) => {
             const value = data?.[0]?.[widget.data_key] ?? '-';
             return (
-              <div key={widget.id} className="rounded-lg border bg-card p-5">
+              <div key={widget.id} className="rounded-lg border bg-card p-4">
                 <p className="text-sm text-muted-foreground mb-1">{widget.title}</p>
-                <h3 className="tabular-data text-3xl font-semibold tracking-tight">
+                <h3 className="tabular-data text-2xl font-semibold tracking-tight">
                   {value}
                   {widget.unit && (
                     <span className="text-base font-normal ml-1 text-muted-foreground">{widget.unit}</span>
@@ -104,7 +104,7 @@ export default function DashboardPage() {
 
       {/* 图表网格 */}
       {chartWidgets.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {chartWidgets.map(({ widget, data, error }) => (
             <DashboardCard
               key={widget.id}

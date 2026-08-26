@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as echarts from 'echarts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTheme } from 'next-themes'
@@ -41,22 +41,27 @@ function DashboardCard({
   const chartInstance = useRef(null)
   const [rootThemeVersion, setRootThemeVersion] = useState(0)
 
-  // 序列化数据为字符串，用于依赖比较
-  const dataString = useMemo(() => {
-    if (!data || data.length === 0) return ''
-    return JSON.stringify(data)
-  }, [data])
-
   useEffect(() => {
     const root = document.documentElement
-    const observer = new MutationObserver(() => {
-      setRootThemeVersion(version => version + 1)
-    })
+    let frameId
+
+    const refreshTheme = () => {
+      window.cancelAnimationFrame(frameId)
+      frameId = window.requestAnimationFrame(() => {
+        setRootThemeVersion(version => version + 1)
+      })
+    }
+
+    const observer = new MutationObserver(refreshTheme)
 
     observer.observe(root, { attributes: true, attributeFilter: ['class'] })
+    refreshTheme()
 
-    return () => observer.disconnect()
-  }, [])
+    return () => {
+      observer.disconnect()
+      window.cancelAnimationFrame(frameId)
+    }
+  }, [resolvedTheme])
 
   useEffect(() => {
     if (!data || data.length === 0 || !chartRef.current) return
@@ -241,6 +246,9 @@ function DashboardCard({
             }),
             type: 'pie',
             radius: ['40%', '70%'],
+            emphasis: {
+              scale: false,
+            },
             label: {
               color: textColor,
             },
@@ -258,7 +266,7 @@ function DashboardCard({
         chartInstance.current = null
       }
     }
-  }, [dataString, mode, dataKey, xKey, resolvedTheme, rootThemeVersion])
+  }, [data, mode, dataKey, xKey, rootThemeVersion])
 
   // 处理窗口大小变化
   useEffect(() => {
@@ -272,16 +280,15 @@ function DashboardCard({
   // 检查数据是否为空
   if (!data || (Array.isArray(data) && data.length === 0)) {
     return (
-      <Card className="shadow-none">
+      <Card className="gap-3 py-4 shadow-none">
         {!hideTitle && (
-          <CardHeader>
-            <CardTitle className="text-lg">{title}</CardTitle>
+          <CardHeader className="px-4">
+            <CardTitle className="text-base">{title}</CardTitle>
           </CardHeader>
         )}
-        <CardContent className={hideTitle ? 'pt-6' : ''}>
+        <CardContent className={hideTitle ? 'px-4 pt-4' : 'px-4'}>
           <div
-            style={{ height: 360 }}
-            className="flex items-center justify-center text-muted-foreground"
+            className="flex h-[clamp(180px,24vh,240px)] items-center justify-center text-muted-foreground"
           >
             暂无数据
           </div>
@@ -291,14 +298,14 @@ function DashboardCard({
   }
 
   return (
-    <Card className="shadow-none">
+    <Card className="gap-3 py-4 shadow-none">
       {!hideTitle && (
-        <CardHeader>
-          <CardTitle className="text-lg">{title}</CardTitle>
+        <CardHeader className="px-4">
+          <CardTitle className="text-base">{title}</CardTitle>
         </CardHeader>
       )}
-      <CardContent className={hideTitle ? 'pt-6' : ''}>
-        <div ref={chartRef} style={{ height: 360 }} />
+      <CardContent className={hideTitle ? 'px-4 pt-4' : 'px-4'}>
+        <div ref={chartRef} className="h-[clamp(180px,24vh,240px)]" />
       </CardContent>
     </Card>
   )
