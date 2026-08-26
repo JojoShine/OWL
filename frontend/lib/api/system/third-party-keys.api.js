@@ -7,6 +7,8 @@ export const thirdPartyKeysApi = {
   // 获取第三方API密钥详情
   getKey: (id) => axios.get(`/third-party-keys/${id}`),
 
+  getScopes: () => axios.get('/third-party-keys/scopes'),
+
   // 创建第三方API密钥
   createKey: (data) => axios.post('/third-party-keys', data),
 

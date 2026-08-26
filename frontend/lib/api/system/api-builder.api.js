@@ -19,11 +19,11 @@ export const apiBuilderApi = {
   // 测试接口
   testInterface: (id, params = {}) => axios.post(`/api-builder/test/${id}`, { params }),
 
-  // 创建全局API密钥（不需要关联接口）
+  // 创建可授权多个 SQL 接口的调用密钥
   createApiKey: (data) => axios.post('/api-builder/keys', data),
 
-  // 获取接口的密钥列表（保留向后兼容）
-  getInterfaceKeys: (interfaceId) => axios.get(`/api-builder/${interfaceId}/keys`),
+  // 获取某个 SQL 接口已授权的密钥
+  getInterfaceKeys: (interfaceId) => axios.get('/api-builder/keys', { params: { interface_id: interfaceId } }),
 
   // 删除API密钥
   deleteApiKey: (keyId) => axios.delete(`/api-builder/keys/${keyId}`),
@@ -31,8 +31,10 @@ export const apiBuilderApi = {
   // 重新生成API密钥
   regenerateApiKey: (keyId) => axios.post(`/api-builder/keys/${keyId}/regenerate`),
 
+  changeApiKeyStatus: (keyId, status) => axios.patch(`/api-builder/keys/${keyId}/status`, { status }),
+
   // 获取所有API密钥
-  getAllApiKeys: () => axios.get('/api-builder/keys'),
+  getAllApiKeys: (params = {}) => axios.get('/api-builder/keys', { params }),
 
   // 更新API密钥信息
   updateApiKey: (id, data) => axios.put(`/api-builder/keys/${id}`, data),

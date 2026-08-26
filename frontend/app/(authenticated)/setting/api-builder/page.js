@@ -217,7 +217,7 @@ export default function ApiBuilderPage() {
           <>
             <Button onClick={() => router.push('/setting/api-builder/keys')} size="lg" className="sm:w-auto" variant="outline">
               <Key className="h-4 w-4 mr-1" />
-              密钥管理
+              接口密钥
             </Button>
             <Button onClick={handleCreate} size="lg" className="sm:w-auto">
               <Plus className="h-4 w-4 mr-1" />
@@ -261,7 +261,7 @@ export default function ApiBuilderPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleManageKeys(interface_)}
-                  title="管理密钥"
+                  title="调用说明"
                 >
                   <Key className="h-4 w-4" />
                 </Button>

@@ -20,6 +20,15 @@ router.get(
   controller.getList
 );
 
+router.get('/scopes', checkPermission('third-party-keys:read'), controller.getScopes);
+
+router.get(
+  '/:id',
+  checkPermission('third-party-keys:read'),
+  validate(validation.keyId),
+  controller.getOne
+);
+
 /**
  * POST /api/admin/third-party-keys
  * 创建新密钥

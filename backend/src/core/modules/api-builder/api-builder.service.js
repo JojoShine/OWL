@@ -2,14 +2,13 @@ const { Op } = require('sequelize');
 const db = require('../../../models');
 const ApiError = require('../../../utils/ApiError');
 const { logger } = require('../../../config/logger');
-const crypto = require('crypto');
 
 class ApiBuilderService {
   /**
    * 创建接口
    */
   async createInterface(data, userId) {
-    const { name, description, sql_query, method, endpoint, version, parameters, require_auth, rate_limit, api_key_id } = data;
+    const { name, description, sql_query, method, endpoint, version, parameters, require_auth, rate_limit } = data;
 
     try {
       const interface_ = await db.ApiInterface.create({
@@ -22,7 +21,6 @@ class ApiBuilderService {
         parameters: parameters || null,
         require_auth: require_auth !== false,
         rate_limit: rate_limit || 1000,
-        api_key_id: api_key_id || null,
         created_by: userId,
       });
 
@@ -92,7 +90,8 @@ class ApiBuilderService {
         {
           model: db.ApiKey,
           as: 'keys',
-          attributes: ['id', 'app_name', 'api_key', 'status', 'expires_at', 'created_at'],
+          attributes: ['id', 'client_name', 'key_prefix', 'status', 'expires_at', 'created_at'],
+          through: { attributes: [] },
         },
       ],
     });
@@ -110,7 +109,7 @@ class ApiBuilderService {
   async updateInterface(id, data) {
     const interface_ = await this.getInterfaceById(id);
 
-    const { name, description, sql_query, method, endpoint, version, parameters, status, require_auth, rate_limit, api_key_id } = data;
+    const { name, description, sql_query, method, endpoint, version, parameters, status, require_auth, rate_limit } = data;
 
     try {
       await interface_.update({
@@ -124,7 +123,6 @@ class ApiBuilderService {
         status: status !== undefined ? status : interface_.status,
         require_auth: require_auth !== undefined ? require_auth : interface_.require_auth,
         rate_limit: rate_limit !== undefined ? rate_limit : interface_.rate_limit,
-        api_key_id: api_key_id !== undefined ? api_key_id : interface_.api_key_id,
       });
 
       logger.info(`Interface updated: ${id}`);
@@ -146,133 +144,6 @@ class ApiBuilderService {
 
     logger.info(`Interface deleted: ${id}`);
     return { message: '接口已删除' };
-  }
-
-  /**
-   * 创建API密钥（3天过期）
-   */
-  async createApiKey(interfaceId, appName, userId) {
-    const interface_ = await this.getInterfaceById(interfaceId);
-
-    // 生成API Key和Secret
-    const apiKey = this.generateApiKey();
-    const apiSecret = crypto
-      .createHmac('sha256', process.env.API_SECRET_KEY || process.env.JWT_SECRET)
-      .update(apiKey)
-      .digest('hex');
-
-    // 180天后过期
-    const expiresAt = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000);
-
-    const key = await db.ApiKey.create({
-      interface_id: interfaceId,
-      app_name: appName,
-      api_key: apiKey,
-      api_secret: apiSecret,
-      expires_at: expiresAt,
-      created_by: userId,
-    });
-
-    logger.info(`API key created for interface ${interfaceId}`);
-    return key;
-  }
-
-  /**
-   * 获取接口的密钥列表
-   */
-  async getInterfaceKeys(interfaceId) {
-    await this.getInterfaceById(interfaceId);
-
-    const keys = await db.ApiKey.findAll({
-      where: { interface_id: interfaceId },
-      attributes: ['id', 'app_name', 'api_key', 'status', 'expires_at', 'last_used_at', 'created_at'],
-      order: [['created_at', 'DESC']],
-    });
-
-    return keys;
-  }
-
-  /**
-   * 删除API密钥
-   */
-  async deleteApiKey(keyId) {
-    const key = await db.ApiKey.findByPk(keyId);
-    if (!key) {
-      throw ApiError.notFound('API密钥不存在');
-    }
-
-    await key.destroy();
-    logger.info(`API key deleted: ${keyId}`);
-    return { message: 'API密钥已删除' };
-  }
-
-  /**
-   * 重新生成API密钥
-   */
-  async regenerateApiKey(keyId) {
-    const key = await db.ApiKey.findByPk(keyId);
-    if (!key) {
-      throw ApiError.notFound('API密钥不存在');
-    }
-
-    const apiKey = this.generateApiKey();
-    const apiSecret = crypto
-      .createHmac('sha256', process.env.API_SECRET_KEY || process.env.JWT_SECRET)
-      .update(apiKey)
-      .digest('hex');
-
-    const expiresAt = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000);
-
-    await key.update({
-      api_key: apiKey,
-      api_secret: apiSecret,
-      expires_at: expiresAt,
-    });
-
-    logger.info(`API key regenerated: ${keyId}`);
-    return key;
-  }
-
-  /**
-   * 验证API密钥
-   */
-  async verifyApiKey(apiKey) {
-    const key = await db.ApiKey.findOne({
-      where: { api_key: apiKey },
-      include: [
-        {
-          model: db.ApiInterface,
-          as: 'interface',
-          attributes: ['id', 'endpoint', 'method', 'sql_query', 'parameters', 'require_auth', 'rate_limit'],
-        },
-      ],
-    });
-
-    if (!key) {
-      throw ApiError.unauthorized('无效的API密钥');
-    }
-
-    if (key.status === 'inactive') {
-      throw ApiError.forbidden('API密钥已禁用');
-    }
-
-    // 检查过期时间
-    if (key.expires_at < new Date()) {
-      await key.update({ status: 'inactive' });
-      throw ApiError.forbidden('API密钥已过期');
-    }
-
-    // 更新最后使用时间
-    await key.update({ last_used_at: new Date() });
-
-    return key;
-  }
-
-  /**
-   * 生成随机API密钥
-   */
-  generateApiKey() {
-    return crypto.randomBytes(32).toString('hex');
   }
 
   /**

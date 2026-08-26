@@ -29,17 +29,6 @@ router.post(
 );
 
 /**
- * @route POST /api/auth/api-token
- * @desc API密钥登录获取Token
- * @access Public
- */
-router.post(
-  '/api-token',
-  validate(authValidation.apiLogin),
-  authController.apiLogin
-);
-
-/**
  * @route GET /api/auth/me
  * @desc 获取当前用户信息
  * @access Private

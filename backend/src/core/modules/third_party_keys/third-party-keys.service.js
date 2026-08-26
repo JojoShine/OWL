@@ -1,182 +1,120 @@
-const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 const db = require('../../../models');
 const ApiError = require('../../../utils/ApiError');
 const { Op } = require('sequelize');
+const { encryptSecret } = require('./third-party-crypto.service');
+const { THIRD_PARTY_SCOPES } = require('./third-party-scopes');
 
-/**
- * 生成唯一的API Key
- * 格式：key_时间戳_随机字符串
- */
-function generateApiKey() {
-  const timestamp = Math.floor(Date.now() / 1000);
-  const random = crypto.randomBytes(4).toString('hex');
-  return `key_${timestamp}_${random}`;
-}
+const PRIVATE_ATTRIBUTES = ['secret_ciphertext', 'secret_iv', 'secret_auth_tag'];
 
-/**
- * 生成32位随机的API Secret
- */
-function generateApiSecret() {
-  return crypto.randomBytes(16).toString('hex');
-}
-
-/**
- * 脱敏API Secret（显示前4位+****+后4位）
- */
-function maskApiSecret(secret) {
-  if (!secret || secret.length < 8) {
-    return '****';
-  }
-  return `${secret.substring(0, 4)}****${secret.substring(secret.length - 4)}`;
-}
-
-/**
- * 列表查询
- */
-async function listKeys({ page = 1, pageSize = 10, client_name = '', status = '' }) {
-  const where = {};
-
-  // 客户端名称模糊搜索
-  if (client_name && client_name.trim()) {
-    where.client_name = { [Op.iLike]: `%${client_name}%` };
-  }
-
-  // 状态筛选
-  if (status && status.trim()) {
-    where.status = status;
-  }
-
-  const offset = (page - 1) * pageSize;
-
-  const { count, rows } = await db.ThirdPartyApiKey.findAndCountAll({
-    where,
-    offset,
-    limit: pageSize,
-    order: [['created_at', 'DESC']],
-  });
-
-  // 脱敏 api_secret
-  const maskedRows = rows.map((row) => ({
-    ...row.toJSON(),
-    api_secret: maskApiSecret(row.api_secret),
-  }));
-
+function generateCredentials() {
   return {
-    rows: maskedRows,
-    total: count,
-    page,
-    pageSize,
+    api_key: `tpk_${crypto.randomBytes(12).toString('hex')}`,
+    api_secret: crypto.randomBytes(32).toString('hex'),
   };
 }
 
-/**
- * 创建新密钥
- */
-async function createKey({ client_name, description, expires_at, remark }, userId) {
-  const api_key = generateApiKey();
-  const api_secret = generateApiSecret();
+async function listKeys({ page = 1, pageSize = 10, client_name = '', status = '' }) {
+  const where = {};
+  if (client_name.trim()) where.client_name = { [Op.iLike]: `%${client_name.trim()}%` };
+  if (status.trim()) where.status = status;
 
+  const { count, rows } = await db.ThirdPartyApiKey.findAndCountAll({
+    where,
+    offset: (page - 1) * pageSize,
+    limit: pageSize,
+    attributes: { exclude: PRIVATE_ATTRIBUTES },
+    order: [['created_at', 'DESC']],
+  });
+  return { rows, total: count, page, pageSize };
+}
+
+async function getKey(id) {
+  const key = await db.ThirdPartyApiKey.findByPk(id, {
+    attributes: { exclude: PRIVATE_ATTRIBUTES },
+  });
+  if (!key) throw ApiError.notFound('第三方签名密钥不存在');
+  return key;
+}
+
+async function createKey(data, userId) {
+  const credentials = generateCredentials();
+  const encrypted = encryptSecret(credentials.api_secret);
   const key = await db.ThirdPartyApiKey.create({
-    id: uuidv4(),
-    api_key,
-    api_secret,
-    client_name,
-    description: description || '',
-    expires_at,
-    remark: remark || '',
+    api_key: credentials.api_key,
+    ...encrypted,
+    client_name: data.client_name.trim(),
+    description: data.description || '',
+    expires_at: data.expires_at || null,
+    remark: data.remark || '',
+    scopes: data.scopes,
     status: 'active',
     created_by: userId,
   });
-
-  // 返回完整的 api_secret（仅此一次）
   return {
     id: key.id,
     api_key: key.api_key,
-    api_secret: key.api_secret, // 完整值
+    api_secret: credentials.api_secret,
     client_name: key.client_name,
+    scopes: key.scopes,
     status: key.status,
     created_at: key.created_at,
   };
 }
 
-/**
- * 更新密钥信息
- */
-async function updateKey(id, { client_name, description, remark }) {
+async function updateKey(id, data, userId) {
   const key = await db.ThirdPartyApiKey.findByPk(id);
-
-  if (!key) {
-    throw ApiError.notFound('密钥不存在');
-  }
-
-  // 不能修改 api_key 和 api_secret
+  if (!key) throw ApiError.notFound('第三方签名密钥不存在');
   await key.update({
-    client_name: client_name || key.client_name,
-    description: description !== undefined ? description : key.description,
-    remark: remark !== undefined ? remark : key.remark,
+    client_name: data.client_name?.trim() || key.client_name,
+    description: data.description ?? key.description,
+    remark: data.remark ?? key.remark,
+    scopes: data.scopes ?? key.scopes,
+    expires_at: data.expires_at === undefined ? key.expires_at : data.expires_at,
+    updated_by: userId,
   });
+  return getKey(id);
+}
 
+async function changeStatus(id, status, userId) {
+  const key = await db.ThirdPartyApiKey.findByPk(id);
+  if (!key) throw ApiError.notFound('第三方签名密钥不存在');
+  await key.update({ status, updated_by: userId });
   return key;
 }
 
-/**
- * 修改密钥状态
- */
-async function changeStatus(id, status) {
+async function regenerateSecret(id, userId) {
   const key = await db.ThirdPartyApiKey.findByPk(id);
-
-  if (!key) {
-    throw ApiError.notFound('密钥不存在');
-  }
-
-  await key.update({ status });
-
-  return key;
-}
-
-/**
- * 重新生成 API Secret
- */
-async function regenerateSecret(id) {
-  const key = await db.ThirdPartyApiKey.findByPk(id);
-
-  if (!key) {
-    throw ApiError.notFound('密钥不存在');
-  }
-
-  const newSecret = generateApiSecret();
-  await key.update({ api_secret: newSecret });
-
-  // 返回完整的新 secret（仅此一次）
+  if (!key) throw ApiError.notFound('第三方签名密钥不存在');
+  const apiSecret = crypto.randomBytes(32).toString('hex');
+  await key.update({ ...encryptSecret(apiSecret), updated_by: userId });
   return {
-    api_secret: newSecret,
+    api_key: key.api_key,
+    api_secret: apiSecret,
+    client_name: key.client_name,
+    scopes: key.scopes,
+    status: key.status,
   };
 }
 
-/**
- * 删除密钥
- */
-async function deleteKey(id) {
+async function deleteKey(id, userId) {
   const key = await db.ThirdPartyApiKey.findByPk(id);
-
-  if (!key) {
-    throw ApiError.notFound('密钥不存在');
-  }
-
+  if (!key) throw ApiError.notFound('第三方签名密钥不存在');
+  await key.update({ deleted_by: userId });
   await key.destroy();
+}
 
-  return true;
+function listScopes() {
+  return THIRD_PARTY_SCOPES;
 }
 
 module.exports = {
   listKeys,
+  getKey,
   createKey,
   updateKey,
   changeStatus,
   regenerateSecret,
   deleteKey,
-  generateApiKey,
-  generateApiSecret,
-  maskApiSecret,
+  listScopes,
 };

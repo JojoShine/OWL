@@ -4,7 +4,6 @@ const controller = require('./api-builder.controller');
 const {
   createInterfaceRules,
   updateInterfaceRules,
-  createApiKeyRules,
   listInterfaceRules,
   handleValidationErrors,
 } = require('./api-builder.validation');
@@ -51,37 +50,6 @@ router.delete(
   authenticate,
   checkPermission('api-interface', 'delete'),
   (req, res) => controller.deleteInterface(req, res)
-);
-
-// API密钥管理API
-router.post(
-  '/:id/keys',
-  authenticate,
-  checkPermission('api-key', 'create'),
-  createApiKeyRules(),
-  handleValidationErrors,
-  (req, res) => controller.createApiKey(req, res)
-);
-
-router.get(
-  '/:id/keys',
-  authenticate,
-  checkPermission('api-key', 'read'),
-  (req, res) => controller.getInterfaceKeys(req, res)
-);
-
-router.delete(
-  '/keys/:keyId',
-  authenticate,
-  checkPermission('api-key', 'delete'),
-  (req, res) => controller.deleteApiKey(req, res)
-);
-
-router.post(
-  '/keys/:keyId/regenerate',
-  authenticate,
-  checkPermission('api-key', 'update'),
-  (req, res, next) => controller.regenerateApiKey(req, res, next)
 );
 
 // SQL查询相关API（这两个路由需要在其他路由前面，防止被 /:id 路由匹配）

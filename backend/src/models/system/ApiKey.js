@@ -7,26 +7,26 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
-      interface_id: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        comment: '关联的接口ID（可选，null表示全局密钥）',
-      },
-      app_name: {
+      client_name: {
         type: DataTypes.STRING(255),
         allowNull: false,
-        comment: '应用名称',
+        comment: '厂商或业务应用名称',
       },
-      api_key: {
-        type: DataTypes.STRING(255),
+      key_prefix: {
+        type: DataTypes.STRING(24),
+        allowNull: false,
+        comment: '用于识别密钥的安全前缀',
+      },
+      key_hash: {
+        type: DataTypes.STRING(64),
         allowNull: false,
         unique: true,
-        comment: 'API密钥',
+        comment: 'API密钥HMAC-SHA256摘要',
       },
-      api_secret: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-        comment: 'API密钥加密值',
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        comment: '密钥用途说明',
       },
       status: {
         type: DataTypes.ENUM('active', 'inactive'),
@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       expires_at: {
         type: DataTypes.DATE,
         allowNull: false,
-        comment: '密钥过期时间（3天后）',
+        comment: '密钥过期时间',
       },
       last_used_at: {
         type: DataTypes.DATE,
@@ -65,9 +65,11 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   ApiKey.associate = (db) => {
-    ApiKey.belongsTo(db.ApiInterface, {
-      foreignKey: 'interface_id',
-      as: 'interface',
+    ApiKey.belongsToMany(db.ApiInterface, {
+      through: db.ApiKeyInterface,
+      foreignKey: 'api_key_id',
+      otherKey: 'interface_id',
+      as: 'interfaces',
     });
     ApiKey.belongsTo(db.User, {
       foreignKey: 'created_by',

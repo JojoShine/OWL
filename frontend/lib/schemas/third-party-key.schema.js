@@ -19,4 +19,6 @@ export const thirdPartyKeySchema = z.object({
     .optional(),
 
   status: z.enum(['active', 'inactive']).optional(),
+
+  scopes: z.array(z.string()).min(1, '请至少选择一个权限范围'),
 });

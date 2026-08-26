@@ -65,29 +65,15 @@ export default function ApiBuilderEditPage() {
     parameterValues: {}, // 参数值
     returnColumns: [], // 返回列信息
     require_auth: false,
-    api_key_id: null, // 关联的API密钥ID
     rate_limit: 1000,
     status: 'active', // 默认状态
   });
 
-  const [apiKeys, setApiKeys] = useState([]); // 可用的API密钥列表
-
   useEffect(() => {
-    fetchApiKeys(); // 获取API密钥列表
     if (!isNewMode) {
       fetchInterface();
     }
   }, []);
-
-  // 获取API密钥列表
-  const fetchApiKeys = async () => {
-    try {
-      const response = await apiBuilderApi.getAllApiKeys();
-      setApiKeys(response.data || []);
-    } catch (error) {
-      console.error('获取API密钥列表失败:', error);
-    }
-  };
 
   const fetchInterface = async () => {
     try {
@@ -109,7 +95,6 @@ export default function ApiBuilderEditPage() {
         parameterValues: interfaceData.parameterValues || {},
         returnColumns: interfaceData.returnColumns || [],
         require_auth: interfaceData.require_auth !== undefined ? interfaceData.require_auth : true,
-        api_key_id: interfaceData.api_key_id || null,
         rate_limit: interfaceData.rate_limit || 1000,
         status: interfaceData.status || 'active',
       });
@@ -404,39 +389,6 @@ export default function ApiBuilderEditPage() {
                 </Label>
               </div>
 
-              {formData.require_auth && (
-                <div>
-                  <Label className="text-base">关联的API密钥</Label>
-                  <Select
-                    value={formData.api_key_id || 'none'}
-                    onValueChange={(value) => handleFieldChange('api_key_id', value === 'none' ? null : value)}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue>
-                        {formData.api_key_id ? (
-                          (() => {
-                            const selectedKey = apiKeys.find((k) => k.id === formData.api_key_id);
-                            return selectedKey ? selectedKey.app_name : '密钥已删除';
-                          })()
-                        ) : (
-                          '选择要关联的API密钥'
-                        )}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">无（不关联密钥）</SelectItem>
-                      {apiKeys.map((key) => (
-                        <SelectItem key={key.id} value={key.id}>
-                          {key.app_name} ({key.id.substring(0, 8)}...)
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {apiKeys.length === 0 && (
-                    <EmptyState title="暂无可用的 API 密钥" description="请先在密钥管理中创建" compact />
-                  )}
-                </div>
-              )}
             </TabsContent>
 
             {/* 步骤2: SQL查询 */}

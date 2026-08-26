@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const { THIRD_PARTY_SCOPE_VALUES } = require('./third-party-scopes');
 
 /**
  * 列表查询验证
@@ -8,7 +9,7 @@ exports.listKeys = {
     page: Joi.number().integer().min(1).default(1),
     pageSize: Joi.number().integer().min(1).max(100).default(10),
     client_name: Joi.string().allow('').optional(),
-    status: Joi.string().valid('active', 'inactive', 'expired').allow('').optional(),
+    status: Joi.string().valid('active', 'inactive').allow('').optional(),
   }),
 };
 
@@ -32,6 +33,7 @@ exports.createKey = {
     remark: Joi.string().allow('').optional().max(500).messages({
       'string.max': '备注最多500个字符',
     }),
+    scopes: Joi.array().items(Joi.string().valid(...THIRD_PARTY_SCOPE_VALUES)).min(1).required(),
   }).required(),
 };
 
@@ -56,6 +58,8 @@ exports.updateKey = {
     remark: Joi.string().allow('').optional().max(500).messages({
       'string.max': '备注最多500个字符',
     }),
+    expires_at: Joi.date().allow(null).optional(),
+    scopes: Joi.array().items(Joi.string().valid(...THIRD_PARTY_SCOPE_VALUES)).min(1).optional(),
   }).required(),
 };
 

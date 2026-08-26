@@ -14,14 +14,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
+import { Checkbox } from '@/components/ui/checkbox';
 import { thirdPartyKeysApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { thirdPartyKeySchema as keySchema } from '@/lib/schemas';
@@ -29,6 +23,7 @@ import { thirdPartyKeySchema as keySchema } from '@/lib/schemas';
 export default function KeyFormDialog({ open, onOpenChange, editingKey, onSuccess }) {
   const isEdit = !!editingKey;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [scopeOptions, setScopeOptions] = useState([]);
 
   const {
     register,
@@ -44,7 +39,7 @@ export default function KeyFormDialog({ open, onOpenChange, editingKey, onSucces
       description: '',
       expires_at: '',
       remark: '',
-      status: 'active',
+      scopes: [],
     },
   });
 
@@ -56,7 +51,7 @@ export default function KeyFormDialog({ open, onOpenChange, editingKey, onSucces
         description: editingKey.description || '',
         expires_at: editingKey.expires_at ? new Date(editingKey.expires_at).toISOString().split('T')[0] : '',
         remark: editingKey.remark || '',
-        status: editingKey.status || 'active',
+        scopes: editingKey.scopes || [],
       });
     } else if (!editingKey) {
       reset({
@@ -64,10 +59,17 @@ export default function KeyFormDialog({ open, onOpenChange, editingKey, onSucces
         description: '',
         expires_at: '',
         remark: '',
-        status: 'active',
+        scopes: [],
       });
     }
   }, [editingKey, open, reset]);
+
+  useEffect(() => {
+    if (!open) return;
+    thirdPartyKeysApi.getScopes()
+      .then((response) => setScopeOptions(response.data || []))
+      .catch(() => setScopeOptions([]));
+  }, [open]);
 
   const onSubmit = async (data) => {
     try {
@@ -76,11 +78,13 @@ export default function KeyFormDialog({ open, onOpenChange, editingKey, onSucces
         client_name: data.client_name,
         description: data.description || '',
         remark: data.remark || '',
+        scopes: data.scopes,
       };
 
-      // 新增时才需要传expires_at
-      if (!isEdit && data.expires_at) {
+      if (data.expires_at) {
         submitData.expires_at = new Date(data.expires_at).toISOString();
+      } else {
+        submitData.expires_at = null;
       }
 
       let response;
@@ -102,8 +106,6 @@ export default function KeyFormDialog({ open, onOpenChange, editingKey, onSucces
       setIsSubmitting(false);
     }
   };
-
-  const statusValue = watch('status');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -145,19 +147,42 @@ export default function KeyFormDialog({ open, onOpenChange, editingKey, onSucces
           </div>
 
           {/* 过期时间 */}
-          {!isEdit && (
-            <div className="space-y-2">
-              <Label htmlFor="expires_at">过期时间</Label>
-              <DatePicker
-                value={watch('expires_at')}
-                onChange={(e) => setValue('expires_at', e.target.value)}
-                placeholder="选择过期时间（可选）"
-              />
-              {errors.expires_at && (
-                <p className="text-sm text-red-500">{errors.expires_at.message}</p>
-              )}
+          <div className="space-y-2">
+            <Label htmlFor="expires_at">过期时间</Label>
+            <DatePicker
+              value={watch('expires_at')}
+              onChange={(e) => setValue('expires_at', e.target.value)}
+              placeholder="选择过期时间（可选）"
+            />
+            {errors.expires_at && (
+              <p className="text-sm text-red-500">{errors.expires_at.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>权限范围 *</Label>
+            <div className="space-y-1 rounded-lg border p-2">
+              {scopeOptions.map((scope) => {
+                const selected = watch('scopes').includes(scope.value);
+                return (
+                  <label key={scope.value} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 hover:bg-muted/60">
+                    <Checkbox
+                      checked={selected}
+                      onCheckedChange={() => setValue(
+                        'scopes',
+                        selected
+                          ? watch('scopes').filter((value) => value !== scope.value)
+                          : [...watch('scopes'), scope.value],
+                        { shouldValidate: true }
+                      )}
+                    />
+                    <span className="text-sm">{scope.label}</span>
+                  </label>
+                );
+              })}
             </div>
-          )}
+            {errors.scopes && <p className="text-sm text-destructive">{errors.scopes.message}</p>}
+          </div>
 
           {/* 备注 */}
           <div className="space-y-2">
@@ -171,25 +196,6 @@ export default function KeyFormDialog({ open, onOpenChange, editingKey, onSucces
               <p className="text-sm text-red-500">{errors.remark.message}</p>
             )}
           </div>
-
-          {/* 状态 */}
-          {isEdit && (
-            <div className="space-y-2">
-              <Label>状态</Label>
-              <Select
-                value={statusValue}
-                onValueChange={(value) => setValue('status', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="选择状态" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">启用</SelectItem>
-                  <SelectItem value="inactive">禁用</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
 
           <DialogFooter>
             <Button

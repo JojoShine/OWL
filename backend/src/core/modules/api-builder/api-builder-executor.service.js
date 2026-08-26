@@ -22,7 +22,7 @@ class ApiBuilderExecutorService {
    * @param {string} ipAddress - 请求来源IP
    * @returns {Promise<Object>} 查询结果
    */
-  async executeInterface(interface_, params, ipAddress = null) {
+  async executeInterface(interface_, params, ipAddress = null, apiKeyId = null) {
     const startTime = Date.now();
     let responseCode = 200;
     let errorMessage = null;
@@ -82,7 +82,7 @@ class ApiBuilderExecutorService {
       // 异步记录日志（不阻塞响应）
       const responseTime = Date.now() - startTime;
       const operationType = this.getOperationType(interface_.sql_query);
-      this.logApiCall(interface_.id, null, operationType, params, responseCode, responseTime, errorMessage, ipAddress);
+      this.logApiCall(interface_.id, apiKeyId, operationType, params, responseCode, responseTime, errorMessage, ipAddress);
     }
 
     return result;
@@ -280,8 +280,15 @@ class ApiBuilderExecutorService {
     // 异步执行，不等待完成
     setImmediate(async () => {
       try {
-        // 这里可以保存到文件或其他存储
-        // 目前仅记录到日志
+        await db.ApiCallLog.create({
+          interface_id: interfaceId,
+          api_key_id: apiKeyId,
+          request_method: method,
+          response_code: responseCode,
+          response_time: responseTime,
+          error_message: errorMessage,
+          ip_address: ipAddress,
+        });
         logger.info('API Call Log', {
           interfaceId,
           apiKeyId,

@@ -28,12 +28,24 @@ exports.getList = async (req, res, next) => {
   }
 };
 
+exports.getScopes = (req, res) => {
+  success(res, thirdPartyKeysService.listScopes(), '获取权限范围成功');
+};
+
+exports.getOne = async (req, res, next) => {
+  try {
+    success(res, await thirdPartyKeysService.getKey(req.params.id), '获取签名密钥成功');
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * 创建新密钥
  */
 exports.create = async (req, res, next) => {
   try {
-    const { client_name, description, expires_at, remark } = req.body;
+    const { client_name, description, expires_at, remark, scopes } = req.body;
     const userId = req.user?.id;
 
     if (!userId) {
@@ -46,6 +58,7 @@ exports.create = async (req, res, next) => {
         description,
         expires_at,
         remark,
+        scopes,
       },
       userId
     );
@@ -69,23 +82,22 @@ exports.create = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { client_name, description, remark } = req.body;
+    const { client_name, description, remark, scopes, expires_at } = req.body;
 
     const key = await thirdPartyKeysService.updateKey(id, {
       client_name,
       description,
       remark,
-    });
+      scopes,
+      expires_at,
+    }, req.user.id);
 
     logger.info('API key updated', {
       id,
       client_name: key.client_name,
     });
 
-    success(res, {
-      ...key.toJSON(),
-      api_secret: thirdPartyKeysService.maskApiSecret(key.api_secret),
-    }, '密钥更新成功');
+    success(res, key, '密钥更新成功');
   } catch (error) {
     logger.error('Error updating API key:', error);
     next(error);
@@ -100,7 +112,7 @@ exports.changeStatus = async (req, res, next) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const key = await thirdPartyKeysService.changeStatus(id, status);
+    const key = await thirdPartyKeysService.changeStatus(id, status, req.user.id);
 
     logger.info('API key status changed', {
       id,
@@ -124,7 +136,7 @@ exports.regenerate = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const result = await thirdPartyKeysService.regenerateSecret(id);
+    const result = await thirdPartyKeysService.regenerateSecret(id, req.user.id);
 
     logger.warn('API secret regenerated', { id });
 
@@ -142,7 +154,7 @@ exports.delete = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    await thirdPartyKeysService.deleteKey(id);
+    await thirdPartyKeysService.deleteKey(id, req.user.id);
 
     logger.info('API key deleted', { id });
 

@@ -1,6 +1,6 @@
 const apiBuilderService = require('./api-builder.service');
-const apiBuilderAuthService = require('./api-builder-auth.service');
 const apiBuilderExecutorService = require('./api-builder-executor.service');
+const apiKeyService = require('./api-key.service');
 const ApiError = require('../../../utils/ApiError');
 const { logger } = require('../../../config/logger');
 
@@ -13,8 +13,6 @@ class ApiBuilderExecutorController {
     try {
       const { id } = req.params;
       const params = req.body.params || {};
-      const userId = req.user.id;
-
       // 获取接口配置
       const interface_ = await apiBuilderService.getInterfaceById(id);
 
@@ -63,9 +61,10 @@ class ApiBuilderExecutorController {
       if (interface_.require_auth) {
         // 接口需要认证，检查是否有有效的API密钥
         // 注意：生成的接口不走内部token鉴权，只支持API Key鉴权
-        if (!req.apiKeyRecord) {
+        if (!req.sqlApiKey) {
           throw ApiError.unauthorized('未提供有效的API密钥');
         }
+        await apiKeyService.authorizeInterface(req.sqlApiKey, interface_);
       }
       // 如果接口不需要认证，直接继续执行
 
@@ -83,7 +82,8 @@ class ApiBuilderExecutorController {
       const result = await apiBuilderExecutorService.executeInterface(
         interface_,
         params,
-        req.clientIp
+        req.clientIp,
+        req.sqlApiKey?.id || null
       );
 
       res.json({

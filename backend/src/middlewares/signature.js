@@ -1,136 +1,94 @@
-const { verifySignature, verifyTimestamp, verifyNonce, cacheNonce } = require('../utils/signature.util');
+const db = require('../models');
 const ApiError = require('../utils/ApiError');
 const { logger } = require('../config/logger');
-const db = require('../models');
+const { redisClient, isRedisAvailable } = require('../config/redis');
+const {
+  decryptSecret,
+  buildCanonicalRequest,
+  createSignature,
+  signaturesMatch,
+} = require('../core/modules/third_party_keys/third-party-crypto.service');
 
-// Nonce缓存（实际生产环境应使用Redis）
-const nonceCache = new Map();
+function auditRequest(req, credential, startedAt, failureReason = null) {
+  req.res.once('finish', () => {
+    db.ThirdPartyApiCallLog.create({
+      third_party_key_id: credential?.id || null,
+      client_name: credential?.client_name || null,
+      request_method: req.method,
+      request_path: req.originalUrl,
+      ip_address: req.clientIp,
+      response_code: req.res.statusCode,
+      response_time: Date.now() - startedAt,
+      failure_reason: failureReason,
+    }).catch((error) => logger.error('Third-party request audit failed', error));
+  });
+}
 
-/**
- * 创建签名验证中间件工厂函数
- * @param {Object} options - 配置选项
- * @param {Boolean} options.requireNonce - 是否需要nonce（默认false）
- * @param {Number} options.timestampWindow - 时间戳有效期（秒，默认300秒=5分钟）
- * @returns {Function} Express中间件函数
- */
-function createSignatureMiddleware(options = {}) {
-  const {
-    requireNonce = false,
-    timestampWindow = 300,
-  } = options;
-
+function verifyThirdPartySignature(requiredScope) {
   return async (req, res, next) => {
+    const startedAt = Date.now();
+    let credential = null;
     try {
-      const { body } = req;
-
-      // 1. 检查必需参数
-      if (!body.api_key) {
-        throw ApiError.badRequest('缺少必需参数: api_key');
+      const apiKey = req.get('X-API-Key');
+      const timestamp = req.get('X-Timestamp');
+      const nonce = req.get('X-Nonce');
+      const providedSignature = req.get('X-Signature');
+      if (!apiKey || !timestamp || !nonce || !providedSignature) {
+        throw ApiError.badRequest('签名请求头不完整');
       }
 
-      if (!body.sign) {
-        throw ApiError.badRequest('缺少必需参数: sign');
+      credential = await db.ThirdPartyApiKey.findOne({ where: { api_key: apiKey } });
+      if (!credential) throw ApiError.unauthorized('第三方凭证无效');
+      if (credential.status !== 'active') throw ApiError.forbidden('第三方凭证不可用');
+      if (credential.expires_at && new Date(credential.expires_at) <= new Date()) {
+        throw ApiError.forbidden('第三方凭证不可用');
       }
 
-      if (!body.timestamp) {
-        throw ApiError.badRequest('缺少必需参数: timestamp');
+      const timestampNumber = Number(timestamp);
+      if (!Number.isFinite(timestampNumber) || Math.abs(Date.now() - timestampNumber) > 300000) {
+        throw ApiError.badRequest('请求时间戳无效或已过期');
       }
 
-      // 2. 查询第三方API密钥信息
-      const apiConfig = await db.ThirdPartyApiKey?.findOne({
-        where: { api_key: body.api_key, status: 'active'}
+      const canonicalRequest = buildCanonicalRequest({
+        method: req.method,
+        path: new URL(req.originalUrl, 'http://local').pathname,
+        query: req.query,
+        timestamp,
+        nonce,
+        rawBody: req.rawBody,
       });
-
-      if (!apiConfig) {
-        logger.warn('Invalid API_KEY attempted', { api_key: body.api_key });
-        throw ApiError.forbidden('无效的 API_KEY 或密钥已禁用');
+      const expectedSignature = createSignature(canonicalRequest, decryptSecret(credential));
+      if (!signaturesMatch(providedSignature, expectedSignature)) {
+        throw ApiError.unauthorized('第三方凭证无效');
       }
 
-      // 3. 验证时间戳
-      if (!verifyTimestamp(body.timestamp, timestampWindow)) {
-        throw ApiError.badRequest(
-          `请求时间戳过期或无效（允许时间差≤${timestampWindow}秒）`
-        );
+      if (!isRedisAvailable()) throw ApiError.serviceUnavailable('签名防重放服务暂不可用');
+      const nonceAccepted = await redisClient.set(
+        `third-party:nonce:${credential.id}:${nonce}`,
+        '1',
+        { NX: true, EX: 600 }
+      );
+      if (nonceAccepted !== 'OK') throw ApiError.conflict('请求已处理，请勿重复提交');
+
+      if (requiredScope && !(credential.scopes || []).includes(requiredScope)) {
+        throw ApiError.forbidden('第三方凭证无此接口权限');
       }
 
-      // 4. 验证nonce（如果需要）
-      if (requireNonce) {
-        if (!body.nonce) {
-          throw ApiError.badRequest('缺少必需参数: nonce');
-        }
-
-        try {
-          verifyNonce(body.nonce, nonceCache);
-          cacheNonce(body.nonce, nonceCache);
-        } catch (error) {
-          throw ApiError.badRequest(error.message);
-        }
-      }
-
-      // 5. 验证签名
-      if (!verifySignature(body, apiConfig.api_secret)) {
-        logger.warn('Signature verification failed', {
-          api_key: body.api_key,
-          path: req.path,
-        });
-        throw ApiError.forbidden('签名验证失败');
-      }
-
-      // 验证通过，保存接入方信息到请求对象
-      req.apiKey = apiConfig.api_key;
-      req.clientName = apiConfig.client_name;
-
-      // 更新最后使用时间
-      if (apiConfig.update) {
-        await apiConfig.update({ last_used_at: new Date() });
-      }
-
+      req.thirdPartyClient = {
+        id: credential.id,
+        apiKey: credential.api_key,
+        clientName: credential.client_name,
+        scopes: credential.scopes || [],
+      };
+      auditRequest(req, credential, startedAt);
+      credential.update({ last_used_at: new Date() })
+        .catch((error) => logger.error('Third-party last-used update failed', error));
       next();
     } catch (error) {
-      if (error.statusCode) {
-        return next(error);
-      }
-      next(ApiError.badRequest('签名验证过程出错: ' + error.message));
+      auditRequest(req, credential, startedAt, error.errorCode || error.name);
+      next(error.statusCode ? error : ApiError.unauthorized('第三方凭证无效'));
     }
   };
 }
 
-/**
- * 高敏感接口签名验证中间件
- * - 强制要求nonce
- * - 默认5分钟时间戳窗口
- * 用于：扣款、转账等高敏感操作
- */
-const verifyHighSensitiveSignature = createSignatureMiddleware({
-  requireNonce: true,
-  timestampWindow: 300,
-});
-
-/**
- * 普通接口签名验证中间件
- * - 不需要nonce
- * - 默认5分钟时间戳窗口
- * 用于：用户同步、食堂信息同步等普通操作
- */
-const verifyNormalSignature = createSignatureMiddleware({
-  requireNonce: false,
-  timestampWindow: 300,
-});
-
-/**
- * 宽松模式签名验证中间件
- * - 不需要nonce
- * - 时间戳窗口30分钟
- * 用于：批量同步等长周期操作
- */
-const verifyRelaxedSignature = createSignatureMiddleware({
-  requireNonce: false,
-  timestampWindow: 1800,
-});
-
-module.exports = {
-  createSignatureMiddleware,
-  verifyHighSensitiveSignature,
-  verifyNormalSignature,
-  verifyRelaxedSignature,
-};
+module.exports = { verifyThirdPartySignature };

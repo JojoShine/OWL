@@ -55,7 +55,6 @@ const createInterfaceRules = () => [
     .optional()
     .isInt({ min: 1 })
     .withMessage('限流值必须是正整数'),
-  body('api_key_id').optional(),
 ];
 
 const updateInterfaceRules = () => [
@@ -120,16 +119,6 @@ const updateInterfaceRules = () => [
     .optional()
     .isInt({ min: 1 })
     .withMessage('限流值必须是正整数'),
-  body('api_key_id').optional(),
-];
-
-const createApiKeyRules = () => [
-  body('app_name')
-    .trim()
-    .notEmpty()
-    .withMessage('应用名称不能为空')
-    .isLength({ max: 255 })
-    .withMessage('应用名称最多255个字符'),
 ];
 
 const listInterfaceRules = () => [
@@ -168,7 +157,6 @@ const handleValidationErrors = (req, res, next) => {
 module.exports = {
   createInterfaceRules,
   updateInterfaceRules,
-  createApiKeyRules,
   listInterfaceRules,
   handleValidationErrors,
 };

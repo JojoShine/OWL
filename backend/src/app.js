@@ -46,8 +46,19 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({
+  limit: '50mb',
+  verify: (req, res, buffer) => {
+    req.rawBody = Buffer.from(buffer);
+  },
+}));
+app.use(express.urlencoded({
+  extended: true,
+  limit: '50mb',
+  verify: (req, res, buffer) => {
+    req.rawBody = Buffer.from(buffer);
+  },
+}));
 
 // 日志中间件
 app.use(accessLogMiddleware);

@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { thirdPartyKeysApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, RefreshCw, Power } from 'lucide-react';
+import { Plus, Edit, Trash2, RefreshCw, Power, BookOpen } from 'lucide-react';
 import KeyFormDialog from '@/components/third-party-keys/key-form-dialog';
 import SecretDisplayDialog from '@/components/third-party-keys/secret-display-dialog';
+import SignatureGuideDialog from '@/components/third-party-keys/signature-guide-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
 import { SearchFilter } from '@/components/common/SearchFilter';
@@ -28,6 +29,7 @@ export default function ThirdPartyKeysPage() {
   const [keyToRegenerate, setKeyToRegenerate] = useState(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [keyToChangeStatus, setKeyToChangeStatus] = useState(null);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   // 获取密钥列表
   const fetchKeys = async () => {
@@ -136,12 +138,7 @@ export default function ThirdPartyKeysPage() {
       toast.success('重新生成密钥成功');
 
       // 显示新密钥
-      setNewKeyData({
-        api_key: keyToRegenerate.api_key,
-        api_secret: response.data?.api_secret,
-        client_name: keyToRegenerate.client_name,
-        status: keyToRegenerate.status,
-      });
+      setNewKeyData(response.data);
       setSecretDialogOpen(true);
 
       fetchKeys();
@@ -179,27 +176,20 @@ export default function ThirdPartyKeysPage() {
   };
 
   // 创建成功回调
-  const handleCreateSuccess = async () => {
-    const response = await thirdPartyKeysApi.getKeys({
-      page: 1,
-      pageSize: 1
-    });
-
-    const latestKey = response.data?.rows?.[0];
-    if (latestKey) {
-      setNewKeyData(latestKey);
-      setSecretDialogOpen(true);
-    }
-
+  const handleCreateSuccess = (createdKey) => {
+    setNewKeyData(createdKey);
+    setSecretDialogOpen(true);
     fetchKeys();
   };
 
   // 状态徽章颜色
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status, expiresAt) => {
+    if (expiresAt && new Date(expiresAt) <= new Date()) {
+      return <Badge variant="destructive">已过期</Badge>;
+    }
     const statusMap = {
       active: { label: '启用', variant: 'default' },
       inactive: { label: '禁用', variant: 'secondary' },
-      expired: { label: '已过期', variant: 'destructive' },
     };
     const config = statusMap[status] || statusMap.active;
     return <Badge variant={config.variant}>{config.label}</Badge>;
@@ -220,7 +210,6 @@ export default function ThirdPartyKeysPage() {
         { label: '全部状态', value: 'all' },
         { label: '启用', value: 'active' },
         { label: '禁用', value: 'inactive' },
-        { label: '已过期', value: 'expired' }
       ]
     }
   ];
@@ -229,57 +218,58 @@ export default function ThirdPartyKeysPage() {
   const columns = [
     {
       key: 'client_name',
-      label: '客户端名称',
-      cellClassName: 'font-medium'
+      label: '外部系统',
+      render: (value, row) => (
+        <div className="flex flex-col gap-0.5">
+          <span className="font-medium">{value}</span>
+          <span className="text-xs text-muted-foreground">{row.description || '未填写说明'}</span>
+        </div>
+      )
     },
     {
       key: 'api_key',
       label: 'API Key',
       render: (value) => (
-        <code className="text-sm bg-muted px-2 py-1 rounded">{value}</code>
+        <code className="rounded bg-muted/60 px-2 py-1 text-xs">{value}</code>
       )
     },
     {
-      key: 'api_secret',
-      label: 'API Secret',
-      render: (value) => (
-        <code className="text-sm bg-muted px-2 py-1 rounded">{value}</code>
+      key: 'scopes',
+      label: '权限范围',
+      render: (value = []) => (
+        <div className="flex max-w-72 flex-wrap gap-1">
+          {value.slice(0, 2).map((scope) => <Badge key={scope} variant="neutral">{scope}</Badge>)}
+          {value.length > 2 ? <Badge variant="outline">+{value.length - 2}</Badge> : null}
+        </div>
       )
-    },
-    {
-      key: 'description',
-      label: '描述',
-      cellClassName: 'max-w-xs truncate',
-      render: (value) => value || '-'
     },
     {
       key: 'status',
       label: '状态',
-      render: (value) => getStatusBadge(value)
+      render: (value, row) => getStatusBadge(value, row.expires_at)
     },
     {
       key: 'expires_at',
-      label: '过期时间',
+      label: '有效期至',
       render: (value) => value ? new Date(value).toLocaleDateString('zh-CN') : '永久'
     },
     {
-      key: 'created_at',
-      label: '创建时间',
-      render: (value) => value ? new Date(value).toLocaleDateString('zh-CN') : '-'
+      key: 'last_used_at',
+      label: '最后使用',
+      render: (value) => value ? new Date(value).toLocaleString('zh-CN') : '-'
     }
   ];
 
   return (
     <PageShell>
       <PageHeader
-        title="第三方密钥"
-        description="集中管理外部服务访问凭据。"
-        actions={
-          <Button onClick={handleAdd} className="sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            新增密钥
-          </Button>
-        }
+        title="第三方签名密钥"
+        description="管理后台系统整合、数据同步和开放接口的 HMAC 签名凭证。"
+        meta={<span className="text-sm text-muted-foreground">共 {pagination.total} 个</span>}
+        actions={<>
+          <Button variant="outline" onClick={() => setGuideOpen(true)}><BookOpen className="h-4 w-4" />接入说明</Button>
+          <Button onClick={handleAdd} className="sm:w-auto"><Plus className="h-4 w-4" />创建签名密钥</Button>
+        </>}
       />
       <PageWorkspace>
         <PageToolbar>
@@ -295,6 +285,7 @@ export default function ThirdPartyKeysPage() {
         <PageSurface className="p-0">
         <DataTable
           variant="workspace"
+          density="compact"
           columns={columns}
           data={keys}
           loading={isLoading}
@@ -355,6 +346,8 @@ export default function ThirdPartyKeysPage() {
         onOpenChange={setSecretDialogOpen}
         keyData={newKeyData}
       />
+
+      <SignatureGuideDialog open={guideOpen} onOpenChange={setGuideOpen} />
 
       {/* 确认删除对话框 */}
       <ConfirmDialog

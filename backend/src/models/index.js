@@ -50,6 +50,7 @@ db.FilePermission = require('./system/FilePermission')(sequelize, Sequelize.Data
 db.Dictionary = require('./system/Dictionary')(sequelize, Sequelize.DataTypes);
 db.ApiInterface = require('./system/ApiInterface')(sequelize, Sequelize.DataTypes);
 db.ApiKey = require('./system/ApiKey')(sequelize, Sequelize.DataTypes);
+db.ApiCallLog = require('./system/ApiCallLog')(sequelize, Sequelize.DataTypes);
 db.WatermarkConfig = require('./system/WatermarkConfig')(sequelize, Sequelize.DataTypes);
 db.SystemConfig = require('./system/SystemConfig')(sequelize, Sequelize.DataTypes);
 db.DashboardWidget = require('./system/DashboardWidget')(sequelize, Sequelize.DataTypes);
@@ -86,10 +87,12 @@ db.GenerationHistory = require('./generator/GenerationHistory')(sequelize, Seque
 db.UserRole = require('./association/UserRole')(sequelize, Sequelize.DataTypes);
 db.RolePermission = require('./association/RolePermission')(sequelize, Sequelize.DataTypes);
 db.RoleMenu = require('./association/RoleMenu')(sequelize, Sequelize.DataTypes);
+db.ApiKeyInterface = require('./association/ApiKeyInterface')(sequelize, Sequelize.DataTypes);
 
 // ========== Third Party Models ==========
 // 第三方对接相关模型
 db.ThirdPartyApiKey = require('./third_party/ThirdPartyApiKey')(sequelize, Sequelize.DataTypes);
+db.ThirdPartyApiCallLog = require('./third_party/ThirdPartyApiCallLog')(sequelize, Sequelize.DataTypes);
 db.ZabbixInstance = require('./third_party/ZabbixInstance')(sequelize, Sequelize.DataTypes);
 db.ZabbixHost = require('./third_party/ZabbixHost')(sequelize, Sequelize.DataTypes);
 

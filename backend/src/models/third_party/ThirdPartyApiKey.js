@@ -13,10 +13,24 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
         comment: 'API密钥（公开标识）',
       },
-      api_secret: {
-        type: DataTypes.STRING(255),
+      secret_ciphertext: {
+        type: DataTypes.TEXT,
         allowNull: false,
-        comment: 'API密钥加密值（仅用于验证）',
+        comment: 'AES-256-GCM加密后的签名密钥',
+      },
+      secret_iv: {
+        type: DataTypes.STRING(32),
+        allowNull: false,
+      },
+      secret_auth_tag: {
+        type: DataTypes.STRING(32),
+        allowNull: false,
+      },
+      scopes: {
+        type: DataTypes.JSONB,
+        allowNull: false,
+        defaultValue: [],
+        comment: '允许访问的第三方接口权限标识',
       },
       client_name: {
         type: DataTypes.STRING(255),
@@ -29,9 +43,9 @@ module.exports = (sequelize, DataTypes) => {
         comment: '密钥描述',
       },
       status: {
-        type: DataTypes.ENUM('active', 'inactive', 'expired'),
+        type: DataTypes.ENUM('active', 'inactive'),
         defaultValue: 'active',
-        comment: '密钥状态（active-激活，inactive-禁用，expired-过期）',
+        comment: '密钥状态（active-激活，inactive-禁用）',
       },
       last_used_at: {
         type: DataTypes.DATE,

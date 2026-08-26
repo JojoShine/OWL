@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,10 @@ import { toast } from 'sonner';
 export default function SecretDisplayDialog({ open, onOpenChange, keyData }) {
   const [showSecret, setShowSecret] = useState(false);
 
+  useEffect(() => {
+    if (open) setShowSecret(false);
+  }, [open]);
+
   const handleCopy = (text, label) => {
     navigator.clipboard.writeText(text);
     toast.success(`${label}已复制到剪贴板`);
@@ -27,9 +31,9 @@ export default function SecretDisplayDialog({ open, onOpenChange, keyData }) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>API密钥创建成功</DialogTitle>
+          <DialogTitle>请保存第三方签名凭证</DialogTitle>
           <DialogDescription>
-            请妥善保存以下信息，API Secret仅显示一次，关闭后将无法再次查看完整密钥。
+            API Secret 仅展示一次，关闭后无法再次查看。
           </DialogDescription>
         </DialogHeader>
 
@@ -104,9 +108,9 @@ export default function SecretDisplayDialog({ open, onOpenChange, keyData }) {
           </div>
 
           {/* 警告提示 */}
-          <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-amber-500/20 dark:bg-amber-500/10">
-            <p className="text-sm text-yellow-800 dark:text-amber-300">
-              <strong>重要提示：</strong>请立即复制并保存API Secret，关闭此窗口后将无法再次查看完整密钥。
+          <div className="rounded-lg border bg-muted/40 p-4">
+            <p className="text-sm text-muted-foreground">
+              请立即复制并安全保存 API Secret；重新生成后旧 Secret 会立即失效。
             </p>
           </div>
         </div>

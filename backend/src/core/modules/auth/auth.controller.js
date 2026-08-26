@@ -69,55 +69,6 @@ class AuthController {
   }
 
   /**
-   * API密钥登录获取Token
-   * POST /api/auth/api-token
-   */
-  async apiLogin(req, res, next) {
-    const ip = req.clientIp;
-    const userAgent = req.get('user-agent');
-    const { app_id } = req.body;
-
-    try {
-      const result = await authService.loginWithApiKey(req.body.app_id, req.body.app_key);
-
-      // 记录API密钥登录成功日志
-      loginLogger.info(
-        JSON.stringify({
-          user: result.user.id,
-          username: result.user.username,
-          action: 'api_login',
-          status: 'success',
-          ip,
-          userAgent,
-          app_id,
-          message: 'API密钥登录成功',
-          timestamp: new Date().toISOString(),
-        })
-      );
-
-      // 只返回token，不返回用户信息
-      success(res, { token: result.token }, 'API密钥验证成功');
-    } catch (error) {
-      // 记录API密钥登录失败日志
-      loginLogger.info(
-        JSON.stringify({
-          user: null,
-          username: 'unknown',
-          action: 'api_login',
-          status: 'failure',
-          ip,
-          userAgent,
-          app_id,
-          message: error.message || 'API密钥登录失败',
-          timestamp: new Date().toISOString(),
-        })
-      );
-
-      next(error);
-    }
-  }
-
-  /**
    * 获取当前用户信息
    * GET /api/auth/me
    */

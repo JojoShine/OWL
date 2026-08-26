@@ -16,7 +16,6 @@ CREATE TABLE owl_api_interfaces (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     deleted_at timestamp with time zone,
-    api_key_id uuid,
     UNIQUE (endpoint, version)
 );
 
@@ -32,12 +31,11 @@ COMMENT ON COLUMN owl_api_interfaces.version IS '接口版本号';
 COMMENT ON COLUMN owl_api_interfaces.parameters IS '接口参数定义';
 COMMENT ON COLUMN owl_api_interfaces.status IS '接口状态';
 COMMENT ON COLUMN owl_api_interfaces.require_auth IS '是否需要认证';
-COMMENT ON COLUMN owl_api_interfaces.rate_limit IS '每小时请求限制';
+COMMENT ON COLUMN owl_api_interfaces.rate_limit IS '每分钟请求限制';
 COMMENT ON COLUMN owl_api_interfaces.created_by IS '创建者ID';
 COMMENT ON COLUMN owl_api_interfaces.created_at IS '创建时间';
 COMMENT ON COLUMN owl_api_interfaces.updated_at IS '更新时间';
 COMMENT ON COLUMN owl_api_interfaces.deleted_at IS '软删除时间';
-COMMENT ON COLUMN owl_api_interfaces.api_key_id IS '关联的API密钥ID（可选，当require_auth=true时使用）';
 
 CREATE INDEX idx_owl_api_interfaces_created_by ON owl_api_interfaces (created_by);
 CREATE INDEX idx_owl_api_interfaces_endpoint ON owl_api_interfaces (endpoint);

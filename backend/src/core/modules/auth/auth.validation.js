@@ -82,24 +82,6 @@ const login = {
 };
 
 /**
- * API密钥登录验证
- */
-const apiLogin = {
-  body: Joi.object({
-    app_id: Joi.string()
-      .required()
-      .messages({
-        'any.required': '应用ID是必填项',
-      }),
-    app_key: Joi.string()
-      .required()
-      .messages({
-        'any.required': '应用密钥是必填项',
-      }),
-  }),
-};
-
-/**
  * 修改密码验证
  */
 const changePassword = {
@@ -133,6 +115,5 @@ const changePassword = {
 module.exports = {
   register,
   login,
-  apiLogin,
   changePassword,
 };

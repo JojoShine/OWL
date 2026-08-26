@@ -77,65 +77,6 @@ class ApiBuilderController {
   }
 
   /**
-   * 创建API密钥
-   */
-  async createApiKey(req, res, next) {
-    try {
-      const { id } = req.params;
-      const { app_name } = req.body;
-      const userId = req.user.id;
-
-      const key = await apiBuilderService.createApiKey(id, app_name, userId);
-      created(res, key.get({ plain: true }), 'API密钥创建成功（180天有效期）');
-    } catch (error) {
-      logger.error('Error creating API key:', error);
-      next(error);
-    }
-  }
-
-  /**
-   * 获取接口的密钥列表
-   */
-  async getInterfaceKeys(req, res, next) {
-    try {
-      const { id } = req.params;
-      const keys = await apiBuilderService.getInterfaceKeys(id);
-      success(res, keys.map(k => k.get({ plain: true })), '获取密钥列表成功');
-    } catch (error) {
-      logger.error('Error getting interface keys:', error);
-      next(error);
-    }
-  }
-
-  /**
-   * 删除API密钥
-   */
-  async deleteApiKey(req, res, next) {
-    try {
-      const { keyId } = req.params;
-      const result = await apiBuilderService.deleteApiKey(keyId);
-      success(res, result, result.message);
-    } catch (error) {
-      logger.error('Error deleting API key:', error);
-      next(error);
-    }
-  }
-
-  /**
-   * 重新生成API密钥
-   */
-  async regenerateApiKey(req, res, next) {
-    try {
-      const { keyId } = req.params;
-      const key = await apiBuilderService.regenerateApiKey(keyId);
-      success(res, key.get({ plain: true }), 'API密钥已重新生成（180天有效期）');
-    } catch (error) {
-      logger.error('Error regenerating API key:', error);
-      next(error);
-    }
-  }
-
-  /**
    * 测试SQL查询
    */
   async testSql(req, res, next) {

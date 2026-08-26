@@ -55,12 +55,7 @@ module.exports = (sequelize, DataTypes) => {
       rate_limit: {
         type: DataTypes.INTEGER,
         defaultValue: 1000,
-        comment: '每小时请求限制',
-      },
-      api_key_id: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        comment: '关联的API密钥ID',
+        comment: '每分钟请求限制',
       },
       created_by: {
         type: DataTypes.UUID,
@@ -88,10 +83,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'created_by',
       as: 'creator',
     });
-    ApiInterface.hasMany(db.ApiKey, {
+    ApiInterface.belongsToMany(db.ApiKey, {
+      through: db.ApiKeyInterface,
       foreignKey: 'interface_id',
+      otherKey: 'api_key_id',
       as: 'keys',
-      onDelete: 'CASCADE',
     });
   };
 
