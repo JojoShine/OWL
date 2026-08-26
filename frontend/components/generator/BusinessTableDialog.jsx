@@ -137,7 +137,7 @@ export default function BusinessTableDialog({ open, onOpenChange, onCreated }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[88dvh] overflow-y-auto sm:max-w-5xl">
+      <DialogContent className="max-h-[88dvh] overflow-y-auto sm:max-w-6xl">
         <DialogHeader>
           <DialogTitle>新建业务表</DialogTitle>
           <DialogDescription>创建后将自动初始化代码生成配置，不支持在此修改或删除已有表。</DialogDescription>
@@ -169,8 +169,8 @@ export default function BusinessTableDialog({ open, onOpenChange, onCreated }) {
             </div>
 
             <div className="overflow-x-auto rounded-lg border">
-              <div className="min-w-[1360px]">
-                <div className="grid grid-cols-[190px_190px_130px_180px_240px_64px_64px_64px_110px] items-center gap-3 bg-muted/45 px-3 py-2.5 text-xs font-medium text-muted-foreground">
+              <div className="min-w-[1060px]">
+                <div className="grid grid-cols-[145px_150px_105px_140px_180px_48px_48px_48px_104px] items-center gap-2 bg-muted/45 px-3 py-2.5 text-xs font-medium text-muted-foreground">
                   <span>字段名 *</span>
                   <span>字段说明</span>
                   <span>类型 *</span>
@@ -182,7 +182,7 @@ export default function BusinessTableDialog({ open, onOpenChange, onCreated }) {
                   <span className="text-right">操作</span>
                 </div>
                 {fields.map((field, index) => (
-                  <div key={field.key} className="grid grid-cols-[190px_190px_130px_180px_240px_64px_64px_64px_110px] items-center gap-3 border-t px-3 py-2 transition-colors hover:bg-muted/20">
+                  <div key={field.key} className="grid grid-cols-[145px_150px_105px_140px_180px_48px_48px_48px_104px] items-center gap-2 border-t px-3 py-2 transition-colors hover:bg-muted/20">
                     <Input className="h-9" value={field.name} onChange={(event) => updateField(field.key, { name: event.target.value.toLowerCase() })} placeholder="customer_name" aria-label="字段名" />
                     <Input className="h-9" value={field.comment} onChange={(event) => updateField(field.key, { comment: event.target.value })} placeholder="客户名称" aria-label="字段说明" />
                     <Select value={field.type} onValueChange={(type) => updateField(field.key, { type, default_value: '', default_current_time: false })}>
