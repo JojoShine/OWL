@@ -20,7 +20,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
-import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
@@ -273,11 +272,11 @@ export function DynamicForm({
     // 查看模式：直接显示文本
     if (isView) {
       return (
-        <div key={field.name} className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
+        <div key={field.name} className={`space-y-2 ${field.formComponent === 'textarea' ? 'md:col-span-2' : ''}`}>
+          <Label className="text-sm text-muted-foreground">
             {field.formLabel || field.label}
           </Label>
-          <div className="text-sm text-foreground py-2">
+          <div className="min-h-10 rounded-md border bg-muted/20 px-3 py-2.5 text-sm text-foreground">
             {formatDisplayValue(field, fieldValue)}
           </div>
         </div>
@@ -287,10 +286,10 @@ export function DynamicForm({
     switch (field.formComponent) {
       case 'textarea':
         return (
-          <div key={field.name} className="space-y-2.5">
-            <Label htmlFor={field.name} className="text-sm font-medium">
+          <div key={field.name} className="space-y-2 md:col-span-2">
+            <Label htmlFor={field.name}>
               {field.formLabel || field.label}
-              {rules.required && <span className="text-destructive ml-1">*</span>}
+              {rules.required && <span className="ml-1 text-destructive">*</span>}
             </Label>
             <Textarea
               id={field.name}
@@ -305,8 +304,8 @@ export function DynamicForm({
 
       case 'switch':
         return (
-          <div key={field.name} className="flex items-center justify-between py-1">
-            <Label htmlFor={field.name} className="text-sm font-medium">{field.formLabel || field.label}</Label>
+          <div key={field.name} className="flex min-h-10 items-center justify-between rounded-md border bg-muted/20 px-3 py-2">
+            <Label htmlFor={field.name}>{field.formLabel || field.label}</Label>
             <Switch
               id={field.name}
               checked={fieldValue}
@@ -324,10 +323,10 @@ export function DynamicForm({
         })) : []);
 
         return (
-          <div key={field.name} className="space-y-2.5">
-            <Label htmlFor={field.name} className="text-sm font-medium">
+          <div key={field.name} className="space-y-2">
+            <Label htmlFor={field.name}>
               {field.formLabel || field.label}
-              {rules.required && <span className="text-destructive ml-1">*</span>}
+              {rules.required && <span className="ml-1 text-destructive">*</span>}
             </Label>
             <Select
               value={String(fieldValue)}
@@ -341,7 +340,7 @@ export function DynamicForm({
               }}
               disabled={field.readonly}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder={`请选择${field.formLabel || field.label}`} />
               </SelectTrigger>
               <SelectContent>
@@ -358,10 +357,10 @@ export function DynamicForm({
 
       case 'number':
         return (
-          <div key={field.name} className="space-y-2.5">
-            <Label htmlFor={field.name} className="text-sm font-medium">
+          <div key={field.name} className="space-y-2">
+            <Label htmlFor={field.name}>
               {field.formLabel || field.label}
-              {rules.required && <span className="text-destructive ml-1">*</span>}
+              {rules.required && <span className="ml-1 text-destructive">*</span>}
             </Label>
             <Input
               id={field.name}
@@ -377,10 +376,10 @@ export function DynamicForm({
       case 'date':
       case 'datetime':
         return (
-          <div key={field.name} className="space-y-2.5">
-            <Label htmlFor={field.name} className="text-sm font-medium">
+          <div key={field.name} className="space-y-2">
+            <Label htmlFor={field.name}>
               {field.formLabel || field.label}
-              {rules.required && <span className="text-destructive ml-1">*</span>}
+              {rules.required && <span className="ml-1 text-destructive">*</span>}
             </Label>
             <DateTimePicker
               value={fieldValue}
@@ -400,10 +399,10 @@ export function DynamicForm({
       default:
         // 默认文本输入
         return (
-          <div key={field.name} className="space-y-2.5">
-            <Label htmlFor={field.name} className="text-sm font-medium">
+          <div key={field.name} className="space-y-2">
+            <Label htmlFor={field.name}>
               {field.formLabel || field.label}
-              {rules.required && <span className="text-destructive ml-1">*</span>}
+              {rules.required && <span className="ml-1 text-destructive">*</span>}
             </Label>
             <Input
               id={field.name}
@@ -449,23 +448,18 @@ export function DynamicForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={formFields.length > 10 ? "max-w-4xl max-h-[90vh] flex flex-col p-0" : "max-w-3xl max-h-[90vh] flex flex-col p-0"}>
-        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4">
+      <DialogContent className={`flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 ${formFields.length > 10 ? 'max-w-4xl' : 'max-w-3xl'}`}>
+        <DialogHeader className="shrink-0 border-b px-6 py-5">
           <DialogTitle>{title || (isView ? '查看' : isEdit ? '编辑' : '新增')}</DialogTitle>
           <DialogDescription>{description || ' '}</DialogDescription>
         </DialogHeader>
 
-        <Separator />
-
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col flex-1 min-h-0">
-          {/* 动态渲染表单字段 - 可滚动区域 */}
-          <div className={`flex-1 overflow-y-auto px-6 py-4 scrollbar-hide ${formFields.length > 10 ? "grid grid-cols-2 gap-4 content-start" : "space-y-4"}`}>
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="flex min-h-0 flex-1 flex-col">
+          <div className="grid min-h-0 flex-1 content-start gap-4 overflow-y-auto px-6 py-5 md:grid-cols-2">
             {formFields.map((field) => renderFormField(field))}
           </div>
 
-          <Separator />
-
-          <DialogFooter className="flex-shrink-0 px-6 py-4">
+          <DialogFooter className="shrink-0 border-t bg-muted/30 px-6 py-4">
             {!isView ? (
               <>
                 <Button
