@@ -9,14 +9,12 @@ import { cn } from '@/lib/utils';
  *
  * @param {Object} props
  * @param {string} props.size - 大小: 'sm' | 'md' | 'lg' (默认: 'md')
- * @param {string} props.variant - 样式: 'spinner' | 'pulse' (默认: 'spinner')
  * @param {string} props.text - 加载文本 (默认: '加载中...')
  * @param {string} props.className - 外层容器额外类名
  * @param {boolean} props.fullHeight - 是否填满容器高度 (默认: false)
  */
 export function Loading({
   size = 'md',
-  variant = 'spinner',
   text = '加载中...',
   className = '',
   fullHeight = false,
@@ -44,17 +42,9 @@ export function Loading({
     >
       <div className={cn('flex items-center', isCompact ? 'gap-2' : 'flex-col gap-3')}>
         <span className={cn(
-          'relative inline-flex shrink-0 items-center justify-center',
+          'inline-flex shrink-0 animate-spin rounded-full border-2 border-muted-foreground/20 border-t-muted-foreground/70 motion-reduce:animate-none',
           sizeClasses[size]
-        )}>
-          <span className="absolute inset-0 rounded-full border border-border/65" />
-          <span className="absolute inset-[3px] animate-spin rounded-full border-2 border-transparent border-r-foreground/20 border-t-foreground/70 motion-reduce:animate-none" />
-          <span className={cn(
-            'rounded-full bg-foreground/45',
-            size === 'sm' ? 'h-1 w-1' : 'h-1.5 w-1.5',
-            variant === 'pulse' && 'animate-pulse'
-          )} />
-        </span>
+        )} />
         {text ? (
           <span className={cn('font-normal tracking-wide text-muted-foreground/70', textSizeClasses[size])}>{text}</span>
         ) : null}

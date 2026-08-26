@@ -6,17 +6,7 @@ import { apiBuilderApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { EmptyState } from '@/components/ui/empty-state';
-import { Loading } from '@/components/ui/loading';
 import { ArrowLeft, Plus, Copy, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -27,7 +17,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { PageHeader, PageShell, PageSurface } from '@/components/layout/page-shell';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { DataTable } from '@/components/common/DataTable';
+import { PageHeader, PageShell, PageSurface, PageWorkspace } from '@/components/layout/page-shell';
 
 // 脱敏显示密钥
 const maskKey = (key) => {
@@ -55,31 +47,10 @@ const formatDate = (dateString) => {
   }
 };
 
-// 检查密钥是否已过期（180天有效期）
-const isKeyExpired = (createdAt) => {
-  if (!createdAt) return false;
-
-  let createdDate = new Date(createdAt);
-
-  // 如果日期解析失败，尝试手动解析
-  if (isNaN(createdDate.getTime()) && typeof createdAt === 'string') {
-    const match = createdAt.match(/(\d{4})-(\d{2})-(\d{2})\s?(\d{2})?:?(\d{2})?:?(\d{2})?/);
-    if (match) {
-      const [, year, month, day, hour = 0, minute = 0, second = 0] = match;
-      createdDate = new Date(year, month - 1, day, hour, minute, second);
-    }
-  }
-
-  if (isNaN(createdDate.getTime())) return false;
-
-  const expiryDate = new Date(createdDate.getTime() + 180 * 24 * 60 * 60 * 1000);
-  return new Date() > expiryDate;
-};
-
 // 获取密钥状态（使用后端返回的expireStatus）
 const getKeyStatus = (expireStatus) => {
   if (expireStatus === 'inactive') {
-    return { text: '已禁用', variant: 'secondary' };
+    return { text: '已禁用', variant: 'neutral' };
   }
   if (expireStatus === 'expired') {
     return { text: '已过期', variant: 'destructive' };
@@ -97,6 +68,8 @@ export default function ApiKeyManagementPage() {
     app_name: '',
   });
   const [visibleKeys, setVisibleKeys] = useState({});
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [keyToDelete, setKeyToDelete] = useState(null);
 
   // 获取密钥列表
   const fetchKeys = async () => {
@@ -150,16 +123,22 @@ export default function ApiKeyManagementPage() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('确定要删除此密钥吗？')) return;
+  const handleDelete = (key) => {
+    setKeyToDelete(key);
+    setConfirmDialogOpen(true);
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!keyToDelete) return;
     try {
-      await apiBuilderApi.deleteApiKey(id);
+      await apiBuilderApi.deleteApiKey(keyToDelete.id);
       toast.success('密钥已删除');
       fetchKeys();
     } catch (error) {
       console.error('删除失败:', error);
       toast.error('删除失败');
+    } finally {
+      setKeyToDelete(null);
     }
   };
 
@@ -175,142 +154,149 @@ export default function ApiKeyManagementPage() {
     }));
   };
 
+  const columns = [
+    {
+      key: 'app_name',
+      label: '应用',
+      render: (value, record) => (
+        <div className="flex flex-col gap-0.5">
+          <span className="font-medium">{value || '-'}</span>
+          <span className="text-xs text-muted-foreground">创建于 {formatDate(record.created_at)}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'id',
+      label: 'App ID',
+      render: (value) => (
+        <div className="flex items-center gap-1.5">
+          <code className="max-w-44 truncate rounded bg-muted/60 px-2 py-1 text-xs text-foreground/80">{value}</code>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => handleCopy(value, 'App ID')}
+            aria-label="复制 App ID"
+            title="复制 App ID"
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      ),
+    },
+    {
+      key: 'api_key',
+      label: 'App Key',
+      render: (value, record) => (
+        <div className="flex items-center gap-1.5">
+          <code className="max-w-52 truncate rounded bg-muted/60 px-2 py-1 text-xs text-foreground/80">
+            {visibleKeys[record.id] ? value : maskKey(value)}
+          </code>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => toggleKeyVisibility(record.id)}
+            aria-label={visibleKeys[record.id] ? '隐藏 App Key' : '显示 App Key'}
+            title={visibleKeys[record.id] ? '隐藏 App Key' : '显示 App Key'}
+          >
+            {visibleKeys[record.id] ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          </Button>
+          {visibleKeys[record.id] ? (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => handleCopy(value, 'App Key')}
+              aria-label="复制 App Key"
+              title="复制 App Key"
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      key: 'expires_at',
+      label: '有效期至',
+      cellClassName: 'text-sm text-muted-foreground tabular-data',
+      render: (value) => formatDate(value),
+    },
+    {
+      key: 'last_used_at',
+      label: '最后使用',
+      cellClassName: 'text-sm text-muted-foreground tabular-data',
+      render: (value) => formatDate(value),
+    },
+    {
+      key: 'expireStatus',
+      label: '状态',
+      render: (value) => {
+        const status = getKeyStatus(value);
+        return <Badge variant={status.variant}>{status.text}</Badge>;
+      },
+    },
+  ];
+
+  const renderActions = (key) => (
+    <>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => handleEdit(key)}
+        aria-label={`编辑密钥 ${key.app_name}`}
+        title="编辑密钥"
+      >
+        <Edit2 className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => handleDelete(key)}
+        aria-label={`删除密钥 ${key.app_name}`}
+        title="删除密钥"
+      >
+        <Trash2 className="h-4 w-4 text-destructive" />
+      </Button>
+    </>
+  );
+
   return (
     <PageShell>
       <PageHeader
         title="API 密钥"
         description="管理接口调用凭据和使用状态。"
+        meta={<span className="text-sm text-muted-foreground">共 {keys.length} 个密钥</span>}
+        leading={
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            aria-label="返回接口开发"
+            title="返回接口开发"
+            className="-ml-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        }
         actions={
-          <>
-            <Button variant="outline" size="icon" onClick={() => router.back()} aria-label="返回">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <Button onClick={handleCreate}>
-              <Plus className="h-4 w-4 mr-1" />
-              创建密钥
-            </Button>
-          </>
+          <Button onClick={handleCreate}>
+            <Plus className="h-4 w-4" />
+            创建密钥
+          </Button>
         }
       />
-      <PageSurface className="p-5 lg:p-3">
-        <div className="mb-4">
-          <h2 className="font-medium">密钥列表</h2>
-          <p className="mt-1 text-sm text-muted-foreground">使用这些密钥通过 app_id 和 app_key 方式登录获取 token</p>
-        </div>
-          <div className="border rounded-lg overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>应用名称</TableHead>
-                  <TableHead>App ID</TableHead>
-                  <TableHead>App Key</TableHead>
-                  <TableHead>创建时间</TableHead>
-                  <TableHead>更新时间</TableHead>
-                  <TableHead>有效期至</TableHead>
-                  <TableHead>状态</TableHead>
-                  <TableHead className="text-right">操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      <Loading size="sm" text="正在加载密钥..." />
-                    </TableCell>
-                  </TableRow>
-                ) : keys.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      <EmptyState title="暂无密钥" compact />
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  keys.map((key) => (
-                    <TableRow key={key.id}>
-                        <TableCell className="font-medium">{key.app_name}</TableCell>
-                        <TableCell className="font-mono text-sm">
-                          <div className="flex items-center gap-2">
-                            <span>{key.id}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCopy(key.id, 'App ID')}
-                              className="h-6 w-6 p-0"
-                            >
-                              <Copy className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-mono text-sm max-w-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="truncate">
-                              {visibleKeys[key.id] ? key.api_key : maskKey(key.api_key)}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleKeyVisibility(key.id)}
-                              className="h-6 w-6 p-0"
-                            >
-                              {visibleKeys[key.id] ? (
-                                <EyeOff className="h-3 w-3" />
-                              ) : (
-                                <Eye className="h-3 w-3" />
-                              )}
-                            </Button>
-                            {visibleKeys[key.id] && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleCopy(key.api_key, 'App Key')}
-                                className="h-6 w-6 p-0"
-                              >
-                                <Copy className="h-3 w-3" />
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {formatDate(key.created_at)}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {formatDate(key.updated_at)}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {formatDate(key.expires_at)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={getKeyStatus(key.expireStatus).variant}>
-                            {getKeyStatus(key.expireStatus).text}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(key)}
-                              title="编辑"
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(key.id)}
-                              title="删除"
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-      </PageSurface>
+      <PageWorkspace>
+        <PageSurface className="p-0">
+          <DataTable
+            variant="workspace"
+            density="compact"
+            columns={columns}
+            data={keys}
+            loading={isLoading}
+            emptyText="暂无 API 密钥"
+            actions={renderActions}
+          />
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 编辑/新增对话框 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -318,7 +304,7 @@ export default function ApiKeyManagementPage() {
           <DialogHeader>
             <DialogTitle>{editingKey ? '编辑密钥' : '新增密钥'}</DialogTitle>
             <DialogDescription>
-              {editingKey ? '修改应用名称' : '创建新的API密钥，自动生成app_id和app_key，有效期180天'}
+              {editingKey ? '修改应用名称' : '创建新的 API 密钥，自动生成 App ID 和 App Key，有效期 180 天'}
             </DialogDescription>
           </DialogHeader>
 
@@ -335,9 +321,9 @@ export default function ApiKeyManagementPage() {
             </div>
 
             {!editingKey && (
-              <div className="bg-muted border border-muted-foreground/20 rounded-lg p-3">
+              <div className="rounded-lg border border-muted-foreground/20 bg-muted p-3">
                 <p className="text-xs text-muted-foreground">
-                  创建后将自动生成唯一的 App ID 和 App Key，用于通过 API 密钥方式登录获取 token。有效期为 180 天，过期后可点击续期按钮延长有效期。
+                  创建后将自动生成唯一的 App ID 和 App Key，可用于接口身份验证。密钥有效期为 180 天，请妥善保存。
                 </p>
               </div>
             )}
@@ -353,6 +339,17 @@ export default function ApiKeyManagementPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={confirmDialogOpen}
+        onOpenChange={setConfirmDialogOpen}
+        onConfirm={handleConfirmDelete}
+        title="确认删除密钥"
+        description={keyToDelete ? `确定要删除“${keyToDelete.app_name}”的 API 密钥吗？删除后相关调用将立即失效。` : ''}
+        confirmText="删除"
+        cancelText="取消"
+        variant="destructive"
+      />
     </PageShell>
   );
 }
