@@ -153,11 +153,7 @@ function LoginForm() {
       description="请输入您的账号信息登录系统"
       backgroundUrl={loginBgUrl}
       layout={loginLayout}
-      footer={
-        showTechStack
-          ? '技术支持 · Next.js · React · Tailwind CSS · Node.js · PostgreSQL'
-          : null
-      }
+      footer={showTechStack ? 'Powered by TBTParent' : null}
     >
         {systemStatus && !systemStatus.redis?.available && (
           <Alert className="mb-4 border-yellow-200 bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-800">

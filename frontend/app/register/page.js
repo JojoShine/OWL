@@ -99,7 +99,7 @@ export default function RegisterPage() {
       systemName={systemName}
       logoUrl={logoUrl}
       description="创建账号以使用管理平台"
-      footer={showTechStack ? '技术支持 · Next.js · React · Tailwind CSS · Node.js · PostgreSQL' : null}
+      footer={showTechStack ? 'Powered by TBTParent' : null}
     >
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {error && (

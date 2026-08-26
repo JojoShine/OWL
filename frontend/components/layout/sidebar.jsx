@@ -9,6 +9,7 @@ import { Loading } from '@/components/ui/loading';
 import { menuApi } from '@/lib/api';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ChevronDown, ChevronRight, LogOut } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { useColorTheme } from '@/lib/utils/theme';
@@ -20,6 +21,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 function SidebarUserMenu() {
   const { user, logout } = useAuth();
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const displayName = user?.real_name || user?.username || '用户';
   const roleText = user?.roles
     ?.map((role) => (typeof role === 'string' ? role : role?.name || role?.code))
@@ -30,42 +32,55 @@ function SidebarUserMenu() {
   const initials = (user?.username || displayName).charAt(0).toUpperCase();
 
   return (
-    <div className="border-t border-sidebar-border px-3 py-2.5">
-      <div className="flex items-center gap-2.5 rounded-lg px-1.5">
-        <Avatar className="h-8 w-8 shrink-0">
-          <AvatarFallback className="bg-sidebar-accent text-xs text-sidebar-accent-foreground">
-            {initials}
-          </AvatarFallback>
-        </Avatar>
+    <>
+      <div className="border-t border-sidebar-border px-3 py-2.5">
+        <div className="flex items-center gap-2.5 rounded-lg px-1.5">
+          <Avatar className="h-8 w-8 shrink-0">
+            <AvatarFallback className="bg-sidebar-accent text-xs text-sidebar-accent-foreground">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
 
-        <div className="min-w-0 flex-1 leading-4">
-          <p className="truncate text-sm font-semibold text-sidebar-accent-foreground" title={displayName}>
-            {displayName}
-          </p>
-          <p
-            className="truncate text-[11px] text-sidebar-foreground/60"
-            title={`${roleText} · ${departmentText}`}
+          <div className="min-w-0 flex-1 leading-4">
+            <p className="truncate text-sm font-semibold text-sidebar-accent-foreground" title={displayName}>
+              {displayName}
+            </p>
+            <p
+              className="truncate text-[11px] text-sidebar-foreground/60"
+              title={`${roleText} · ${departmentText}`}
+            >
+              {roleText} · {departmentText}
+            </p>
+            <p className="truncate text-[11px] text-sidebar-foreground/45" title={emailText}>
+              {emailText}
+            </p>
+          </div>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label="退出登录"
+            title="退出登录"
+            onClick={() => setLogoutConfirmOpen(true)}
+            className="h-7 w-7 shrink-0 text-sidebar-foreground/50 hover:bg-destructive/10 hover:text-destructive"
           >
-            {roleText} · {departmentText}
-          </p>
-          <p className="truncate text-[11px] text-sidebar-foreground/45" title={emailText}>
-            {emailText}
-          </p>
+            <LogOut className="h-3.5 w-3.5" />
+          </Button>
         </div>
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label="退出登录"
-          title="退出登录"
-          onClick={logout}
-          className="h-7 w-7 shrink-0 text-sidebar-foreground/50 hover:bg-destructive/10 hover:text-destructive"
-        >
-          <LogOut className="h-3.5 w-3.5" />
-        </Button>
       </div>
-    </div>
+
+      <ConfirmDialog
+        open={logoutConfirmOpen}
+        onOpenChange={setLogoutConfirmOpen}
+        onConfirm={logout}
+        title="确认退出登录"
+        description="确定退出当前账号吗？退出后需要重新登录。"
+        confirmText="退出登录"
+        cancelText="取消"
+        variant="default"
+      />
+    </>
   );
 }
 

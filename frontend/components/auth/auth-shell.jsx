@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -42,15 +41,24 @@ export function AuthShell({
 
   const formPanel = (
     <section className="relative flex min-h-dvh items-center justify-center px-4 py-16 sm:px-8">
-      <Card className="w-full max-w-md border bg-card shadow-none">
+      <Card className="w-full max-w-md border-0 bg-transparent shadow-none">
         <CardHeader className="items-center gap-3 text-center">
-          {logoUrl ? (
-            <img
-              src={logoUrl}
-              alt={`${systemName} 标志`}
-              className="size-14 rounded-lg object-contain dark:invert"
-            />
-          ) : null}
+          <div className="flex flex-col items-center gap-1.5">
+            {logoUrl ? (
+              // 系统 Logo 支持后台配置的任意资源地址，无法预先加入 Next Image 域名白名单。
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logoUrl}
+                alt={`${systemName} 标志`}
+                className="mx-auto size-14 rounded-lg object-contain dark:invert"
+              />
+            ) : null}
+            {footer ? (
+              <p className="text-center text-xs leading-5 text-muted-foreground">
+                {footer}
+              </p>
+            ) : null}
+          </div>
           <div className="space-y-2">
             <CardTitle className="text-2xl font-semibold tracking-[-0.02em]">
               {systemName}
@@ -59,11 +67,6 @@ export function AuthShell({
           </div>
         </CardHeader>
         <CardContent>{children}</CardContent>
-        {footer ? (
-          <CardFooter className="justify-center border-t text-center text-xs leading-5 text-muted-foreground">
-            {footer}
-          </CardFooter>
-        ) : null}
       </Card>
     </section>
   );

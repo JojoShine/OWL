@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { menuApi, systemConfigApi } from '@/lib/api';
@@ -7,6 +7,7 @@ import Sidebar from './sidebar';
 
 const stableMocks = vi.hoisted(() => ({
   applySystemConfigTheme: vi.fn(),
+  logout: vi.fn(),
 }));
 
 beforeAll(() => vi.stubGlobal('React', React));
@@ -67,7 +68,7 @@ vi.mock('@/lib/utils/auth', () => ({
       roles: [{ name: '系统管理员', code: 'admin' }],
       department: { name: '研发中心' },
     },
-    logout: vi.fn(),
+    logout: stableMocks.logout,
   }),
 }));
 
@@ -97,6 +98,7 @@ describe('Sidebar nested menu controls', () => {
     });
     systemConfigApi.getConfig.mockResolvedValue({ success: true, data: {} });
     stableMocks.applySystemConfigTheme.mockClear();
+    stableMocks.logout.mockClear();
   });
 
   it('uses sibling navigation and named expansion buttons without nested controls', async () => {
@@ -129,13 +131,20 @@ describe('Sidebar nested menu controls', () => {
     expect(screen.getByRole('link', { name: '用户工具' })).toBeInTheDocument();
   });
 
-  it('shows complete user information with a direct logout action', async () => {
+  it('shows complete user information and confirms before logout', async () => {
+    const interaction = userEvent.setup();
     render(<Sidebar />);
 
     expect(await screen.findByText('测试用户')).toBeInTheDocument();
-    expect(screen.getByText('系统管理员')).toBeInTheDocument();
+    expect(screen.getByText(/系统管理员/)).toBeInTheDocument();
     expect(screen.getByText('tester@example.com')).toBeInTheDocument();
-    expect(screen.getByText('研发中心')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '退出登录' })).toBeInTheDocument();
+    expect(screen.getByText(/研发中心/)).toBeInTheDocument();
+
+    await interaction.click(screen.getByRole('button', { name: '退出登录' }));
+    expect(stableMocks.logout).not.toHaveBeenCalled();
+    expect(screen.getByRole('heading', { name: '确认退出登录' })).toBeInTheDocument();
+
+    await interaction.click(within(screen.getByRole('dialog')).getByRole('button', { name: '退出登录' }));
+    expect(stableMocks.logout).toHaveBeenCalledTimes(1);
   });
 });
