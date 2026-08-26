@@ -30,7 +30,13 @@ import {
   Server, RefreshCw, AlertTriangle, Activity, Eye,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { PageHeader, PageShell, PageToolbar } from '@/components/layout/page-shell';
+import {
+  PageHeader,
+  PageShell,
+  PageSurface,
+  PageToolbar,
+  PageWorkspace,
+} from '@/components/layout/page-shell';
 
 // 严重级别映射
 const SEVERITY_MAP = {
@@ -290,21 +296,18 @@ export default function ZabbixMonitorPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 主机列表 */}
         <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>主机列表</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <PageToolbar className="border-0 bg-muted/30 p-4">
-                <SearchFilter
-                  fields={searchFields}
-                  values={hostSearch}
-                  onChange={setHostSearch}
-                  onSearch={handleHostSearch}
-                  onReset={handleHostReset}
-                  variant="toolbar"
-                />
-              </PageToolbar>
+          <PageWorkspace>
+            <PageToolbar>
+              <SearchFilter
+                fields={searchFields}
+                values={hostSearch}
+                onChange={setHostSearch}
+                onSearch={handleHostSearch}
+                onReset={handleHostReset}
+                variant="toolbar"
+              />
+            </PageToolbar>
+            <PageSurface className="p-0">
               <DataTable
                 columns={hostColumns}
                 data={hosts}
@@ -323,8 +326,8 @@ export default function ZabbixMonitorPage() {
                   </Button>
                 )}
               />
-            </CardContent>
-          </Card>
+            </PageSurface>
+          </PageWorkspace>
         </div>
 
         {/* 告警面板 */}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   FileTextIcon,
   UserCheckIcon,
@@ -13,47 +13,46 @@ import {
 import { logApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LogTable from '@/components/logs/LogTable';
 import LogFilters from '@/components/logs/LogFilters';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PageHeader, PageShell, PageToolbar } from '@/components/layout/page-shell';
+import {
+  PageHeader,
+  PageShell,
+  PageSurface,
+  PageToolbar,
+  PageWorkspace,
+} from '@/components/layout/page-shell';
 
 const TAB_CONFIGS = [
   {
     value: 'operation',
     label: '操作日志',
-    description: '记录系统内关键操作行为',
     icon: ActivityIcon,
   },
   {
     value: 'login',
     label: '登录日志',
-    description: '追踪用户登录与登出情况',
     icon: UserCheckIcon,
   },
   {
     value: 'system',
     label: '系统日志',
-    description: '查看应用运行时系统日志',
     icon: FileTextIcon,
   },
   {
     value: 'access',
     label: '访问日志',
-    description: '分析接口访问请求记录',
     icon: FileTextIcon,
   },
   {
     value: 'error',
     label: '错误日志',
-    description: '排查错误与异常堆栈',
     icon: AlertTriangleIcon,
   },
   {
     value: 'database',
     label: '数据库日志',
-    description: '监控 Redis 和 PostgreSQL 访问',
     icon: DatabaseIcon,
   },
 ];
@@ -73,6 +72,7 @@ export default function LogsPage() {
 
   // 状态管理
   const [activeTab, setActiveTab] = useState('operation'); // operation | login | system | access | error
+  const [tableType, setTableType] = useState('operation');
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
@@ -91,16 +91,16 @@ export default function LogsPage() {
     action: '',
   });
   const [stats, setStats] = useState(null);
+  const latestRequestId = useRef(0);
+  const latestStatsRequestId = useRef(0);
 
   /**
    * 加载日志
    */
   const loadLogs = useCallback(async () => {
+    const requestId = ++latestRequestId.current;
     try {
       setLoading(true);
-      // 清除之前的展示
-      setLogs([]);
-
       const params = {
         page: pagination.page,
         limit: pagination.limit,
@@ -131,7 +131,9 @@ export default function LogsPage() {
           return;
       }
 
+      if (requestId !== latestRequestId.current) return;
       const data = response.data || {};
+      setTableType(activeTab);
       setLogs(data.logs || []);
       setPagination(prev => ({
         ...prev,
@@ -139,10 +141,13 @@ export default function LogsPage() {
         totalPages: data.totalPages || 0,
       }));
     } catch (error) {
+      if (requestId !== latestRequestId.current) return;
       console.error('Failed to load logs:', error);
+      setTableType(activeTab);
+      setLogs([]);
       toast.error('加载日志失败');
     } finally {
-      setLoading(false);
+      if (requestId === latestRequestId.current) setLoading(false);
     }
   }, [activeTab, pagination.page, pagination.limit, filters]);
 
@@ -150,10 +155,13 @@ export default function LogsPage() {
    * 加载统计数据
    */
   const loadStats = useCallback(async () => {
+    const requestId = ++latestStatsRequestId.current;
     try {
       const response = await logApi.getLogStats({ type: activeTab });
+      if (requestId !== latestStatsRequestId.current) return;
       setStats(response.data || null);
     } catch (error) {
+      if (requestId !== latestStatsRequestId.current) return;
       console.error('Failed to load stats:', error);
     }
   }, [activeTab]);
@@ -172,7 +180,11 @@ export default function LogsPage() {
    * 刷新日志
    */
   const handleRefresh = () => {
-    setPagination(prev => ({ ...prev, page: 1 }));
+    if (pagination.page === 1) {
+      loadLogs();
+    } else {
+      setPagination(prev => ({ ...prev, page: 1 }));
+    }
     loadStats();
   };
 
@@ -228,91 +240,65 @@ export default function LogsPage() {
 
   return (
     <PageShell>
-      <PageHeader title="日志中心" description="检索、审阅并导出系统各类审计日志。" />
-      {/* 日志列表 */}
+      <PageHeader
+        title="日志中心"
+        description="检索、审阅并导出系统各类审计日志。"
+        meta={stats ? <span className="text-sm text-muted-foreground">共 {stats.total || 0} 条记录</span> : null}
+        actions={(
+          <>
+            <Button onClick={handleRefresh} variant="outline">
+              <RefreshCwIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              刷新
+            </Button>
+            <Button onClick={() => handleExport('csv')} variant="outline">
+              <DownloadIcon className="h-4 w-4" />
+              导出 CSV
+            </Button>
+            <Button onClick={() => handleExport('json')} variant="outline">
+              <DownloadIcon className="h-4 w-4" />
+              导出 JSON
+            </Button>
+          </>
+        )}
+      />
       <Tabs
         value={activeTab}
         onValueChange={(value) => {
           setActiveTab(value);
           setPagination(prev => ({ ...prev, page: 1 }));
         }}
-        className="flex-1 flex flex-col"
+        className="flex-1 gap-4"
       >
-        <TabsList className="mb-6 flex flex-wrap gap-2">
+        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 sm:w-fit">
           {TAB_CONFIGS.map((tab) => {
             const Icon = tab.icon;
             return (
-              <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-2">
-                <Icon className="w-4 h-4" />
+              <TabsTrigger key={tab.value} value={tab.value} className="flex-none px-3">
+                <Icon className="h-4 w-4" />
                 {tab.label}
               </TabsTrigger>
             );
           })}
         </TabsList>
-
-        {TAB_CONFIGS.map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <TabsContent key={tab.value} value={tab.value} className="flex-1">
-              <Card>
-                <CardHeader>
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-md bg-muted p-2">
-                        <Icon className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <CardTitle>{tab.label}</CardTitle>
-                        <CardDescription>{tab.description}</CardDescription>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {tab.value === activeTab && stats && (
-                        <div className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm text-muted-foreground">
-                          <FileTextIcon className="h-4 w-4" />
-                          <span>{stats.total || 0} 条记录</span>
-                        </div>
-                      )}
-                      <Button
-                        onClick={handleRefresh}
-                        variant="outline"
-                        className="flex items-center"
-                      >
-                        <RefreshCwIcon className={`mr-2 h-4 w-4 ${loading && tab.value === activeTab ? 'animate-spin' : ''}`} />
-                        刷新
-                      </Button>
-                      <Button onClick={() => handleExport('csv')} variant="outline" className="flex items-center">
-                        <DownloadIcon className="mr-2 h-4 w-4" />
-                        导出 CSV
-                      </Button>
-                      <Button onClick={() => handleExport('json')} variant="outline" className="flex items-center">
-                        <DownloadIcon className="mr-2 h-4 w-4" />
-                        导出 JSON
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <PageToolbar className="border-0 bg-muted/30 p-4">
-                    <LogFilters
-                      type={tab.value}
-                      filters={filters}
-                      onChange={handleFiltersChange}
-                    />
-                  </PageToolbar>
-                  <LogTable
-                    type={tab.value}
-                    logs={tab.value === activeTab ? logs : []}
-                    loading={tab.value === activeTab ? loading : false}
-                    pagination={pagination}
-                    onPageChange={handlePageChange}
-                    onPageSizeChange={handlePageSizeChange}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          );
-        })}
+        <PageWorkspace>
+          <PageToolbar>
+            <LogFilters
+              type={activeTab}
+              filters={filters}
+              onChange={handleFiltersChange}
+            />
+          </PageToolbar>
+          <PageSurface className="p-0">
+            <LogTable
+              type={tableType}
+              logs={logs}
+              loading={loading}
+              pagination={pagination}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </PageSurface>
+        </PageWorkspace>
       </Tabs>
     </PageShell>
   );

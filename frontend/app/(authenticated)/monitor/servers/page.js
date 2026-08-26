@@ -8,13 +8,18 @@ import { Plus, Edit, Trash2, Play, Activity, Server, RefreshCw } from 'lucide-re
 import { Switch } from '@/components/ui/switch';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
-import { Card, CardContent } from '@/components/ui/card';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import ServerFormDialog from './server-form-dialog';
 import ServerLogsDialog from './server-logs-dialog';
 import ServerServicesDialog from './server-services-dialog';
-import { PageHeader, PageShell, PageToolbar } from '@/components/layout/page-shell';
+import {
+  PageHeader,
+  PageShell,
+  PageSurface,
+  PageToolbar,
+  PageWorkspace,
+} from '@/components/layout/page-shell';
 
 export default function ServerMonitorPage() {
   const [servers, setServers] = useState([]);
@@ -329,22 +334,18 @@ export default function ServerMonitorPage() {
           </Button>
         </>}
       />
-      {/* 主卡片 */}
-      <Card>
-        <CardContent className="space-y-4 pt-5">
-          {/* 搜索栏 */}
-          <PageToolbar className="border-0 bg-muted/30 p-4">
-            <SearchFilter
-              fields={searchFields}
-              values={searchValues}
-              onChange={setSearchValues}
-              onSearch={handleSearch}
-              onReset={handleReset}
-              variant="toolbar"
-            />
-          </PageToolbar>
-
-          {/* 数据表格 */}
+      <PageWorkspace>
+        <PageToolbar>
+          <SearchFilter
+            fields={searchFields}
+            values={searchValues}
+            onChange={setSearchValues}
+            onSearch={handleSearch}
+            onReset={handleReset}
+            variant="toolbar"
+          />
+        </PageToolbar>
+        <PageSurface className="p-0">
           <DataTable
             columns={columns}
             data={servers}
@@ -398,8 +399,8 @@ export default function ServerMonitorPage() {
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
           />
-        </CardContent>
-      </Card>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 添加/编辑对话框 */}
       <ServerFormDialog

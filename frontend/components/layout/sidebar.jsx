@@ -238,7 +238,7 @@ export default function Sidebar({ onNavigate }) {
       </div>
 
       {/* 菜单区域 */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
+      <nav className="scrollbar-hide flex-1 overflow-y-auto overscroll-contain px-3 py-4">
         {loading ? (
           <Loading size="sm" variant="pulse" />
         ) : businessMenus.length === 0 && systemMenus.length === 0 ? (

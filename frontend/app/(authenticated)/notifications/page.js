@@ -1,34 +1,31 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Bell, Check, Trash2, Send, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import NotificationList from '@/components/notification/NotificationList';
 import NotificationFilter from '@/components/notification/NotificationFilter';
 import SendNotificationDialog from '@/components/notification/SendNotificationDialog';
 import BroadcastNotificationDialog from '@/components/notification/BroadcastNotificationDialog';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
 import { useSocket } from '@/contexts/SocketContext';
 import { useAuth } from '@/lib/utils/auth';
 import { notificationApi } from '@/lib/api';
 import { toast } from 'sonner';
-import { PageHeader, PageShell, PageToolbar } from '@/components/layout/page-shell';
+import {
+  PageHeader,
+  PageShell,
+  PageSurface,
+  PageToolbar,
+  PageWorkspace,
+} from '@/components/layout/page-shell';
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [limit, setLimit] = useState(10);
   const [filters, setFilters] = useState({
     readStatus: 'all',
     type: 'all',
@@ -37,11 +34,11 @@ export default function NotificationsPage() {
   const [broadcastDialogOpen, setBroadcastDialogOpen] = useState(false);
   const { on, off } = useSocket();
   const { user: currentUser } = useAuth();
-
-  const limit = 10;
+  const latestRequestId = useRef(0);
 
   // 获取通知列表
   const fetchNotifications = useCallback(async () => {
+    const requestId = ++latestRequestId.current;
     setIsLoading(true);
     try {
       const params = {
@@ -59,24 +56,23 @@ export default function NotificationsPage() {
       }
 
       const response = await notificationApi.getNotifications(params);
+      if (requestId !== latestRequestId.current) return;
       if (response.success) {
         const data = response.data;
         // 适配后端返回的数据结构：items 或 notifications
         const items = data.items || data.notifications || [];
         const total = data.pagination?.total || data.total || 0;
-        const totalPages = data.pagination?.totalPages || data.totalPages || 1;
-
         setNotifications(items);
         setTotal(total);
-        setTotalPages(totalPages);
       }
     } catch (error) {
+      if (requestId !== latestRequestId.current) return;
       console.error('Failed to fetch notifications:', error);
       toast.error('获取通知失败');
     } finally {
-      setIsLoading(false);
+      if (requestId === latestRequestId.current) setIsLoading(false);
     }
-  }, [page, filters]);
+  }, [page, limit, filters]);
 
   // 标记为已读
   const handleMarkAsRead = async (id) => {
@@ -110,9 +106,12 @@ export default function NotificationsPage() {
   const handleDelete = async (id) => {
     try {
       await notificationApi.deleteNotification(id);
-      // 更新本地数据
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
-      setTotal((prev) => prev - 1);
+      if (notifications.length === 1 && page > 1) {
+        setPage((currentPage) => Math.max(1, currentPage - 1));
+      } else {
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
+      }
+      setTotal((prev) => Math.max(0, prev - 1));
       toast.success('已删除');
     } catch (error) {
       console.error('Failed to delete notification:', error);
@@ -153,7 +152,6 @@ export default function NotificationsPage() {
   // 监听实时通知
   // 模块归属：通知模块 - 通知列表页面
   // 使用场景：实时接收新通知并插入列表顶部
-  // 只依赖 on/off，不依赖 filters/limit —— 避免筛选条件变化时重建 WebSocket 监听器
   useEffect(() => {
     const handleNewNotification = (notification) => {
       // 如果当前筛选条件匹配，添加到列表顶部
@@ -171,7 +169,7 @@ export default function NotificationsPage() {
     return () => {
       off('notification', handleNewNotification);
     };
-  }, [on, off]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [on, off, filters.readStatus, filters.type, limit]);
 
   // 监听跨组件的已读事件
   useEffect(() => {
@@ -208,6 +206,11 @@ export default function NotificationsPage() {
   const handleFiltersChange = (newFilters) => {
     setFilters(newFilters);
     setPage(1); // 重置页码
+  };
+
+  const handlePageSizeChange = (pageSize) => {
+    setLimit(pageSize);
+    setPage(1);
   };
 
   // 处理发送通知
@@ -251,87 +254,6 @@ export default function NotificationsPage() {
       // console.log('[Notifications] Is Admin:', isAdmin);
     }
   }, [currentUser, isAdmin]);
-
-  // 分页组件
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    const pages = [];
-    const maxVisiblePages = 5;
-
-    let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-    if (endPage - startPage < maxVisiblePages - 1) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return (
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-            />
-          </PaginationItem>
-
-          {startPage > 1 && (
-            <>
-              <PaginationItem>
-                <PaginationLink onClick={() => setPage(1)} className="cursor-pointer">
-                  1
-                </PaginationLink>
-              </PaginationItem>
-              {startPage > 2 && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
-            </>
-          )}
-
-          {pages.map((pageNum) => (
-            <PaginationItem key={pageNum}>
-              <PaginationLink
-                onClick={() => setPage(pageNum)}
-                isActive={pageNum === page}
-                className="cursor-pointer"
-              >
-                {pageNum}
-              </PaginationLink>
-            </PaginationItem>
-          ))}
-
-          {endPage < totalPages && (
-            <>
-              {endPage < totalPages - 1 && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
-              <PaginationItem>
-                <PaginationLink onClick={() => setPage(totalPages)} className="cursor-pointer">
-                  {totalPages}
-                </PaginationLink>
-              </PaginationItem>
-            </>
-          )}
-
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    );
-  };
 
   return (
     <PageShell>
@@ -378,42 +300,26 @@ export default function NotificationsPage() {
         </Card>
       </div>
 
-      {/* 通知列表 */}
-      <Card>
-        <CardHeader>
-          <CardTitle>通知列表</CardTitle>
-          <CardDescription>
-            {page > 1 ? `第 ${(page - 1) * limit + 1} - ${Math.min(page * limit, total)} 条` : `共 ${total} 条通知`}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* 筛选器 */}
-          <PageToolbar className="border-0 bg-muted/30 p-4">
-            <NotificationFilter
-              filters={filters}
-              onChange={handleFiltersChange}
-            />
-          </PageToolbar>
-
-          {/* 表格 */}
-          <div className="border rounded-lg overflow-hidden">
-            <NotificationList
-              notifications={notifications}
-              onMarkAsRead={handleMarkAsRead}
-              onDelete={handleDelete}
-              onNotificationClick={handleNotificationClick}
-              isLoading={isLoading}
-            />
-          </div>
-
-          {/* 分页 */}
-          {!isLoading && notifications.length > 0 && (
-            <div className="flex justify-center">
-              {renderPagination()}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <PageWorkspace>
+        <PageToolbar>
+          <NotificationFilter
+            filters={filters}
+            onChange={handleFiltersChange}
+          />
+        </PageToolbar>
+        <PageSurface className="p-0">
+          <NotificationList
+            notifications={notifications}
+            onMarkAsRead={handleMarkAsRead}
+            onDelete={handleDelete}
+            onNotificationClick={handleNotificationClick}
+            isLoading={isLoading}
+            pagination={{ page, total, pageSize: limit }}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 发送通知对话框 */}
       <SendNotificationDialog

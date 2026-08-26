@@ -1,18 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SearchIcon, XIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { SearchFilter } from '@/components/common/SearchFilter';
 
 const readStatusOptions = [
-  { value: 'all', label: '全部' },
+  { value: 'all', label: '全部状态' },
   { value: 'unread', label: '未读' },
   { value: 'read', label: '已读' },
 ];
@@ -34,11 +26,6 @@ export default function NotificationFilter({ filters, onChange }) {
     setLocalFilters(filters);
   }, [filters]);
 
-  // 处理筛选变化
-  const handleChange = (key, value) => {
-    setLocalFilters({ ...localFilters, [key]: value });
-  };
-
   // 应用筛选
   const handleApply = () => {
     onChange(localFilters);
@@ -55,64 +42,28 @@ export default function NotificationFilter({ filters, onChange }) {
   };
 
   return (
-    <div>
-      <div className="flex flex-wrap items-end gap-4">
-        {/* 阅读状态 */}
-        <div className="flex-shrink-0">
-          <label className="text-sm font-medium text-foreground mb-1.5 block">
-            阅读状态
-          </label>
-          <Select
-            value={localFilters.readStatus || 'all'}
-            onValueChange={(value) => handleChange('readStatus', value)}
-          >
-            <SelectTrigger className="w-auto min-w-[140px]">
-              <SelectValue placeholder="选择状态" />
-            </SelectTrigger>
-            <SelectContent>
-              {readStatusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* 通知类型 */}
-        <div className="flex-shrink-0">
-          <label className="text-sm font-medium text-foreground mb-1.5 block">
-            通知类型
-          </label>
-          <Select
-            value={localFilters.type || 'all'}
-            onValueChange={(value) => handleChange('type', value)}
-          >
-            <SelectTrigger className="w-auto min-w-[140px]">
-              <SelectValue placeholder="选择类型" />
-            </SelectTrigger>
-            <SelectContent>
-              {typeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* 操作按钮 */}
-        <div className="flex-shrink-0 flex gap-2">
-          <Button onClick={handleApply}>
-            <SearchIcon className="w-4 h-4 mr-2" />
-            查询
-          </Button>
-          <Button onClick={handleReset} variant="outline">
-            <XIcon className="w-4 h-4 mr-2" />
-            重置
-          </Button>
-        </div>
-      </div>
-    </div>
+    <SearchFilter
+      fields={[
+        {
+          type: 'select',
+          name: 'readStatus',
+          placeholder: '阅读状态',
+          preserveAllValue: true,
+          options: readStatusOptions,
+        },
+        {
+          type: 'select',
+          name: 'type',
+          placeholder: '通知类型',
+          preserveAllValue: true,
+          options: typeOptions,
+        },
+      ]}
+      values={localFilters}
+      onChange={setLocalFilters}
+      onSearch={handleApply}
+      onReset={handleReset}
+      variant="toolbar"
+    />
   );
 }

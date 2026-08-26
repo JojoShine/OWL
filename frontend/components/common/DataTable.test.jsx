@@ -60,20 +60,37 @@ describe('DataTable workspace variant', () => {
     expect(screen.getByText('2026-08-25 10:30:00').closest('[data-slot="table-cell"]')).toHaveClass('tabular-data');
   });
 
-  it('keeps loading rows aligned to the loaded column geometry', () => {
+  it('keeps the current rows while the next page fades in', () => {
     const columns = [
       { key: 'name', label: '名称' },
       { key: 'createdAt', label: '创建时间', numeric: true },
     ];
     const actions = () => <button>编辑</button>;
     const { rerender } = render(
-      <DataTable columns={columns} data={[{ id: 1, name: '用户', createdAt: '2026-08-25' }]} actions={actions} />
+      <DataTable
+        columns={columns}
+        data={[{ id: 1, name: '用户', createdAt: '2026-08-25' }]}
+        actions={actions}
+        pagination={{ page: 1, pageSize: 10, total: 20 }}
+        onPageChange={vi.fn()}
+      />
     );
 
     expect(screen.getAllByRole('cell')).toHaveLength(3);
 
-    rerender(<DataTable columns={columns} data={[]} actions={actions} loading />);
-    expect(screen.getByText('加载中...').closest('[data-slot="table-cell"]')).toHaveAttribute('colspan', '3');
+    rerender(
+      <DataTable
+        columns={columns}
+        data={[]}
+        actions={actions}
+        loading
+        pagination={{ page: 2, pageSize: 10, total: 20 }}
+        onPageChange={vi.fn()}
+      />
+    );
+    expect(screen.getByText('用户')).toBeInTheDocument();
+    expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
+    expect(screen.getByText('用户').closest('[data-slot="table-body"]')).toHaveClass('opacity-0');
   });
 
   it('uses a zero row key and exposes the expand control name', async () => {

@@ -29,9 +29,28 @@ export default function LogFilters({ type, filters, onChange }) {
       url: '',
       status: '',
       action: '',
+      dbType: '',
+      type: '',
     };
     setLocalFilters(resetFilters);
     onChange(resetFilters);
+  };
+
+  const filterValues = {
+    ...localFilters,
+    dateRange: {
+      start: localFilters.startDate || '',
+      end: localFilters.endDate || '',
+    },
+  };
+
+  const handleFilterValuesChange = (nextValues) => {
+    const { dateRange, ...nextFilters } = nextValues;
+    setLocalFilters({
+      ...nextFilters,
+      startDate: dateRange?.start || '',
+      endDate: dateRange?.end || '',
+    });
   };
 
   /**
@@ -40,16 +59,9 @@ export default function LogFilters({ type, filters, onChange }) {
   const getFilterFields = () => {
     const common = [
       {
-        key: 'startDate',
-        name: 'startDate',
-        label: '开始日期',
-        type: 'date',
-      },
-      {
-        key: 'endDate',
-        name: 'endDate',
-        label: '结束日期',
-        type: 'date',
+        key: 'dateRange',
+        name: 'dateRange',
+        type: 'dateRange',
       },
     ];
 
@@ -58,17 +70,16 @@ export default function LogFilters({ type, filters, onChange }) {
         {
           key: 'userId',
           name: 'userId',
-          label: '用户ID',
           type: 'text',
           placeholder: '输入用户ID',
         },
         {
           key: 'method',
           name: 'method',
-          label: 'HTTP方法',
           type: 'select',
+          placeholder: 'HTTP 方法',
           options: [
-            { value: '', label: '全部' },
+            { value: '', label: '全部方法' },
             { value: 'GET', label: 'GET' },
             { value: 'POST', label: 'POST' },
             { value: 'PUT', label: 'PUT' },
@@ -78,7 +89,6 @@ export default function LogFilters({ type, filters, onChange }) {
         {
           key: 'url',
           name: 'url',
-          label: 'URL',
           type: 'text',
           placeholder: '输入URL关键词',
         },
@@ -87,17 +97,16 @@ export default function LogFilters({ type, filters, onChange }) {
         {
           key: 'username',
           name: 'username',
-          label: '用户名',
           type: 'text',
           placeholder: '输入用户名',
         },
         {
           key: 'action',
           name: 'action',
-          label: '操作',
           type: 'select',
+          placeholder: '操作',
           options: [
-            { value: '', label: '全部' },
+            { value: '', label: '全部操作' },
             { value: 'login', label: '登录' },
             { value: 'logout', label: '登出' },
           ],
@@ -105,10 +114,10 @@ export default function LogFilters({ type, filters, onChange }) {
         {
           key: 'status',
           name: 'status',
-          label: '状态',
           type: 'select',
+          placeholder: '状态',
           options: [
-            { value: '', label: '全部' },
+            { value: '', label: '全部状态' },
             { value: 'success', label: '成功' },
             { value: 'failure', label: '失败' },
           ],
@@ -119,10 +128,10 @@ export default function LogFilters({ type, filters, onChange }) {
         {
           key: 'method',
           name: 'method',
-          label: 'HTTP方法',
           type: 'select',
+          placeholder: 'HTTP 方法',
           options: [
-            { value: '', label: '全部' },
+            { value: '', label: '全部方法' },
             { value: 'GET', label: 'GET' },
             { value: 'POST', label: 'POST' },
             { value: 'PUT', label: 'PUT' },
@@ -132,7 +141,6 @@ export default function LogFilters({ type, filters, onChange }) {
         {
           key: 'url',
           name: 'url',
-          label: 'URL',
           type: 'text',
           placeholder: '输入URL关键词',
         },
@@ -142,10 +150,10 @@ export default function LogFilters({ type, filters, onChange }) {
         {
           key: 'dbType',
           name: 'dbType',
-          label: '数据库类型',
           type: 'select',
+          placeholder: '数据库类型',
           options: [
-            { value: '', label: '全部' },
+            { value: '', label: '全部数据库' },
             { value: 'redis', label: 'Redis' },
             { value: 'postgresql', label: 'PostgreSQL' },
           ],
@@ -153,10 +161,10 @@ export default function LogFilters({ type, filters, onChange }) {
         {
           key: 'action',
           name: 'action',
-          label: '操作类型',
           type: 'select',
+          placeholder: '操作类型',
           options: [
-            { value: '', label: '全部' },
+            { value: '', label: '全部操作' },
             { value: 'set', label: 'SET' },
             { value: 'get', label: 'GET' },
             { value: 'del', label: 'DEL' },
@@ -174,8 +182,8 @@ export default function LogFilters({ type, filters, onChange }) {
   return (
     <SearchFilter
       fields={fields}
-      values={localFilters}
-      onChange={setLocalFilters}
+      values={filterValues}
+      onChange={handleFilterValuesChange}
       onSearch={handleApply}
       onReset={handleReset}
       variant="toolbar"

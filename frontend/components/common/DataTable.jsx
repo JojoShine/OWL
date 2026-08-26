@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -21,6 +20,9 @@ function TableFrame({ workspace, children }) {
 
   return <div className="overflow-hidden rounded-lg">{children}</div>;
 }
+
+const ROW_TRANSITION_MS = 200;
+const EMPTY_DATA = [];
 
 /**
  * 数据表格组件 - 通用的数据展示表格
@@ -62,7 +64,7 @@ function TableFrame({ workspace, children }) {
  */
 export function DataTable({
   columns = [],
-  data = [],
+  data = EMPTY_DATA,
   loading = false,
   actions,
   actionsLabel = '操作',
@@ -78,6 +80,83 @@ export function DataTable({
   ...rest
 }) {
   const [expandedRows, setExpandedRows] = useState(new Set());
+  const [renderedData, setRenderedData] = useState(data);
+  const [rowsVisible, setRowsVisible] = useState(true);
+  const renderedDataRef = useRef(data);
+  const transitionStartedAtRef = useRef(0);
+  const paginationKey = pagination
+    ? `${pagination.page ?? 1}:${pagination.pageSize ?? 10}`
+    : null;
+  const settledPaginationKeyRef = useRef(paginationKey);
+  const isPaginationTransition = paginationKey !== null
+    && paginationKey !== settledPaginationKeyRef.current;
+
+  useEffect(() => {
+    let swapTimer;
+    let revealFrame;
+    let revealTimer;
+
+    const hasPendingPagination = paginationKey !== null
+      && paginationKey !== settledPaginationKeyRef.current;
+
+    if (loading) {
+      if (hasPendingPagination && renderedDataRef.current.length > 0) {
+        if (!transitionStartedAtRef.current) {
+          transitionStartedAtRef.current = Date.now();
+        }
+        setRowsVisible(false);
+      } else if (!hasPendingPagination) {
+        transitionStartedAtRef.current = 0;
+        setRowsVisible(true);
+      }
+
+      return undefined;
+    }
+
+    const revealRows = () => {
+      if (typeof window.requestAnimationFrame === 'function') {
+        revealFrame = window.requestAnimationFrame(() => setRowsVisible(true));
+      } else {
+        revealTimer = window.setTimeout(() => setRowsVisible(true), 0);
+      }
+    };
+
+    if (data !== renderedDataRef.current) {
+      const isInitialLoad = renderedDataRef.current.length === 0
+        && transitionStartedAtRef.current === 0;
+      const elapsed = transitionStartedAtRef.current
+        ? Date.now() - transitionStartedAtRef.current
+        : ROW_TRANSITION_MS;
+      const remainingFadeTime = Math.max(0, ROW_TRANSITION_MS - elapsed);
+
+      const swapRows = () => {
+        if (isInitialLoad && data.length > 0) setRowsVisible(false);
+        renderedDataRef.current = data;
+        setRenderedData(data);
+        settledPaginationKeyRef.current = paginationKey;
+        transitionStartedAtRef.current = 0;
+        revealRows();
+      };
+
+      if (remainingFadeTime > 0) {
+        swapTimer = window.setTimeout(swapRows, remainingFadeTime);
+      } else {
+        swapRows();
+      }
+    } else if (transitionStartedAtRef.current) {
+      settledPaginationKeyRef.current = paginationKey;
+      transitionStartedAtRef.current = 0;
+      revealRows();
+    } else if (!hasPendingPagination) {
+      setRowsVisible(true);
+    }
+
+    return () => {
+      if (swapTimer) window.clearTimeout(swapTimer);
+      if (revealTimer) window.clearTimeout(revealTimer);
+      if (revealFrame) window.cancelAnimationFrame(revealFrame);
+    };
+  }, [data, loading, paginationKey]);
 
   // 切换行展开状态
   const toggleRow = (rowId) => {
@@ -101,6 +180,7 @@ export function DataTable({
   return (
     <div
       data-slot="data-table"
+      aria-busy={loading}
       className={cn(
         isWorkspace ? 'overflow-hidden rounded-lg border bg-card' : 'space-y-4',
         className
@@ -131,10 +211,17 @@ export function DataTable({
               )}
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {loading ? (
+          <TableBody
+            aria-hidden={!rowsVisible}
+            inert={!rowsVisible}
+            className={cn(
+              'transition-opacity duration-200 ease-out motion-reduce:transition-none',
+              rowsVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
+            )}
+          >
+            {loading && !(isPaginationTransition && renderedData.length > 0) ? (
               <TableLoading colSpan={totalColumns} variant={isWorkspace ? 'workspace' : 'default'} />
-            ) : data.length === 0 ? (
+            ) : renderedData.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={totalColumns}
@@ -147,7 +234,7 @@ export function DataTable({
                 </TableCell>
               </TableRow>
             ) : (
-              data.map((row, index) => {
+              renderedData.map((row, index) => {
                 const rowId = row[rowKey] ?? index;
                 const rowLabel = row.name || row.username || rowId;
                 const isExpanded = expandedRows.has(rowId);

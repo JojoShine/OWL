@@ -189,8 +189,10 @@ export default function LogTable({ type, logs, loading, pagination, onPageChange
   const columns = getColumns();
 
   return (
-    <div className="space-y-4">
+    <>
       <DataTable
+        variant="workspace"
+        density="compact"
         columns={columns}
         data={logs}
         loading={loading}
@@ -278,6 +280,6 @@ export default function LogTable({ type, logs, loading, pagination, onPageChange
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

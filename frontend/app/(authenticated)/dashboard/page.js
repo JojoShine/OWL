@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardCard from '@/components/dashboard/DashboardCard';
 import { dashboardWidgetApi, menuApi } from '@/lib/api';
-import { PageHeader, PageShell } from '@/components/layout/page-shell';
+import { PageShell } from '@/components/layout/page-shell';
 
 function hasPath(menus, targetPath) {
   for (const menu of menus) {
@@ -55,7 +55,6 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <PageShell>
-        <PageHeader title="仪表盘" description="查看关键业务指标与数据趋势。" />
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="bg-card border rounded-lg p-6 animate-pulse">
@@ -82,7 +81,6 @@ export default function DashboardPage() {
 
   return (
     <PageShell>
-      <PageHeader title="仪表盘" description="查看关键业务指标与数据趋势。" />
       {/* 数字指标行 */}
       {metricWidgets.length > 0 && (
         <div className={`grid ${getMetricCols(metricWidgets.length)} gap-4`}>
