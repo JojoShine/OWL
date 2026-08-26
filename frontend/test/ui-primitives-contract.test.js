@@ -88,9 +88,9 @@ describe('neutral UI primitive contract', () => {
     const activeTab = screen.getByRole('tab', { name: '第一项' });
     expect(tabsList).toHaveClass('bg-muted', 'h-10', 'rounded-lg', 'border-border');
     expect(activeTab).toHaveClass(
-      'data-[state=active]:bg-background',
-      'data-[state=active]:text-foreground',
-      'data-[state=active]:shadow-[0_1px_2px_rgba(15,23,42,0.10),inset_0_0_0_1px_rgba(15,23,42,0.06)]'
+      'data-[state=active]:bg-foreground',
+      'data-[state=active]:text-background',
+      'data-[state=active]:shadow-[0_1px_3px_rgba(15,23,42,0.22)]'
     );
     expect(activeTab).not.toHaveClass('data-[state=active]:bg-primary');
   });
