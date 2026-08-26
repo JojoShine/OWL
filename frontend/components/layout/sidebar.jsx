@@ -9,15 +9,7 @@ import { Loading } from '@/components/ui/loading';
 import { menuApi } from '@/lib/api';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ChevronDown, ChevronRight, ChevronsUpDown, LogOut, User } from 'lucide-react';
+import { ChevronDown, ChevronRight, LogOut } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { useColorTheme } from '@/lib/utils/theme';
 import { useAuth } from '@/lib/utils/auth';
@@ -29,63 +21,56 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 function SidebarUserMenu() {
   const { user, logout } = useAuth();
   const displayName = user?.real_name || user?.username || '用户';
-  const secondaryText = user?.email || (user?.username ? `@${user.username}` : '当前账号');
+  const roleText = user?.roles
+    ?.map((role) => (typeof role === 'string' ? role : role?.name || role?.code))
+    .filter(Boolean)
+    .join('、') || '未分配角色';
+  const emailText = user?.email || '未填写邮箱';
+  const departmentText = user?.department?.name || user?.department_name || '未分配部门';
   const initials = (user?.username || displayName).charAt(0).toUpperCase();
 
   return (
-    <div className="border-t border-sidebar-border p-3">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+    <div className="border-t border-sidebar-border px-3 py-3.5">
+      <div className="rounded-lg px-1.5">
+        <div className="flex items-center gap-2.5">
+          <Avatar className="h-9 w-9 shrink-0">
+            <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+
+          <p className="min-w-0 flex-1 truncate text-sm font-semibold text-sidebar-accent-foreground" title={displayName}>
+            {displayName}
+          </p>
+
           <Button
+            type="button"
             variant="ghost"
-            className="h-auto w-full justify-start gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            size="icon"
+            aria-label="退出登录"
+            title="退出登录"
+            onClick={logout}
+            className="h-8 w-8 shrink-0 text-sidebar-foreground/50 hover:bg-destructive/10 hover:text-destructive"
           >
-            <Avatar className="h-9 w-9 shrink-0">
-              <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium text-sidebar-accent-foreground">
-                {displayName}
-              </span>
-              <span className="mt-0.5 block truncate text-xs font-normal text-sidebar-foreground/60">
-                {secondaryText}
-              </span>
-            </span>
-            <ChevronsUpDown className="h-4 w-4 shrink-0 text-sidebar-foreground/45" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          side="top"
-          align="start"
-          sideOffset={8}
-          className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-0"
-          forceMount
-        >
-          <DropdownMenuLabel className="font-normal">
-            <div className="space-y-1">
-              <p className="truncate text-sm font-medium leading-none">{displayName}</p>
-              {user?.username ? (
-                <p className="truncate text-xs leading-none text-muted-foreground">@{user.username}</p>
-              ) : null}
-              {user?.email ? (
-                <p className="truncate text-xs leading-none text-muted-foreground">{user.email}</p>
-              ) : null}
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <User className="h-4 w-4" />
-            <span>个人信息</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={logout}>
             <LogOut className="h-4 w-4" />
-            <span>退出登录</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </Button>
+        </div>
+
+        <div className="mt-2 space-y-1 text-xs leading-5">
+          <p className="flex min-w-0 gap-2">
+            <span className="w-7 shrink-0 text-sidebar-foreground/40">角色</span>
+            <span className="truncate text-sidebar-foreground/65" title={roleText}>{roleText}</span>
+          </p>
+          <p className="flex min-w-0 gap-2">
+            <span className="w-7 shrink-0 text-sidebar-foreground/40">邮箱</span>
+            <span className="truncate text-sidebar-foreground/55" title={emailText}>{emailText}</span>
+          </p>
+          <p className="flex min-w-0 gap-2">
+            <span className="w-7 shrink-0 text-sidebar-foreground/40">部门</span>
+            <span className="truncate text-sidebar-foreground/55" title={departmentText}>{departmentText}</span>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

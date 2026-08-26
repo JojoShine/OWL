@@ -202,6 +202,11 @@ class AuthService {
             },
           ],
         },
+        {
+          model: db.Department,
+          as: 'department',
+          attributes: ['id', 'name'],
+        },
       ],
     });
 
@@ -288,6 +293,11 @@ class AuthService {
             },
           ],
         },
+        {
+          model: db.Department,
+          as: 'department',
+          attributes: ['id', 'name'],
+        },
       ],
     });
 
@@ -332,6 +342,11 @@ class AuthService {
               through: { attributes: [] },
             },
           ],
+        },
+        {
+          model: db.Department,
+          as: 'department',
+          attributes: ['id', 'name'],
         },
       ],
     });

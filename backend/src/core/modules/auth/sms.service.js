@@ -196,6 +196,10 @@ class SMSService {
         model: db.Role,
         as: 'roles',
         through: { attributes: [] },
+      }, {
+        model: db.Department,
+        as: 'department',
+        attributes: ['id', 'name'],
       }],
     });
 
@@ -253,9 +257,21 @@ class SMSService {
 
     logger.info(`用户通过短信登录: ${user.username}`);
 
+    const userWithProfile = await db.User.findByPk(user.id, {
+      include: [{
+        model: db.Role,
+        as: 'roles',
+        through: { attributes: [] },
+      }, {
+        model: db.Department,
+        as: 'department',
+        attributes: ['id', 'name'],
+      }],
+    });
+
     return {
       token,
-      user: user.toSafeJSON(),
+      user: userWithProfile.toSafeJSON(),
     };
   }
 }

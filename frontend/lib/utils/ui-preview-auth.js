@@ -8,7 +8,8 @@ const previewUser = {
   username: 'preview',
   real_name: 'UI Preview',
   email: 'preview@example.invalid',
-  roles: [{ code: 'super_admin' }],
+  roles: [{ name: '超级管理员', code: 'super_admin' }],
+  department: { name: '平台研发部' },
 };
 
 export function syncUiPreviewAuth({ storage, nodeEnv, previewEnabled, hostname }) {

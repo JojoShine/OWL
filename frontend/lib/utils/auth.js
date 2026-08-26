@@ -27,6 +27,8 @@ export const AuthProvider = ({ children }) => {
 
   // 初始化：从localStorage加载用户信息
   useEffect(() => {
+    let isActive = true;
+
     const initAuth = () => {
       try {
         syncUiPreviewAuth({
@@ -42,6 +44,19 @@ export const AuthProvider = ({ children }) => {
         if (token && userStr) {
           const userData = JSON.parse(userStr);
           setUser(userData);
+
+          // 先使用本地信息快速渲染，再后台同步角色、部门等最新资料。
+          if (token !== 'preview-only') {
+            authApi.getCurrentUser()
+              .then((response) => {
+                if (!isActive || !response?.data) return;
+                localStorage.setItem(getStorageKey('user'), JSON.stringify(response.data));
+                setUser(response.data);
+              })
+              .catch((error) => {
+                console.error('同步用户信息失败:', error);
+              });
+          }
         }
       } catch (error) {
         console.error('初始化认证失败:', error);
@@ -52,6 +67,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     initAuth();
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   // 监听WebSocket事件（被踢出通知）

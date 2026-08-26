@@ -60,7 +60,13 @@ vi.mock('@/lib/utils/theme', () => ({
 
 vi.mock('@/lib/utils/auth', () => ({
   useAuth: () => ({
-    user: { username: 'tester', real_name: '测试用户', email: 'tester@example.com' },
+    user: {
+      username: 'tester',
+      real_name: '测试用户',
+      email: 'tester@example.com',
+      roles: [{ name: '系统管理员', code: 'admin' }],
+      department: { name: '研发中心' },
+    },
     logout: vi.fn(),
   }),
 }));
@@ -121,5 +127,15 @@ describe('Sidebar nested menu controls', () => {
       expect(screen.getByRole('button', { name: '收起系统工具' })).toHaveAttribute('aria-expanded', 'true')
     );
     expect(screen.getByRole('link', { name: '用户工具' })).toBeInTheDocument();
+  });
+
+  it('shows complete user information with a direct logout action', async () => {
+    render(<Sidebar />);
+
+    expect(await screen.findByText('测试用户')).toBeInTheDocument();
+    expect(screen.getByText('系统管理员')).toBeInTheDocument();
+    expect(screen.getByText('tester@example.com')).toBeInTheDocument();
+    expect(screen.getByText('研发中心')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '退出登录' })).toBeInTheDocument();
   });
 });
