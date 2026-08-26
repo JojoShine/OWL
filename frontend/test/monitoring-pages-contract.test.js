@@ -53,4 +53,18 @@ describe('monitoring page design contract', () => {
     expect(read('components/monitor/ApiMonitorTable.jsx')).toContain("PATCH: 'bg-purple-100");
     expect(read('app/(authenticated)/monitor/alerts/page.js')).toContain("critical: { className: 'bg-red-100");
   });
+
+  it('uses resolved theme tokens for monitoring chart structure colors', () => {
+    const monitor = read('app/(authenticated)/monitor/page.js');
+    const dashboardCard = read('components/dashboard/DashboardCard.jsx');
+
+    expect(monitor).not.toMatch(/hsl\((?:var\(--|--)/);
+    expect(monitor).toContain("backgroundColor: 'var(--card)'");
+    expect(dashboardCard).toContain('const { resolvedTheme } = useTheme()');
+    expect(dashboardCard).toContain("attributeFilter: ['class']");
+    expect(dashboardCard).toContain('rootThemeVersion');
+    expect(dashboardCard).toContain("getTailwindColor('--popover')");
+    expect(dashboardCard).toContain("const CHART_COLORS = ['--chart-1', '--chart-2', '--chart-3', '--chart-4', '--chart-5']");
+    expect(dashboardCard).not.toContain("theme === 'dark'");
+  });
 });

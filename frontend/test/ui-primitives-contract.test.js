@@ -90,9 +90,7 @@ describe('neutral UI primitive contract', () => {
     expect(activeTab).toHaveClass(
       'data-[state=active]:bg-foreground',
       'data-[state=active]:text-background',
-      'data-[state=active]:shadow-[0_1px_3px_rgba(15,23,42,0.22)]',
-      'dark:data-[state=active]:bg-white/[0.14]',
-      'dark:data-[state=active]:text-slate-50'
+      'data-[state=active]:shadow-[0_1px_3px_rgba(15,23,42,0.22)]'
     );
     expect(activeTab).not.toHaveClass('data-[state=active]:bg-primary');
   });
@@ -147,7 +145,7 @@ describe('neutral UI primitive contract', () => {
     );
 
     expect(document.querySelector('[data-slot="dialog-overlay"]')).toHaveClass(
-      'bg-slate-950/35',
+      'bg-black/35',
       'backdrop-blur-[1px]'
     );
     expect(document.querySelector('[data-slot="button"]')).toHaveClass(

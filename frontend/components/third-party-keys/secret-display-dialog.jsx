@@ -104,8 +104,8 @@ export default function SecretDisplayDialog({ open, onOpenChange, keyData }) {
           </div>
 
           {/* 警告提示 */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <p className="text-sm text-yellow-800">
+          <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-amber-500/20 dark:bg-amber-500/10">
+            <p className="text-sm text-yellow-800 dark:text-amber-300">
               <strong>重要提示：</strong>请立即复制并保存API Secret，关闭此窗口后将无法再次查看完整密钥。
             </p>
           </div>

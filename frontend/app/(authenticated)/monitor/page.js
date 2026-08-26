@@ -115,25 +115,27 @@ export default function MonitorPage() {
                   <XAxis
                     dataKey="time"
                     className="text-xs"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
                   />
                   <YAxis
                     className="text-xs"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
                     domain={[0, 100]}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
+                      backgroundColor: 'var(--card)',
+                      border: '1px solid var(--border)',
                       borderRadius: '6px',
                     }}
+                    labelStyle={{ color: 'var(--foreground)' }}
+                    itemStyle={{ color: 'var(--foreground)' }}
                   />
                   <Area
                     type="monotone"
                     dataKey="value"
-                    stroke="hsl(var(--primary))"
-                    fill="hsl(var(--primary))"
+                    stroke="var(--chart-1)"
+                    fill="var(--chart-1)"
                     fillOpacity={0.2}
                     name="CPU %"
                   />
@@ -154,25 +156,27 @@ export default function MonitorPage() {
                   <XAxis
                     dataKey="time"
                     className="text-xs"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
                   />
                   <YAxis
                     className="text-xs"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
                     domain={[0, 100]}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
+                      backgroundColor: 'var(--card)',
+                      border: '1px solid var(--border)',
                       borderRadius: '6px',
                     }}
+                    labelStyle={{ color: 'var(--foreground)' }}
+                    itemStyle={{ color: 'var(--foreground)' }}
                   />
                   <Area
                     type="monotone"
                     dataKey="value"
-                    stroke="hsl(142.1 76.2% 36.3%)"
-                    fill="hsl(142.1 76.2% 36.3%)"
+                    stroke="var(--chart-2)"
+                    fill="var(--chart-2)"
                     fillOpacity={0.2}
                     name="内存 %"
                   />
@@ -193,23 +197,25 @@ export default function MonitorPage() {
                   <XAxis
                     dataKey="time"
                     className="text-xs"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
                   />
                   <YAxis
                     className="text-xs"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
+                      backgroundColor: 'var(--card)',
+                      border: '1px solid var(--border)',
                       borderRadius: '6px',
                     }}
+                    labelStyle={{ color: 'var(--foreground)' }}
+                    itemStyle={{ color: 'var(--foreground)' }}
                   />
                   <Line
                     type="monotone"
                     dataKey="value"
-                    stroke="hsl(221.2 83.2% 53.3%)"
+                    stroke="var(--chart-1)"
                     strokeWidth={2}
                     dot={{ r: 3 }}
                     name="响应时间 (ms)"
@@ -231,23 +237,25 @@ export default function MonitorPage() {
                   <XAxis
                     dataKey="time"
                     className="text-xs"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
                   />
                   <YAxis
                     className="text-xs"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(--card))',
+                      backgroundColor: 'var(--card)',
+                      border: '1px solid var(--border)',
                       borderRadius: '6px',
                     }}
+                    labelStyle={{ color: 'var(--foreground)' }}
+                    itemStyle={{ color: 'var(--foreground)' }}
                   />
                   <Line
                     type="monotone"
                     dataKey="upload"
-                    stroke="hsl(262.1 83.3% 57.8%)"
+                    stroke="var(--chart-4)"
                     strokeWidth={2}
                     dot={{ r: 3 }}
                     name="上传 (KB/s)"
@@ -255,7 +263,7 @@ export default function MonitorPage() {
                   <Line
                     type="monotone"
                     dataKey="download"
-                    stroke="hsl(142.1 76.2% 36.3%)"
+                    stroke="var(--chart-2)"
                     strokeWidth={2}
                     dot={{ r: 3 }}
                     name="下载 (KB/s)"

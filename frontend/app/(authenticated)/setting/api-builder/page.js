@@ -203,7 +203,7 @@ export default function ApiBuilderPage() {
     {
       key: 'createdAt',
       label: '创建时间',
-      cellClassName: 'text-sm text-muted-foreground dark:text-white',
+      cellClassName: 'text-sm text-muted-foreground',
       render: (value, record) => formatDate(value || record.created_at)
     }
   ];

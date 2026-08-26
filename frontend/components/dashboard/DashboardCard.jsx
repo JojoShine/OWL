@@ -1,79 +1,26 @@
 'use client'
 
-import { useEffect, useRef, useMemo } from 'react'
+import { useEffect, useRef, useMemo, useState } from 'react'
 import * as echarts from 'echarts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTheme } from 'next-themes'
 
-const CHART_COLORS = ['#00d4ff', '#00b8ff', '#0099ff', '#0080ff', '#0066ff', '#0055ff', '#0044cc', '#0033aa']
+const CHART_COLORS = ['--chart-1', '--chart-2', '--chart-3', '--chart-4', '--chart-5']
 
-// 从 Tailwind CSS 变量中获取颜色值
+// 从当前主题的 CSS 变量中读取浏览器已经解析的颜色值。
 const getTailwindColor = (variable) => {
-  if (typeof document === 'undefined') return '#3b82f6' // SSR 时返回默认蓝色
-  const value = getComputedStyle(document.documentElement)
+  if (typeof document === 'undefined') return ''
+
+  return getComputedStyle(document.documentElement)
     .getPropertyValue(variable)
     .trim()
-
-  // 如果是 HSL 格式，转换为 RGB
-  if (value && value.includes(' ')) {
-    // HSL 格式: "222.2 47.4% 11.2%"
-    const [h, s, l] = value.split(' ').map(v => parseFloat(v))
-    return hslToHex(h, s, l)
-  }
-
-  return value || '#3b82f6'
 }
 
-// HSL 转 HEX
-const hslToHex = (h, s, l) => {
-  s = s / 100
-  l = l / 100
-
-  const c = (1 - Math.abs(2 * l - 1)) * s
-  const x = c * (1 - Math.abs((h / 60) % 2 - 1))
-  const m = l - c / 2
-
-  let r = 0, g = 0, b = 0
-
-  if (h >= 0 && h < 60) {
-    r = c; g = x; b = 0
-  } else if (h >= 60 && h < 120) {
-    r = x; g = c; b = 0
-  } else if (h >= 120 && h < 180) {
-    r = 0; g = c; b = x
-  } else if (h >= 180 && h < 240) {
-    r = 0; g = x; b = c
-  } else if (h >= 240 && h < 300) {
-    r = x; g = 0; b = c
-  } else if (h >= 300 && h < 360) {
-    r = c; g = 0; b = x
-  }
-
-  const toHex = (n) => {
-    const hex = Math.round((n + m) * 255).toString(16)
-    return hex.length === 1 ? '0' + hex : hex
-  }
-
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
-}
-
-// 获取饼图颜色调色板（动态获取主题色）
-const getPieColors = () => {
-  const primaryColor = getTailwindColor('--primary')
-
-  return [
-    primaryColor,                  // 主题色（从 CSS 变量获取）
-    '#ec4899',                     // 粉色
-    '#f59e0b',                     // 琥珀色
-    '#8b5cf6',                     // 紫色
-    '#10b981',                     // 翠绿
-    '#06b6d4',                     // 青色
-    '#f43f5e',                     // 玫瑰红
-    '#a855f7',                     // 紫罗兰
-    '#14b8a6',                     // 绿松
-    '#84cc16',                     // 青柠
-  ]
-}
+// 饼图使用全局图表色，确保深浅主题和品牌主题使用同一套色阶。
+const getPieColors = () => (
+  CHART_COLORS.map(getTailwindColor)
+    .filter(Boolean)
+)
 
 /**
  * Dashboard Card Component
@@ -89,15 +36,27 @@ function DashboardCard({
   hideTitle = false,
   unit = '',
 }) {
-  const { theme } = useTheme()
+  const { resolvedTheme } = useTheme()
   const chartRef = useRef(null)
   const chartInstance = useRef(null)
+  const [rootThemeVersion, setRootThemeVersion] = useState(0)
 
   // 序列化数据为字符串，用于依赖比较
   const dataString = useMemo(() => {
     if (!data || data.length === 0) return ''
     return JSON.stringify(data)
   }, [data])
+
+  useEffect(() => {
+    const root = document.documentElement
+    const observer = new MutationObserver(() => {
+      setRootThemeVersion(version => version + 1)
+    })
+
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] })
+
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     if (!data || data.length === 0 || !chartRef.current) return
@@ -116,25 +75,29 @@ function DashboardCard({
       backgroundColor: 'transparent'
     })
 
-    // 获取当前主题的文字颜色
-    const isDark = theme === 'dark'
-    const textColor = isDark ? '#ffffff' : '#000000'
-    const gridColor = isDark ? '#404040' : '#e5e7eb'  // 暗黑模式下稍微浅一些
-    const axisColor = isDark ? '#555555' : '#cccccc'  // 坐标轴颜色也调亮一些
-    // Line、Area、Bar 图表使用主题自适应颜色（暗黑白色，浅色黑色）
-    const lineColor = isDark ? '#ffffff' : '#000000'
+    const textColor = getTailwindColor('--foreground')
+    const mutedTextColor = getTailwindColor('--muted-foreground')
+    const borderColor = getTailwindColor('--border')
+    const popoverColor = getTailwindColor('--popover')
+    const popoverTextColor = getTailwindColor('--popover-foreground')
+    const primaryColor = getTailwindColor('--primary')
+    const chartSurfaceColor = getTailwindColor('--card') || getTailwindColor('--background')
+
+    const tooltipStyle = {
+      backgroundColor: popoverColor,
+      textStyle: { color: popoverTextColor },
+      borderColor,
+      borderWidth: 1,
+    }
 
     let option = {}
 
     if (mode === 'line') {
       option = {
-        color: [lineColor],
+        color: [primaryColor],
         tooltip: {
           trigger: 'axis',
-          backgroundColor: isDark ? 'rgba(30, 30, 30, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-          textStyle: { color: textColor },
-          borderColor: isDark ? axisColor : '#cccccc',
-          borderWidth: 1,
+          ...tooltipStyle,
         },
         grid: {
           left: 60,
@@ -146,36 +109,33 @@ function DashboardCard({
         xAxis: {
           type: 'category',
           data: data.map(item => item[xKey]),
-          axisLine: { lineStyle: { color: isDark ? axisColor : '#cccccc' } },
-          axisLabel: { color: textColor },
+          axisLine: { lineStyle: { color: borderColor } },
+          axisLabel: { color: mutedTextColor },
           splitLine: { show: false },
         },
         yAxis: {
           type: 'value',
-          axisLine: { lineStyle: { color: isDark ? axisColor : '#cccccc' } },
-          axisLabel: { color: textColor },
-          splitLine: { lineStyle: { color: gridColor } },
+          axisLine: { lineStyle: { color: borderColor } },
+          axisLabel: { color: mutedTextColor },
+          splitLine: { lineStyle: { color: borderColor } },
         },
         series: [
           {
             data: data.map(item => item[dataKey]),
             type: 'line',
             smooth: true,
-            lineStyle: { width: 3, color: lineColor },
-            itemStyle: { borderWidth: 2, borderColor: lineColor },
+            lineStyle: { width: 3, color: primaryColor },
+            itemStyle: { borderWidth: 2, borderColor: primaryColor },
             symbolSize: 6,
           },
         ],
       }
     } else if (mode === 'area') {
       option = {
-        color: [lineColor],
+        color: [primaryColor],
         tooltip: {
           trigger: 'axis',
-          backgroundColor: isDark ? 'rgba(30, 30, 30, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-          textStyle: { color: textColor },
-          borderColor: isDark ? axisColor : '#cccccc',
-          borderWidth: 1,
+          ...tooltipStyle,
         },
         grid: {
           left: 60,
@@ -187,37 +147,34 @@ function DashboardCard({
         xAxis: {
           type: 'category',
           data: data.map(item => item[xKey]),
-          axisLine: { lineStyle: { color: isDark ? axisColor : '#cccccc' } },
-          axisLabel: { color: textColor },
+          axisLine: { lineStyle: { color: borderColor } },
+          axisLabel: { color: mutedTextColor },
           splitLine: { show: false },
         },
         yAxis: {
           type: 'value',
-          axisLine: { lineStyle: { color: isDark ? axisColor : '#cccccc' } },
-          axisLabel: { color: textColor },
-          splitLine: { lineStyle: { color: gridColor } },
+          axisLine: { lineStyle: { color: borderColor } },
+          axisLabel: { color: mutedTextColor },
+          splitLine: { lineStyle: { color: borderColor } },
         },
         series: [
           {
             data: data.map(item => item[dataKey]),
             type: 'line',
             smooth: true,
-            areaStyle: { color: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.1)' },
-            lineStyle: { width: 3, color: lineColor },
-            itemStyle: { borderWidth: 2, borderColor: lineColor },
+            areaStyle: { color: primaryColor, opacity: 0.18 },
+            lineStyle: { width: 3, color: primaryColor },
+            itemStyle: { borderWidth: 2, borderColor: primaryColor },
             symbolSize: 6,
           },
         ],
       }
     } else if (mode === 'bar') {
       option = {
-        color: [lineColor],
+        color: [primaryColor],
         tooltip: {
           trigger: 'axis',
-          backgroundColor: isDark ? 'rgba(30, 30, 30, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-          textStyle: { color: textColor },
-          borderColor: isDark ? axisColor : '#cccccc',
-          borderWidth: 1,
+          ...tooltipStyle,
         },
         grid: {
           left: 60,
@@ -229,15 +186,15 @@ function DashboardCard({
         xAxis: {
           type: 'category',
           data: data.map(item => item[xKey]),
-          axisLine: { lineStyle: { color: isDark ? axisColor : '#cccccc' } },
-          axisLabel: { color: textColor },
+          axisLine: { lineStyle: { color: borderColor } },
+          axisLabel: { color: mutedTextColor },
           splitLine: { show: false },
         },
         yAxis: {
           type: 'value',
-          axisLine: { lineStyle: { color: isDark ? axisColor : '#cccccc' } },
-          axisLabel: { color: textColor },
-          splitLine: { lineStyle: { color: gridColor } },
+          axisLine: { lineStyle: { color: borderColor } },
+          axisLabel: { color: mutedTextColor },
+          splitLine: { lineStyle: { color: borderColor } },
         },
         series: [
           {
@@ -245,7 +202,7 @@ function DashboardCard({
             type: 'bar',
             itemStyle: {
               borderRadius: [8, 8, 0, 0],
-              color: lineColor,
+              color: primaryColor,
             },
             emphasis: {
               disabled: true,
@@ -257,29 +214,11 @@ function DashboardCard({
       // 获取饼图颜色（动态获取主题色）
       const pieColors = getPieColors()
 
-      // 辅助函数：根据颜色的亮度决定边框颜色
-      const getBorderColor = (color) => {
-        // 如果背景是暗黑模式，使用深色边框
-        if (isDark) return '#1a1a1a'
-
-        // 浅色模式下，检查颜色是否是黑色或深色
-        // 黑色检查
-        if (color === '#000000' || color === 'rgb(0, 0, 0)') {
-          return '#333333'  // 深灰色边框
-        }
-
-        // 其他情况使用白色边框
-        return '#ffffff'
-      }
-
       option = {
         color: pieColors,
         tooltip: {
           trigger: 'item',
-          backgroundColor: isDark ? 'rgba(30, 30, 30, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-          textStyle: { color: textColor },
-          borderColor: isDark ? axisColor : '#cccccc',
-          borderWidth: 1,
+          ...tooltipStyle,
         },
         legend: {
           bottom: 0,
@@ -295,7 +234,7 @@ function DashboardCard({
                 value: item[dataKey],
                 itemStyle: {
                   color: pieColor,
-                  borderColor: getBorderColor(pieColor),
+                  borderColor: chartSurfaceColor,
                   borderWidth: 2,
                 },
               }
@@ -319,7 +258,7 @@ function DashboardCard({
         chartInstance.current = null
       }
     }
-  }, [dataString, mode, dataKey, xKey, theme])
+  }, [dataString, mode, dataKey, xKey, resolvedTheme, rootThemeVersion])
 
   // 处理窗口大小变化
   useEffect(() => {

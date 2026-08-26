@@ -16,6 +16,28 @@ describe('admin shell design contract', () => {
     expect(css).toContain('--sidebar-accent: #f1f3f5');
   });
 
+  it('defines the approved layered charcoal dark palette', () => {
+    const css = read('app/globals.css');
+    expect(css).toContain('--background: #0b0b0c');
+    expect(css).toContain('--card: #18181b');
+    expect(css).toContain('--popover: #202023');
+    expect(css).toContain('--foreground: #f1f1f2');
+    expect(css).toContain('--muted-foreground: #a1a1aa');
+    expect(css).toContain('--border: #2e2e33');
+    expect(css).toContain('--sidebar: #161618');
+    expect(css).toContain('color-scheme: dark');
+  });
+
+  it('keeps every explicit color theme legible on dark chart surfaces', () => {
+    const css = read('app/globals.css');
+
+    for (const theme of ['blue', 'green', 'purple', 'orange', 'red', 'cyan']) {
+      expect(css).toMatch(
+        new RegExp(`\\.theme-${theme}\\.dark\\s*\\{[^}]*--chart-1:[^}]*--chart-5:`)
+      );
+    }
+  });
+
   it('uses a lightweight sidebar rather than a primary color block', () => {
     const sidebar = read('components/layout/sidebar.jsx');
     expect(sidebar).toContain('bg-sidebar');
