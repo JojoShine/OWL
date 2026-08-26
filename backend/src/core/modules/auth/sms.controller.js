@@ -13,7 +13,7 @@ class SMSController {
   async sendCode(req, res, next) {
     try {
       const { phone } = req.body;
-      const ip = req.ip || req.connection.remoteAddress;
+      const ip = req.clientIp;
       
       const result = await smsService.sendVerificationCode(phone, ip);
       success(res, result, '验证码已发送');
@@ -41,7 +41,7 @@ class SMSController {
    * POST /api/auth/sms/login
    */
   async login(req, res, next) {
-    const ip = req.ip || req.connection.remoteAddress;
+    const ip = req.clientIp;
     const userAgent = req.get('user-agent');
 
     try {

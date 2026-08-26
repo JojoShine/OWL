@@ -1,9 +1,11 @@
 const morgan = require('morgan');
 const { accessLogger, operationLogger } = require('../config/logger');
 
+morgan.token('client-ip', (req) => req.clientIp || req.ip || 'unknown');
+
 // 访问日志中间件
 const accessLogMiddleware = morgan(
-  ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"',
+  ':client-ip - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"',
   {
     stream: {
       write: (message) => accessLogger.http(message.trim()),
@@ -41,7 +43,7 @@ const operationLogMiddleware = (req, res, next) => {
           user: req.user?.id || 'anonymous',
           method: req.method,
           url: req.originalUrl,
-          ip: req.ip,
+          ip: req.clientIp,
           userAgent: req.get('user-agent'),
           body: filterSensitiveData(req.body),  // 过滤敏感字段
           timestamp: new Date().toISOString(),

@@ -104,7 +104,7 @@ class DataSecurityController {
       const userId = req.user.id;
 
       await dataSecurityService.validatePasswordWithAttempts(userId, password, {
-        ipAddress: req.ip,
+        ipAddress: req.clientIp,
         userAgent: req.get('user-agent'),
       });
 
@@ -122,7 +122,7 @@ class DataSecurityController {
     try {
       const userId = req.user.id;
       const result = await plainAccessService.requestPlainAccess(userId, req.body, {
-        ipAddress: req.ip,
+        ipAddress: req.clientIp,
         userAgent: req.get('user-agent'),
       });
       success(res, result, '申请成功');

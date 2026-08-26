@@ -16,10 +16,15 @@ const {
   operationLogMiddleware,
 } = require('./middlewares/requestLogger');
 const dataMaskingMiddleware = require('./middlewares/dataMasking');
+const { clientIpMiddleware, parseTrustProxy } = require('./middlewares/clientIp');
 
 const app = express();
 
+// 仅信任明确配置或来自本机/私有网络的反向代理，使 req.ip 能安全解析真实客户端地址。
+app.set('trust proxy', parseTrustProxy(process.env.TRUST_PROXY));
+
 // 基础中间件
+app.use(clientIpMiddleware);
 app.use(helmet({
   crossOriginResourcePolicy: false, // 允许跨域资源访问
 }));

@@ -22,10 +22,7 @@ class AuthController {
    * POST /api/auth/login
    */
   async login(req, res, next) {
-    const ip = req.ip ||
-               req.connection.remoteAddress ||
-               req.headers['x-forwarded-for']?.split(',')[0] ||
-               'unknown';
+    const ip = req.clientIp;
     const userAgent = req.get('user-agent') || '';
     const { username } = req.body;
 
@@ -76,7 +73,7 @@ class AuthController {
    * POST /api/auth/api-token
    */
   async apiLogin(req, res, next) {
-    const ip = req.ip || req.connection.remoteAddress;
+    const ip = req.clientIp;
     const userAgent = req.get('user-agent');
     const { app_id } = req.body;
 
@@ -164,7 +161,7 @@ class AuthController {
    * POST /api/auth/logout
    */
   async logout(req, res, next) {
-    const ip = req.ip || req.connection.remoteAddress;
+    const ip = req.clientIp;
     const userAgent = req.get('user-agent');
 
     try {

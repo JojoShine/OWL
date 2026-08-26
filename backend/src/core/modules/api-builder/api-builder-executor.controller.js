@@ -22,7 +22,7 @@ class ApiBuilderExecutorController {
       const result = await apiBuilderExecutorService.testInterface(
         interface_,
         params,
-        req.ip,
+        req.clientIp,
         null
       );
 
@@ -83,7 +83,7 @@ class ApiBuilderExecutorController {
       const result = await apiBuilderExecutorService.executeInterface(
         interface_,
         params,
-        req.ip
+        req.clientIp
       );
 
       res.json({
