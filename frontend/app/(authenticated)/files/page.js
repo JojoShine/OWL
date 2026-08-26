@@ -154,6 +154,7 @@ export default function FilesPage() {
     if (folderId === null) {
       setCurrentFolderInfo(null);
       setSelectedItems([]);
+      await loadRootContents();
       return;
     }
     if (folderName) {
