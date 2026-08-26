@@ -13,7 +13,7 @@ import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { usePermission } from '@/lib/hooks/usePermission';
 import PlainAccessButton from '@/components/sensitive-fields/plain-access-button';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 
 export default function UsersPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
@@ -297,7 +297,8 @@ export default function UsersPage() {
           ) : null
         }
       />
-      <PageToolbar>
+      <PageWorkspace>
+        <PageToolbar>
         <SearchFilter
           variant="toolbar"
           fields={searchFields}
@@ -306,8 +307,8 @@ export default function UsersPage() {
           onSearch={handleSearch}
           onReset={handleReset}
         />
-      </PageToolbar>
-      <PageSurface className="p-5 pt-4 lg:p-3">
+        </PageToolbar>
+        <PageSurface className="p-0">
         <DataTable
           variant="workspace"
           density="compact"
@@ -319,7 +320,8 @@ export default function UsersPage() {
           onPageSizeChange={handlePageSizeChange}
           actions={renderUserActions}
         />
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 用户表单弹窗 */}
       <UserFormDialog

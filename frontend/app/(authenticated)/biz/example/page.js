@@ -14,7 +14,7 @@ import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 
 export default function ExamplePage() {
   const [data, setData] = useState([]);
@@ -93,7 +93,8 @@ export default function ExamplePage() {
             </Button>
         )}
       />
-      <PageToolbar>
+      <PageWorkspace>
+        <PageToolbar>
           <SearchFilter
             fields={searchFields}
             values={searchValues}
@@ -101,8 +102,8 @@ export default function ExamplePage() {
             onSearch={handleSearch}
             onReset={handleReset}
           />
-      </PageToolbar>
-      <PageSurface className="p-5 lg:p-3">
+        </PageToolbar>
+        <PageSurface className="p-0">
           <DataTable
             columns={columns}
             data={data}
@@ -110,7 +111,8 @@ export default function ExamplePage() {
             pagination={pagination}
             onPageChange={(page) => setPagination(prev => ({ ...prev, page }))}
           />
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 新建/编辑弹窗 */}
       {/* <ExampleDialog

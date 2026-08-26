@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { usePermission } from '@/lib/hooks/usePermission';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 
 export default function SensitiveFieldsPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
@@ -233,7 +233,8 @@ export default function SensitiveFieldsPage() {
           ) : null
         }
       />
-      <PageToolbar>
+      <PageWorkspace>
+        <PageToolbar>
         <SearchFilter
           variant="toolbar"
           fields={searchFields}
@@ -242,8 +243,8 @@ export default function SensitiveFieldsPage() {
           onSearch={handleSearch}
           onReset={handleReset}
         />
-      </PageToolbar>
-      <PageSurface className="p-5 pt-4 lg:p-3">
+        </PageToolbar>
+        <PageSurface className="p-0">
         <DataTable
           variant="workspace"
           columns={columns}
@@ -275,7 +276,8 @@ export default function SensitiveFieldsPage() {
             </>
           )}
         />
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 敏感字段表单弹窗 */}
       <SensitiveFieldFormDialog

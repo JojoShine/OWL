@@ -28,7 +28,7 @@ import { toast } from 'sonner';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import ZabbixInstallGuide from '@/components/zabbix/ZabbixInstallGuide';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 
 export default function ZabbixPage() {
   const [instances, setInstances] = useState([]);
@@ -290,7 +290,8 @@ export default function ZabbixPage() {
           </>
         )}
       />
-      <PageToolbar>
+      <PageWorkspace>
+        <PageToolbar>
         <SearchFilter
           variant="toolbar"
           fields={searchFields}
@@ -299,9 +300,9 @@ export default function ZabbixPage() {
           onSearch={handleSearch}
           onReset={handleReset}
         />
-      </PageToolbar>
+        </PageToolbar>
 
-      <PageSurface className="p-5 lg:p-3">
+        <PageSurface className="p-0">
         <DataTable
           variant="workspace"
           density="compact"
@@ -357,7 +358,8 @@ export default function ZabbixPage() {
             </div>
           )}
         />
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 新增/编辑弹窗 */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>

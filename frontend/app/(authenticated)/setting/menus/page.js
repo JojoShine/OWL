@@ -12,7 +12,7 @@ import MenuFormDialog from '@/components/menus/menu-form-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
 import { usePermission } from '@/lib/hooks/usePermission';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 
 export default function MenusPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
@@ -201,7 +201,8 @@ export default function MenusPage() {
           ) : null
         }
       />
-      <PageToolbar>
+      <PageWorkspace>
+        <PageToolbar>
         <SearchFilter
           variant="toolbar"
           fields={searchFields}
@@ -210,8 +211,8 @@ export default function MenusPage() {
           onSearch={() => {}}
           onReset={() => setSearchValues({ keyword: '', type: 'all', status: 'all' })}
         />
-      </PageToolbar>
-      <PageSurface className="p-5 lg:p-3">
+        </PageToolbar>
+        <PageSurface className="p-5 lg:p-3">
         <div className="grid grid-cols-2 gap-4 border-b pb-5 text-sm md:grid-cols-4">
           <div>
             <p className="text-muted-foreground">菜单总数</p>
@@ -277,7 +278,8 @@ export default function MenusPage() {
             expandedIds={expandedMenus}
           />
         )}
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 菜单表单弹窗 */}
       <MenuFormDialog

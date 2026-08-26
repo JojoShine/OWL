@@ -11,7 +11,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 
 export default function ThirdPartyKeysPage() {
   const [keys, setKeys] = useState([]);
@@ -281,7 +281,8 @@ export default function ThirdPartyKeysPage() {
           </Button>
         }
       />
-      <PageToolbar>
+      <PageWorkspace>
+        <PageToolbar>
         <SearchFilter
           variant="toolbar"
           fields={searchFields}
@@ -290,8 +291,8 @@ export default function ThirdPartyKeysPage() {
           onSearch={handleSearch}
           onReset={handleReset}
         />
-      </PageToolbar>
-      <PageSurface className="p-5 pt-4 lg:p-3">
+        </PageToolbar>
+        <PageSurface className="p-0">
         <DataTable
           variant="workspace"
           columns={columns}
@@ -337,7 +338,8 @@ export default function ThirdPartyKeysPage() {
             </div>
           )}
         />
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 密钥表单弹窗 */}
       <KeyFormDialog

@@ -14,7 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import EmailTaskDialog from '@/components/notification/EmailTaskDialog';
 import EmailTemplateFormDialog from '@/components/notification/EmailTemplateFormDialog';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 
 const frequencyMap = {
   once: '一次',
@@ -385,7 +385,8 @@ export default function EmailManagementPage() {
           </Button>
         }
       />
-      <PageToolbar>
+      <PageWorkspace>
+        <PageToolbar>
         <Tabs value={activeView} onValueChange={setActiveView} className="space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <TabsList>
@@ -419,8 +420,8 @@ export default function EmailManagementPage() {
             />
           )}
         </Tabs>
-      </PageToolbar>
-      <PageSurface className="p-5 pt-4 lg:p-3">
+        </PageToolbar>
+        <PageSurface className="p-0">
         {activeView === 'tasks' ? (
           <DataTable
             variant="workspace"
@@ -486,7 +487,8 @@ export default function EmailManagementPage() {
             )}
           />
         )}
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 邮件任务表单弹窗 */}
       <EmailTaskDialog

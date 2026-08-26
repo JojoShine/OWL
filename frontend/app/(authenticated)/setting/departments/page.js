@@ -12,7 +12,7 @@ import DepartmentFormDialog from '@/components/departments/department-form-dialo
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
 import { usePermission } from '@/lib/hooks/usePermission';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 
 export default function DepartmentsPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
@@ -189,7 +189,8 @@ export default function DepartmentsPage() {
           ) : null
         }
       />
-      <PageToolbar>
+      <PageWorkspace>
+        <PageToolbar>
         <SearchFilter
           variant="toolbar"
           fields={searchFields}
@@ -198,8 +199,8 @@ export default function DepartmentsPage() {
           onSearch={() => {}}
           onReset={() => setSearchValues({ keyword: '', status: 'all' })}
         />
-      </PageToolbar>
-      <PageSurface className="p-5 lg:p-3">
+        </PageToolbar>
+        <PageSurface className="p-5 lg:p-3">
         <div className="grid grid-cols-2 gap-4 border-b pb-5 text-sm md:grid-cols-4">
           <div>
             <p className="text-muted-foreground">部门总数</p>
@@ -273,7 +274,8 @@ export default function DepartmentsPage() {
             expandedIds={expandedDepartments}
           />
         )}
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 部门表单弹窗 */}
       <DepartmentFormDialog

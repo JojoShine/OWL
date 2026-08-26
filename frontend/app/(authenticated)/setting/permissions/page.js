@@ -5,7 +5,7 @@ import { permissionApi } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 
 export default function PermissionsPage() {
   const [permissions, setPermissions] = useState([]);
@@ -132,7 +132,8 @@ export default function PermissionsPage() {
         title="权限管理"
         description="维护系统权限标识和访问能力。"
       />
-      <PageToolbar>
+      <PageWorkspace>
+        <PageToolbar>
         <SearchFilter
           variant="toolbar"
           fields={searchFields}
@@ -141,8 +142,8 @@ export default function PermissionsPage() {
           onSearch={handleSearch}
           onReset={handleReset}
         />
-      </PageToolbar>
-      <PageSurface className="p-5 pt-4 lg:p-3">
+        </PageToolbar>
+        <PageSurface className="p-0">
         <DataTable
           variant="workspace"
           columns={columns}
@@ -153,7 +154,8 @@ export default function PermissionsPage() {
           onPageSizeChange={handlePageSizeChange}
           actions={() => <div className="h-8"></div>}
         />
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
     </PageShell>
   );
 }

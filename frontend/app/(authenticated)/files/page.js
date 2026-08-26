@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 import FileList from '@/components/files/FileList';
 
 // 对话框组件动态导入 - 仅在需要时加载
@@ -336,7 +336,8 @@ export default function FilesPage() {
       />
 
       {/* 操作按钮和搜索 */}
-      <PageToolbar className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <PageWorkspace>
+        <PageToolbar className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <Button onClick={() => setUploadDialogOpen(true)}>
             <UploadIcon />
@@ -385,10 +386,10 @@ export default function FilesPage() {
             </Button>
           </div>
         </div>
-      </PageToolbar>
+        </PageToolbar>
 
-      {/* 文件列表 */}
-      <PageSurface className="p-5 lg:p-3">
+        {/* 文件列表 */}
+        <PageSurface className="p-5 lg:p-3">
         <FileList
           folders={filteredFolders}
           files={filteredFiles}
@@ -399,7 +400,8 @@ export default function FilesPage() {
           onFileClick={handleFileClick}
           onAction={handleItemAction}
         />
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 对话框组件 - 仅在打开时渲染 */}
       {uploadDialogOpen && (

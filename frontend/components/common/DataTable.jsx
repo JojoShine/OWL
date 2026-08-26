@@ -100,6 +100,7 @@ export function DataTable({
 
   return (
     <div
+      data-slot="data-table"
       className={cn(
         isWorkspace ? 'overflow-hidden rounded-lg border bg-card' : 'space-y-4',
         className

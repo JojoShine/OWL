@@ -21,9 +21,25 @@ export function PageHeader({ title, description, meta, actions, className }) {
 }
 
 export function PageToolbar({ className, ...props }) {
-  return <div className={cn('rounded-lg border bg-card px-4 py-4', className)} {...props} />;
+  return <div data-slot="page-toolbar" className={cn('rounded-lg border bg-card px-4 py-4', className)} {...props} />;
 }
 
 export function PageSurface({ className, ...props }) {
-  return <section className={cn('overflow-hidden rounded-lg border bg-card', className)} {...props} />;
+  return <section data-slot="page-surface" className={cn('overflow-hidden rounded-lg border bg-card', className)} {...props} />;
+}
+
+export function PageWorkspace({ className, ...props }) {
+  return (
+    <section
+      data-slot="page-workspace"
+      className={cn(
+        'overflow-hidden rounded-lg border bg-card',
+        '[&>[data-slot=page-toolbar]]:rounded-none [&>[data-slot=page-toolbar]]:border-x-0 [&>[data-slot=page-toolbar]]:border-t-0',
+        '[&>[data-slot=page-surface]]:rounded-none [&>[data-slot=page-surface]]:border-0',
+        '[&_[data-slot=data-table]]:rounded-none [&_[data-slot=data-table]]:border-0',
+        className
+      )}
+      {...props}
+    />
+  );
 }

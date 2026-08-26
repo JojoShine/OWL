@@ -13,7 +13,7 @@ import TestInterfaceDialog from '@/components/api-builder/test-interface-dialog'
 import { getFullApiUrl } from '@/lib/utils/api-url';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 
 // 格式化日期的辅助函数
 const formatDate = (dateString) => {
@@ -226,7 +226,8 @@ export default function ApiBuilderPage() {
           </>
         )}
       />
-      <PageToolbar>
+      <PageWorkspace>
+        <PageToolbar>
           {/* 搜索栏 */}
           <SearchFilter
             fields={searchFields}
@@ -235,9 +236,9 @@ export default function ApiBuilderPage() {
             onSearch={handleSearch}
             onReset={handleReset}
           />
-      </PageToolbar>
+        </PageToolbar>
 
-      <PageSurface className="p-5 lg:p-3">
+        <PageSurface className="p-0">
         {/* 接口列表 */}
           <DataTable
             columns={columns}
@@ -283,7 +284,8 @@ export default function ApiBuilderPage() {
               </>
             )}
           />
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 删除确认对话框 */}
       <ConfirmDialog

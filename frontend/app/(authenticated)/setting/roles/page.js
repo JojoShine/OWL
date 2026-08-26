@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { usePermission } from '@/lib/hooks/usePermission';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 
 export default function RolesPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
@@ -207,7 +207,8 @@ export default function RolesPage() {
           ) : null
         }
       />
-      <PageToolbar>
+      <PageWorkspace>
+        <PageToolbar>
         <SearchFilter
           variant="toolbar"
           fields={searchFields}
@@ -216,8 +217,8 @@ export default function RolesPage() {
           onSearch={handleSearch}
           onReset={handleReset}
         />
-      </PageToolbar>
-      <PageSurface className="p-5 pt-4 lg:p-3">
+        </PageToolbar>
+        <PageSurface className="p-0">
         <DataTable
           variant="workspace"
           columns={columns}
@@ -249,7 +250,8 @@ export default function RolesPage() {
             </>
           )}
         />
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 角色表单弹窗 */}
       <RoleFormDialog

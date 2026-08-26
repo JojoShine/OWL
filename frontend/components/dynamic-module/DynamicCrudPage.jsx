@@ -8,7 +8,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
-import { PageHeader, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 import { toast } from 'sonner';
 import axios from '@/lib/utils/module-client';
 import { usePermission } from '@/lib/hooks/usePermission';
@@ -647,20 +647,21 @@ export function DynamicCrudPage({ config }) {
             </DialogContent>
       </Dialog>
 
-      {/* 筛选器 */}
-      {config.fields?.some((field) => field.isSearchable) && (
-        <PageToolbar>
-          <DynamicFilters
-            fields={config.fields}
-            filters={filters}
-            onChange={setFilters}
-            onSearch={handleSearch}
-            onReset={handleResetFilters}
-          />
-        </PageToolbar>
-      )}
+      <PageWorkspace>
+        {/* 筛选器 */}
+        {config.fields?.some((field) => field.isSearchable) && (
+          <PageToolbar>
+            <DynamicFilters
+              fields={config.fields}
+              filters={filters}
+              onChange={setFilters}
+              onSearch={handleSearch}
+              onReset={handleResetFilters}
+            />
+          </PageToolbar>
+        )}
 
-      <PageSurface className="space-y-4 p-5">
+        <PageSurface className="space-y-4 p-5 lg:p-3">
           {/* 数据表格 */}
           <DynamicTable
             data={data}
@@ -688,7 +689,8 @@ export function DynamicCrudPage({ config }) {
               onPageSizeChange={handlePageSizeChange}
             />
           )}
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
 
       {/* 表单对话框 */}
       <DynamicForm

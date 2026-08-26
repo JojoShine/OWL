@@ -6,7 +6,7 @@ import LogFilters from '@/components/logs/LogFilters';
 import LogTable from '@/components/logs/LogTable';
 import { logApi } from '@/lib/api/system/log.api';
 import { toast } from 'sonner';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 
 const LOG_TYPES = [
   { value: 'operation', label: '操作日志' },
@@ -114,7 +114,8 @@ export default function LogsPage() {
         title="系统日志"
         description="查询系统操作和运行记录。"
       />
-      <PageToolbar>
+      <PageWorkspace>
+        <PageToolbar>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-7">
             {LOG_TYPES.map((type) => (
@@ -134,8 +135,8 @@ export default function LogsPage() {
             </TabsContent>
           ))}
         </Tabs>
-      </PageToolbar>
-      <PageSurface>
+        </PageToolbar>
+        <PageSurface>
         <div className="border-b px-5 py-4">
           <h2 className="font-medium">{LOG_TYPES.find(t => t.value === activeTab)?.label}</h2>
         </div>
@@ -149,7 +150,8 @@ export default function LogsPage() {
             onPageSizeChange={handlePageSizeChange}
           />
         </div>
-      </PageSurface>
+        </PageSurface>
+      </PageWorkspace>
     </PageShell>
   );
 }
