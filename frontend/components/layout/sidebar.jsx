@@ -30,46 +30,40 @@ function SidebarUserMenu() {
   const initials = (user?.username || displayName).charAt(0).toUpperCase();
 
   return (
-    <div className="border-t border-sidebar-border px-3 py-3.5">
-      <div className="rounded-lg px-1.5">
-        <div className="flex items-center gap-2.5">
-          <Avatar className="h-9 w-9 shrink-0">
-            <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+    <div className="border-t border-sidebar-border px-3 py-2.5">
+      <div className="flex items-center gap-2.5 rounded-lg px-1.5">
+        <Avatar className="h-8 w-8 shrink-0">
+          <AvatarFallback className="bg-sidebar-accent text-xs text-sidebar-accent-foreground">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
 
-          <p className="min-w-0 flex-1 truncate text-sm font-semibold text-sidebar-accent-foreground" title={displayName}>
+        <div className="min-w-0 flex-1 leading-4">
+          <p className="truncate text-sm font-semibold text-sidebar-accent-foreground" title={displayName}>
             {displayName}
           </p>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="退出登录"
-            title="退出登录"
-            onClick={logout}
-            className="h-8 w-8 shrink-0 text-sidebar-foreground/50 hover:bg-destructive/10 hover:text-destructive"
+          <p
+            className="truncate text-[11px] text-sidebar-foreground/60"
+            title={`${roleText} · ${departmentText}`}
           >
-            <LogOut className="h-4 w-4" />
-          </Button>
+            {roleText} · {departmentText}
+          </p>
+          <p className="truncate text-[11px] text-sidebar-foreground/45" title={emailText}>
+            {emailText}
+          </p>
         </div>
 
-        <div className="mt-2 space-y-1 text-xs leading-5">
-          <p className="flex min-w-0 gap-2">
-            <span className="w-7 shrink-0 text-sidebar-foreground/40">角色</span>
-            <span className="truncate text-sidebar-foreground/65" title={roleText}>{roleText}</span>
-          </p>
-          <p className="flex min-w-0 gap-2">
-            <span className="w-7 shrink-0 text-sidebar-foreground/40">邮箱</span>
-            <span className="truncate text-sidebar-foreground/55" title={emailText}>{emailText}</span>
-          </p>
-          <p className="flex min-w-0 gap-2">
-            <span className="w-7 shrink-0 text-sidebar-foreground/40">部门</span>
-            <span className="truncate text-sidebar-foreground/55" title={departmentText}>{departmentText}</span>
-          </p>
-        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="退出登录"
+          title="退出登录"
+          onClick={logout}
+          className="h-7 w-7 shrink-0 text-sidebar-foreground/50 hover:bg-destructive/10 hover:text-destructive"
+        >
+          <LogOut className="h-3.5 w-3.5" />
+        </Button>
       </div>
     </div>
   );
