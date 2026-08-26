@@ -1,10 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { XIcon, ShareIcon, CopyIcon, CheckIcon, ClockIcon } from 'lucide-react';
+import { ShareIcon, CopyIcon, CheckIcon, ClockIcon } from 'lucide-react';
 import { fileShareApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -94,22 +103,16 @@ export default function FileShareDialog({ open, onClose, file }) {
   if (!open || !file) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-popover rounded-lg shadow-xl w-full max-w-md">
+    <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) handleClose(); }}>
+      <DialogContent className="max-w-md gap-0 p-0" showCloseButton={!creating}>
         {/* 头部 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <div className="flex items-center gap-2">
+        <DialogHeader className="border-b px-6 py-5 pr-12">
+          <DialogTitle className="flex items-center gap-2">
             <ShareIcon className="w-5 h-5 text-primary" />
-            <h2 className="text-xl font-semibold text-foreground">分享文件</h2>
-          </div>
-          <button
-            onClick={handleClose}
-            disabled={creating}
-            className="p-1 hover:bg-accent rounded-lg transition-colors disabled:opacity-50"
-          >
-            <XIcon className="w-5 h-5 text-muted-foreground" />
-          </button>
-        </div>
+            分享文件
+          </DialogTitle>
+          <DialogDescription>创建一个有时效限制的公开下载链接</DialogDescription>
+        </DialogHeader>
 
         {/* 内容 */}
         <div className="px-6 py-4">
@@ -164,11 +167,11 @@ export default function FileShareDialog({ open, onClose, file }) {
                 分享链接
               </label>
               <div className="flex items-center gap-2 mb-4">
-                <input
+                <Input
                   type="text"
                   value={shareLink}
                   readOnly
-                  className="flex-1 px-4 py-2 border border-border rounded-lg bg-muted text-foreground text-sm"
+                  className="flex-1 bg-muted"
                 />
                 <Button
                   onClick={handleCopyLink}
@@ -209,15 +212,15 @@ export default function FileShareDialog({ open, onClose, file }) {
         </div>
 
         {/* 底部按钮 */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
+        <DialogFooter className="border-t px-6 py-4">
           <Button
             variant="outline"
             onClick={handleClose}
           >
             关闭
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

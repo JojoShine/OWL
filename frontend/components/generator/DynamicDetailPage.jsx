@@ -52,7 +52,7 @@ export default function DynamicDetailPage({
    */
   const formatFieldValue = (field, value) => {
     if (value === null || value === undefined) {
-      return <span className="text-gray-400 italic">-</span>;
+      return <span className="italic text-muted-foreground">-</span>;
     }
 
     // 根据formatType进行格式化
@@ -87,7 +87,7 @@ export default function DynamicDetailPage({
               href={value}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
+              className="text-primary hover:underline"
             >
               {value}
             </a>
@@ -116,7 +116,7 @@ export default function DynamicDetailPage({
 
   if (!record || !pageConfig) {
     return (
-      <div className="text-center p-8 text-gray-500">
+      <div className="rounded-lg border border-dashed bg-card p-12 text-center text-sm text-muted-foreground">
         暂无数据
       </div>
     );
@@ -136,7 +136,7 @@ export default function DynamicDetailPage({
           </Button>
           <div>
             <h1 className="text-2xl font-bold">{pageConfig.description || pageConfig.moduleName}</h1>
-            <p className="text-sm text-gray-500 mt-1">详细信息</p>
+            <p className="mt-1 text-sm text-muted-foreground">详细信息</p>
           </div>
         </div>
       </div>
@@ -169,10 +169,10 @@ export default function DynamicDetailPage({
 
                   return (
                     <div key={fieldIndex} className="space-y-1">
-                      <label className="text-sm font-medium text-gray-700">
+                      <label className="text-sm font-medium text-muted-foreground">
                         {groupField.label}
                       </label>
-                      <div className="text-sm text-gray-900">
+                      <div className="text-sm text-foreground">
                         {formatFieldValue(fullField, fieldValue)}
                       </div>
                     </div>
@@ -190,15 +190,15 @@ export default function DynamicDetailPage({
               <CardTitle className="text-lg">详细信息</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {pageConfig.fields
                   .filter(f => f.showInList !== false)
                   .map((field, index) => (
                     <div key={index} className="space-y-1">
-                      <label className="text-sm font-medium text-gray-700">
+                      <label className="text-sm font-medium text-muted-foreground">
                         {field.label}
                       </label>
-                      <div className="text-sm text-gray-900">
+                      <div className="text-sm text-foreground">
                         {formatFieldValue(field, record[field.name])}
                       </div>
                     </div>

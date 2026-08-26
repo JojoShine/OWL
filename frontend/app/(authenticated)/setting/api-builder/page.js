@@ -6,7 +6,6 @@ import { apiBuilderApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Key, Play } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import ApiKeysDialog from '@/components/api-builder/api-keys-dialog';
@@ -14,6 +13,7 @@ import TestInterfaceDialog from '@/components/api-builder/test-interface-dialog'
 import { getFullApiUrl } from '@/lib/utils/api-url';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 
 // 格式化日期的辅助函数
 const formatDate = (dateString) => {
@@ -134,10 +134,10 @@ export default function ApiBuilderPage() {
 
   const getMethodBadge = (method) => {
     const colors = {
-      GET: 'bg-blue-100 text-blue-800',
-      POST: 'bg-green-100 text-green-800',
-      PUT: 'bg-yellow-100 text-yellow-800',
-      DELETE: 'bg-red-100 text-red-800',
+      GET: 'bg-muted text-foreground',
+      POST: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+      PUT: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
+      DELETE: 'bg-destructive/10 text-destructive',
     };
     return (
       <span className={`px-2 py-1 rounded text-xs font-medium ${colors[method] || colors.GET}`}>
@@ -209,14 +209,12 @@ export default function ApiBuilderPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <CardTitle>接口开发</CardTitle>
-            <CardDescription>管理通过SQL生成的动态API接口</CardDescription>
-          </div>
-          <div className="flex gap-2">
+    <PageShell>
+      <PageHeader
+        title="接口开发"
+        description="管理通过 SQL 生成的动态 API 接口"
+        actions={(
+          <>
             <Button onClick={() => router.push('/setting/api-builder/keys')} size="lg" className="sm:w-auto" variant="outline">
               <Key className="h-4 w-4 mr-1" />
               密钥管理
@@ -225,9 +223,10 @@ export default function ApiBuilderPage() {
               <Plus className="h-4 w-4 mr-1" />
               新增
             </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </>
+        )}
+      />
+      <PageToolbar>
           {/* 搜索栏 */}
           <SearchFilter
             fields={searchFields}
@@ -236,8 +235,10 @@ export default function ApiBuilderPage() {
             onSearch={handleSearch}
             onReset={handleReset}
           />
+      </PageToolbar>
 
-          {/* 接口列表 */}
+      <PageSurface className="p-5">
+        {/* 接口列表 */}
           <DataTable
             columns={columns}
             data={interfaces}
@@ -282,8 +283,7 @@ export default function ApiBuilderPage() {
               </>
             )}
           />
-        </CardContent>
-      </Card>
+      </PageSurface>
 
       {/* 删除确认对话框 */}
       <ConfirmDialog
@@ -318,6 +318,6 @@ export default function ApiBuilderPage() {
           interface_={selectedInterface}
         />
       )}
-    </div>
+    </PageShell>
   );
 }

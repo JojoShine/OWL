@@ -12,9 +12,9 @@ import { exampleApi } from '@/lib/api/biz/example.api';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 
 export default function ExamplePage() {
   const [data, setData] = useState([]);
@@ -82,18 +82,18 @@ export default function ExamplePage() {
   ];
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>示例模块</CardTitle>
+    <PageShell>
+      <PageHeader
+        title="示例模块"
+        description="浏览和管理示例业务数据"
+        actions={(
             <Button onClick={() => { setEditingItem(null); setIsDialogOpen(true); }}>
               <Plus className="mr-2 h-4 w-4" />
               新建
             </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        )}
+      />
+      <PageToolbar>
           <SearchFilter
             fields={searchFields}
             values={searchValues}
@@ -101,6 +101,8 @@ export default function ExamplePage() {
             onSearch={handleSearch}
             onReset={handleReset}
           />
+      </PageToolbar>
+      <PageSurface className="p-5">
           <DataTable
             columns={columns}
             data={data}
@@ -108,8 +110,7 @@ export default function ExamplePage() {
             pagination={pagination}
             onPageChange={(page) => setPagination(prev => ({ ...prev, page }))}
           />
-        </CardContent>
-      </Card>
+      </PageSurface>
 
       {/* 新建/编辑弹窗 */}
       {/* <ExampleDialog
@@ -118,6 +119,6 @@ export default function ExamplePage() {
         item={editingItem}
         onSuccess={() => { setIsDialogOpen(false); fetchData(); }}
       /> */}
-    </div>
+    </PageShell>
   );
 }

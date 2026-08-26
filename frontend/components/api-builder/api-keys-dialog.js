@@ -139,7 +139,7 @@ export default function ApiKeysDialog({ open, onOpenChange, interface_ }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[85dvh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>接口调用说明</DialogTitle>
           <DialogDescription className="flex items-center justify-between">
@@ -158,7 +158,7 @@ export default function ApiKeysDialog({ open, onOpenChange, interface_ }) {
 
         <div className="space-y-4 overflow-x-hidden">
           {/* 接口信息 */}
-          <div className="border rounded-lg p-4 bg-muted/50">
+          <div className="rounded-lg border bg-muted/40 p-4">
             <h3 className="font-semibold text-base mb-3">接口信息</h3>
             <div className="space-y-2 text-sm">
               <div>
@@ -181,21 +181,21 @@ export default function ApiKeysDialog({ open, onOpenChange, interface_ }) {
           </div>
 
           {/* 调用流程 */}
-          <div className="border rounded-lg p-4 bg-muted">
+          <div className="rounded-lg border p-4">
             <h3 className="font-semibold text-base mb-4">调用流程</h3>
 
             {interface_.require_auth ? (
               <Tabs defaultValue="step1" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6 bg-background border rounded-lg p-2 gap-2 h-14">
-                  <TabsTrigger value="step1" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-md transition-all">步骤 1：获取令牌</TabsTrigger>
-                  <TabsTrigger value="step2" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-md transition-all">步骤 2：调用接口</TabsTrigger>
+                <TabsList className="mb-5 grid w-full grid-cols-2">
+                  <TabsTrigger value="step1">步骤 1：获取令牌</TabsTrigger>
+                  <TabsTrigger value="step2">步骤 2：调用接口</TabsTrigger>
                 </TabsList>
 
                 {/* 步骤1：获取Token */}
                 <TabsContent value="step1" className="space-y-3 mt-6">
                   <p className="text-sm mb-3">该接口需要认证。请先获取令牌，然后调用接口时在请求头中传递。</p>
                   <div className="text-xs mb-2 text-muted-foreground">使用 cURL 获取令牌：</div>
-                  <div className="flex items-center gap-2 overflow-hidden bg-card" style={{ padding: '12px', borderRadius: '6px' }}>
+                  <div className="flex items-center gap-2 overflow-hidden rounded-md border bg-muted/50 p-3">
                     <code className="text-xs flex-1 font-mono break-words overflow-hidden">
                       {`curl -X POST ${apiBaseUrl}/auth/api-token \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "app_id": "your-app-id",\n    "app_key": "your-app-key"\n  }'`}
                     </code>
@@ -230,7 +230,7 @@ export default function ApiKeysDialog({ open, onOpenChange, interface_ }) {
                   {hasParams && (
                     <>
                       <div className="text-xs mb-2 text-muted-foreground">请求参数示例：</div>
-                      <div className="flex items-center gap-2 overflow-hidden bg-card border border-border" style={{ padding: '12px', borderRadius: '6px' }}>
+                      <div className="flex items-center gap-2 overflow-hidden rounded-md border bg-muted/50 p-3">
                         <code className="text-xs flex-1 font-mono break-words overflow-hidden">
                           {JSON.stringify(sampleParams, null, 2)}
                         </code>
@@ -248,7 +248,7 @@ export default function ApiKeysDialog({ open, onOpenChange, interface_ }) {
                   )}
 
                   <div className="text-xs mt-3 mb-2 text-muted-foreground">cURL 示例：</div>
-                  <div className="flex items-center gap-2 overflow-hidden bg-card border border-border" style={{ padding: '12px', borderRadius: '6px' }}>
+                  <div className="flex items-center gap-2 overflow-hidden rounded-md border bg-muted/50 p-3">
                     <code className="text-xs flex-1 font-mono break-words overflow-hidden">
                       {`curl -X ${interface_.method} ${getFullApiUrl(interface_.endpoint)}${interface_.method === 'GET' && hasParams ? '?' + Object.entries(sampleParams).map(([k, v]) => `${k}=${v}`).join('&') : ''} \\\n  -H "Authorization: Bearer YOUR_TOKEN"${interface_.method !== 'GET' && hasParams ? ` \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(sampleParams)}'` : ''}`}
                     </code>
@@ -271,7 +271,7 @@ export default function ApiKeysDialog({ open, onOpenChange, interface_ }) {
                 {hasParams && (
                   <>
                     <div className="text-xs mb-2 text-muted-foreground">请求参数示例：</div>
-                    <div className="flex items-center gap-2 overflow-hidden bg-card border border-border" style={{ padding: '12px', borderRadius: '6px' }}>
+                    <div className="flex items-center gap-2 overflow-hidden rounded-md border bg-muted/50 p-3">
                       <code className="text-xs flex-1 font-mono break-words overflow-hidden">
                         {JSON.stringify(sampleParams, null, 2)}
                       </code>
@@ -289,7 +289,7 @@ export default function ApiKeysDialog({ open, onOpenChange, interface_ }) {
                 )}
 
                 <div className="text-xs mb-2 text-muted-foreground">cURL 示例：</div>
-                <div className="flex items-center gap-2 overflow-hidden bg-card border border-border" style={{ padding: '12px', borderRadius: '6px' }}>
+                <div className="flex items-center gap-2 overflow-hidden rounded-md border bg-muted/50 p-3">
                   <code className="text-xs flex-1 font-mono break-words overflow-hidden">
                     {`curl -X ${interface_.method} ${getFullApiUrl(interface_.endpoint)}${interface_.method === 'GET' && hasParams ? '?' + Object.entries(sampleParams).map(([k, v]) => `${k}=${v}`).join('&') : ''}${interface_.method !== 'GET' && hasParams ? ` \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(sampleParams)}'` : ''}`}
                   </code>

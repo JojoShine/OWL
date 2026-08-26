@@ -154,7 +154,7 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>权限管理</DialogTitle>
           <DialogDescription>
@@ -164,7 +164,7 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
 
         <div className="space-y-6">
           {/* Inheritance Setting */}
-          <div className="border border-border rounded-lg p-4 bg-muted">
+          <div className="rounded-lg border bg-muted/40 p-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-medium text-foreground">权限继承</h3>
@@ -177,10 +177,11 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
               <button
                 onClick={handleInheritChange}
                 disabled={loading}
-                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                aria-pressed={inherit}
+                className={`rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
                   inherit
-                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
-                    : 'bg-muted text-muted-foreground'
+                    ? 'border-foreground bg-foreground text-background'
+                    : 'border-border bg-background text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {inherit ? '已启用' : '已禁用'}
@@ -189,10 +190,10 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
           </div>
 
           {/* Add Permission Form */}
-          <div className="border border-border rounded-lg p-4">
+          <div className="rounded-lg border p-4">
             <h3 className="font-medium mb-4 text-foreground">添加权限</h3>
             <div className="space-y-3">
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
                   <SelectTrigger className="flex-1">
                     <SelectValue placeholder="选择角色" />
@@ -210,7 +211,7 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
                   value={selectedPermission}
                   onValueChange={setSelectedPermission}
                 >
-                  <SelectTrigger className="w-28">
+                  <SelectTrigger className="sm:w-28">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -234,7 +235,7 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
           </div>
 
           {/* Permissions List */}
-          <div className="border border-border rounded-lg p-4">
+          <div className="rounded-lg border p-4">
             <h3 className="font-medium mb-4 text-foreground">当前权限</h3>
             {permissions.length === 0 ? (
               <p className="text-muted-foreground text-sm">暂无权限设置</p>
@@ -243,7 +244,7 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
                 {permissions.map((perm) => (
                   <div
                     key={perm.id}
-                    className="flex items-center justify-between p-3 bg-muted rounded"
+                    className="flex items-center justify-between rounded-md bg-muted/60 p-3"
                   >
                     <div className="flex-1">
                       <div className="font-medium text-sm text-foreground">
@@ -257,7 +258,7 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
                     <button
                       onClick={() => handleDeletePermission(perm.id)}
                       disabled={loading}
-                      className="p-2 hover:bg-destructive/10 text-destructive dark:text-red-400 rounded transition-colors"
+                      className="rounded p-2 text-destructive transition-colors hover:bg-destructive/10"
                       title="删除权限"
                     >
                       <Trash2 className="w-4 h-4" />

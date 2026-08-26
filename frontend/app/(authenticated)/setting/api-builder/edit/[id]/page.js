@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { apiBuilderApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ArrowLeft, CheckCircle2, Play, Wand2 } from 'lucide-react';
+import { PageHeader, PageShell } from '@/components/layout/page-shell';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-sql';
 import 'ace-builds/src-noconflict/theme-textmate';
@@ -275,29 +277,25 @@ export default function ApiBuilderEditPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h2 className="text-2xl font-bold">加载中...</h2>
-        </div>
-      </div>
+      <PageShell>
+        <PageHeader title="加载中..." description="正在读取接口配置" />
+      </PageShell>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <PageShell>
       {/* 页面头 */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h2 className="text-xl font-bold">{isNewMode ? '新增接口' : '编辑接口'}</h2>
-          <p className="text-sm text-muted-foreground">{isNewMode ? '创建一个新的API接口' : '修改API接口配置'}</p>
-        </div>
-      </div>
+      <PageHeader
+        title={isNewMode ? '新增接口' : '编辑接口'}
+        description={isNewMode ? '创建一个新的 API 接口' : '修改 API 接口配置'}
+        actions={(
+          <Button variant="outline" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+            返回
+          </Button>
+        )}
+      />
 
       {/* 分步骤表单 */}
       <Card>
@@ -385,11 +383,11 @@ export default function ApiBuilderEditPage() {
 
               <div>
                 <Label className="text-base">接口描述</Label>
-                <textarea
+                <Textarea
                   value={formData.description}
                   onChange={(e) => handleFieldChange('description', e.target.value)}
                   placeholder="输入接口描述"
-                  className="w-full px-3 py-2 border rounded-md mt-1 text-base h-20"
+                  className="mt-1 min-h-20 text-base"
                 />
               </div>
 
@@ -498,11 +496,11 @@ export default function ApiBuilderEditPage() {
                   <>
                     <div className="mt-4 border-t"></div>
                     <div className="mt-2 p-3 border rounded-md bg-muted/50">
-                      <p className="text-base font-semibold text-slate-900 dark:text-white mb-3">请求参数值：</p>
+                      <p className="mb-3 text-base font-semibold text-foreground">请求参数值：</p>
                       <div className="space-y-3">
                         {extractedParams.map((param) => (
                           <div key={param.name} className="grid grid-cols-2 gap-2">
-                            <label className="text-base text-slate-700 dark:text-gray-300 flex items-center">
+                            <label className="flex items-center text-base text-foreground">
                               {param.name}
                               <span className="text-red-400 ml-1">*</span>
                             </label>
@@ -524,11 +522,11 @@ export default function ApiBuilderEditPage() {
                   <>
                     <div className="mt-4 border-t"></div>
                     <div className="mt-2 p-3 border rounded-md bg-muted/50">
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white mb-3">测试结果</p>
+                      <p className="mb-3 text-sm font-semibold text-foreground">测试结果</p>
 
                       {testResult.operationType === 'SELECT' ? (
                         <>
-                          <div className="text-sm text-slate-700 dark:text-gray-300 space-y-2 mb-3">
+                          <div className="mb-3 space-y-2 text-sm text-muted-foreground">
                             <p>总数据行数：<strong>{testResult.rowCount}</strong> | 显示：<strong>{Math.min(testResult.rowCount, 5)}</strong> 条</p>
                             <p>返回列数：<strong>{testResult.columns?.length || 0}</strong></p>
                           </div>
@@ -538,9 +536,9 @@ export default function ApiBuilderEditPage() {
                             <div className="mt-3 overflow-x-auto" style={{ minHeight: '280px' }}>
                               <table className="w-full text-sm border-collapse">
                                 <thead>
-                                  <tr className="bg-slate-200 dark:bg-slate-800">
+                                  <tr className="bg-muted">
                                     {testResult.columns?.map((col) => (
-                                      <th key={col.name} className="border px-3 py-3 text-left font-semibold text-slate-900 dark:text-white">
+                                      <th key={col.name} className="border px-3 py-3 text-left font-semibold text-foreground">
                                         {col.name}
                                       </th>
                                     ))}
@@ -548,9 +546,9 @@ export default function ApiBuilderEditPage() {
                                 </thead>
                                 <tbody>
                                   {testResult.sample.map((row, idx) => (
-                                    <tr key={idx} className="bg-white dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-800">
+                                    <tr key={idx} className="bg-card hover:bg-muted/60">
                                       {testResult.columns?.map((col) => (
-                                        <td key={col.name} className="border px-3 py-3 text-slate-700 dark:text-gray-300 max-w-xs truncate">
+                                        <td key={col.name} className="max-w-xs truncate border px-3 py-3 text-foreground">
                                           {String(row[col.name] ?? '-')}
                                         </td>
                                       ))}
@@ -560,8 +558,8 @@ export default function ApiBuilderEditPage() {
                               </table>
                             </div>
                           ) : (
-                            <div className="mt-3 p-3 bg-white dark:bg-slate-800 rounded" style={{ minHeight: '280px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <p className="text-sm text-slate-600 dark:text-gray-300">暂无数据记录</p>
+                            <div className="mt-3 flex min-h-[280px] items-center justify-center rounded bg-card p-3">
+                              <p className="text-sm text-muted-foreground">暂无数据记录</p>
                             </div>
                           )}
                         </>
@@ -569,8 +567,8 @@ export default function ApiBuilderEditPage() {
                         <div className="space-y-3">
                           <div className="p-3 bg-green-50 dark:bg-green-950 rounded">
                             <p className="text-sm text-green-700 dark:text-green-400 font-semibold mb-2">✓ {testResult.operationType} 操作成功</p>
-                            <p className="text-sm text-green-600 dark:text-gray-300">受影响行数：<strong className="text-green-900 dark:text-white">{testResult.affectedRows}</strong></p>
-                            <p className="text-sm text-green-700 dark:text-gray-400 mt-2">{testResult.message}</p>
+                            <p className="text-sm text-green-700 dark:text-green-300">受影响行数：<strong>{testResult.affectedRows}</strong></p>
+                            <p className="mt-2 text-sm text-green-700 dark:text-green-300">{testResult.message}</p>
                           </div>
                         </div>
                       )}
@@ -643,6 +641,6 @@ export default function ApiBuilderEditPage() {
           </Tabs>
         </CardContent>
       </Card>
-    </div>
+    </PageShell>
   );
 }

@@ -7,7 +7,8 @@ import { Pagination } from '@/components/ui/pagination';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
+import { PageHeader, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 import { toast } from 'sonner';
 import axios from '@/lib/utils/module-client';
 import { usePermission } from '@/lib/hooks/usePermission';
@@ -497,18 +498,12 @@ export function DynamicCrudPage({ config }) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* 页面卡片 */}
-      <Card>
-        {/* 页面标题 */}
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <CardTitle>{config.description || config.moduleName}</CardTitle>
-            <CardDescription>
-              {config.description ? `管理${config.description}` : ''}
-            </CardDescription>
-          </div>
-          <div className="flex gap-2">
+    <div className="space-y-5">
+      <PageHeader
+        title={config.description || config.moduleName}
+        description={config.description ? `管理${config.description}` : '管理模块数据'}
+        actions={(
+          <>
             {config.features?.batchDelete && selectedRows.length > 0 && canDelete && (
               <Button variant="destructive" onClick={handleBatchDelete}>
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -540,46 +535,42 @@ export function DynamicCrudPage({ config }) {
                 新增
               </Button>
             )}
-          </div>
-        </CardHeader>
+          </>
+        )}
+      />
 
-        <CardContent className="space-y-4">
-          {/* 导入进度遮罩层 */}
-          {importLoading && (
-            <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-              <Card className="w-[420px] p-6 shadow-lg">
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold">数据导入中</h3>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {batchInfo.total > 1
-                        ? `正在提交第 ${batchInfo.current} / ${batchInfo.total} 批`
-                        : '正在处理您的文件，请稍候...'}
-                    </p>
-                  </div>
-                  <Progress value={importProgress} className="h-2" />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>
-                      {importProgress === 0 ? '准备中...' : importProgress === 100 ? '处理完成' : `${importProgress}%`}
-                    </span>
-                    {batchInfo.total > 1 && (
-                      <span>
-                        已成功 {batchInfo.successCount} 条
-                      </span>
-                    )}
-                  </div>
-                  {batchInfo.total > 1 && (
-                    <p className="text-xs text-center text-muted-foreground">
-                      每批最多 {IMPORT_BATCH_SIZE} 条，单批超时 5 分钟自动中止
-                    </p>
-                  )}
-                </div>
-              </Card>
+      {/* 导入进度遮罩层 */}
+      {importLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm">
+          <Card className="w-full max-w-[420px] p-6 shadow-lg">
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold">数据导入中</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {batchInfo.total > 1
+                    ? `正在提交第 ${batchInfo.current} / ${batchInfo.total} 批`
+                    : '正在处理您的文件，请稍候...'}
+                </p>
+              </div>
+              <Progress value={importProgress} className="h-2" />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>
+                  {importProgress === 0 ? '准备中...' : importProgress === 100 ? '处理完成' : `${importProgress}%`}
+                </span>
+                {batchInfo.total > 1 && <span>已成功 {batchInfo.successCount} 条</span>}
+              </div>
+              {batchInfo.total > 1 && (
+                <p className="text-center text-xs text-muted-foreground">
+                  每批最多 {IMPORT_BATCH_SIZE} 条，单批超时 5 分钟自动中止
+                </p>
+              )}
             </div>
-          )}
+          </Card>
+        </div>
+      )}
 
-          {/* 导入结果 Dialog */}
-          <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+      {/* 导入结果 Dialog */}
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
             <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col p-0">
               <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0">
                 <DialogTitle className="text-xl">导入结果</DialogTitle>
@@ -654,9 +645,11 @@ export function DynamicCrudPage({ config }) {
                 </Button>
               </div>
             </DialogContent>
-          </Dialog>
+      </Dialog>
 
-          {/* 筛选器 */}
+      {/* 筛选器 */}
+      {config.fields?.some((field) => field.isSearchable) && (
+        <PageToolbar>
           <DynamicFilters
             fields={config.fields}
             filters={filters}
@@ -664,7 +657,10 @@ export function DynamicCrudPage({ config }) {
             onSearch={handleSearch}
             onReset={handleResetFilters}
           />
+        </PageToolbar>
+      )}
 
+      <PageSurface className="space-y-4 p-5">
           {/* 数据表格 */}
           <DynamicTable
             data={data}
@@ -692,8 +688,7 @@ export function DynamicCrudPage({ config }) {
               onPageSizeChange={handlePageSizeChange}
             />
           )}
-        </CardContent>
-      </Card>
+      </PageSurface>
 
       {/* 表单对话框 */}
       <DynamicForm

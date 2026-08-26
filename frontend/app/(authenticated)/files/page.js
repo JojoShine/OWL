@@ -17,7 +17,9 @@ import { folderApi, fileApi } from '@/lib/api';
 import { formatFileSize } from '@/lib/utils/file';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { PageHeader, PageShell, PageSurface, PageToolbar } from '@/components/layout/page-shell';
 import FileList from '@/components/files/FileList';
 
 // 对话框组件动态导入 - 仅在需要时加载
@@ -308,16 +310,12 @@ export default function FilesPage() {
   const { folders: filteredFolders, files: filteredFiles } = getFilteredItems();
 
   return (
-    <div className="space-y-6">
-      {/* 页面标题 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">文件管理</h1>
-          <p className="text-muted-foreground mt-2">
-            管理您的文件和文件夹
-          </p>
-        </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-muted rounded-lg min-h-[44px]">
+    <PageShell>
+      <PageHeader
+        title="文件管理"
+        description="管理您的文件和文件夹"
+        actions={(
+          <div className="flex min-h-10 items-center gap-2 rounded-md border bg-card px-3 py-2">
           {stats ? (
             <>
               <HardDriveIcon className="w-5 h-5 text-muted-foreground" />
@@ -333,12 +331,13 @@ export default function FilesPage() {
           ) : (
             <div className="w-32 h-4 bg-muted-foreground/10 rounded animate-pulse" />
           )}
-        </div>
-      </div>
+          </div>
+        )}
+      />
 
       {/* 操作按钮和搜索 */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
+      <PageToolbar className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <Button onClick={() => setUploadDialogOpen(true)}>
             <UploadIcon />
             上传文件
@@ -358,15 +357,15 @@ export default function FilesPage() {
             刷新
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[240px] flex-1 lg:flex-none">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
+            <Input
               type="text"
               placeholder="搜索文件或文件夹..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 w-64 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full pl-9 lg:w-72"
             />
           </div>
           <div className="flex items-center gap-0.5 border border-border rounded-md p-0.5">
@@ -386,19 +385,21 @@ export default function FilesPage() {
             </Button>
           </div>
         </div>
-      </div>
+      </PageToolbar>
 
       {/* 文件列表 */}
-      <FileList
-        folders={filteredFolders}
-        files={filteredFiles}
-        currentFolder={currentFolderInfo}
-        viewMode={viewMode}
-        loading={loading}
-        onFolderClick={handleFolderClick}
-        onFileClick={handleFileClick}
-        onAction={handleItemAction}
-      />
+      <PageSurface className="p-5">
+        <FileList
+          folders={filteredFolders}
+          files={filteredFiles}
+          currentFolder={currentFolderInfo}
+          viewMode={viewMode}
+          loading={loading}
+          onFolderClick={handleFolderClick}
+          onFileClick={handleFileClick}
+          onAction={handleItemAction}
+        />
+      </PageSurface>
 
       {/* 对话框组件 - 仅在打开时渲染 */}
       {uploadDialogOpen && (
@@ -476,6 +477,6 @@ export default function FilesPage() {
           isFolder={currentItemIsFolder}
         />
       )}
-    </div>
+    </PageShell>
   );
 }

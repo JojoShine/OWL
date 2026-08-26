@@ -2,7 +2,6 @@
 
 import { useState, useRef, useCallback } from 'react';
 import {
-  XIcon,
   UploadIcon,
   FileIcon,
   CheckCircleIcon,
@@ -14,6 +13,14 @@ import { fileApi } from '@/lib/api';
 import { formatFileSize, getFileIcon, validateFileSize } from '@/lib/utils/file';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 /**
  * 文件上传对话框组件
@@ -254,7 +261,7 @@ export default function FileUploadDialog({ open, onClose, folderId, onUploadComp
   const getStatusIcon = (status) => {
     switch (status) {
       case 'uploading':
-        return <Loader2Icon className="w-5 h-5 text-blue-500 animate-spin" />;
+        return <Loader2Icon className="w-5 h-5 text-primary animate-spin" />;
       case 'success':
         return <CheckCircleIcon className="w-5 h-5 text-green-500" />;
       case 'error':
@@ -267,22 +274,21 @@ export default function FileUploadDialog({ open, onClose, folderId, onUploadComp
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-popover rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+    <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) handleClose(); }}>
+      <DialogContent
+        className="max-h-[85vh] max-w-2xl gap-0 overflow-hidden p-0"
+        showCloseButton={!uploading}
+        onEscapeKeyDown={(event) => { if (uploading) event.preventDefault(); }}
+        onPointerDownOutside={(event) => { if (uploading) event.preventDefault(); }}
+      >
         {/* 头部 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-xl font-semibold text-foreground">上传文件</h2>
-          <button
-            onClick={handleClose}
-            disabled={uploading}
-            className="p-1 hover:bg-accent rounded-lg transition-colors disabled:opacity-50"
-          >
-            <XIcon className="w-5 h-5 text-muted-foreground" />
-          </button>
-        </div>
+        <DialogHeader className="border-b px-6 py-5 pr-12">
+          <DialogTitle>上传文件</DialogTitle>
+          <DialogDescription>选择一个或多个文件上传到当前目录</DialogDescription>
+        </DialogHeader>
 
         {/* 内容 */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="min-h-0 flex-1 overflow-y-auto p-6">
           {/* 拖拽上传区域 */}
           <div
             onDragEnter={handleDrag}
@@ -401,7 +407,7 @@ export default function FileUploadDialog({ open, onClose, folderId, onUploadComp
         </div>
 
         {/* 底部按钮 */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
+        <DialogFooter className="border-t px-6 py-4">
           <Button
             variant="outline"
             onClick={handleClose}
@@ -416,8 +422,8 @@ export default function FileUploadDialog({ open, onClose, folderId, onUploadComp
             {uploading && <Loader2Icon className="w-4 h-4 animate-spin" />}
             {uploading ? '上传中...' : '开始上传'}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

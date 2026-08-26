@@ -34,8 +34,8 @@ export default function ConfigsSection({
 
   if (configs.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
+      <Card className="border-dashed bg-muted/20">
+        <CardContent className="py-12 text-center text-sm text-muted-foreground">
           暂无模块配置，请先从"数据库表"标签页初始化配置
         </CardContent>
       </Card>

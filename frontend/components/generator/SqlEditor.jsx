@@ -199,7 +199,7 @@ export default function SqlEditor({ value, onChange, onFieldsGenerated }) {
             </div>
           )}
 
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             提示：只支持SELECT查询，支持多表JOIN，可使用WHERE条件过滤。点击右上角图标可切换语法高亮。
           </p>
         </div>
@@ -282,36 +282,36 @@ export default function SqlEditor({ value, onChange, onFieldsGenerated }) {
 
         {/* 预览数据表格 */}
         {previewData && previewData.length > 0 && (
-          <div className="border rounded-lg overflow-hidden">
-            <div className="bg-gray-50 px-4 py-2 border-b">
+          <div className="overflow-hidden rounded-lg border bg-card">
+            <div className="border-b bg-muted/40 px-4 py-2">
               <h4 className="text-sm font-medium">
                 预览数据（前10条）
               </h4>
             </div>
             <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50 sticky top-0">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="sticky top-0 bg-muted/60">
                   <tr>
                     {Object.keys(previewData[0]).map((key) => (
                       <th
                         key={key}
-                        className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
                       >
                         {key}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-border bg-card">
                   {previewData.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50">
+                    <tr key={idx} className="hover:bg-muted/30">
                       {Object.values(row).map((value, colIdx) => (
                         <td
                           key={colIdx}
-                          className="px-4 py-2 text-sm text-gray-900 whitespace-nowrap"
+                          className="whitespace-nowrap px-4 py-2 text-sm text-foreground"
                         >
                           {value === null ? (
-                            <span className="text-gray-400 italic">null</span>
+                            <span className="italic text-muted-foreground">null</span>
                           ) : typeof value === 'object' ? (
                             JSON.stringify(value)
                           ) : (

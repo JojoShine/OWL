@@ -1,11 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { XIcon, FolderIcon, HomeIcon } from 'lucide-react';
+import { FolderIcon, HomeIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/ui/loading';
 import { folderApi } from '@/lib/api';
 import { toast } from 'sonner';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 /**
  * 移动文件/文件夹对话框组件
@@ -73,28 +82,22 @@ export default function MoveDialog({ open, onClose, item, isFolder, onSuccess })
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-popover rounded-lg shadow-xl w-full max-w-md">
+    <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen && !loading) onClose(); }}>
+      <DialogContent className="max-w-md gap-0 p-0" showCloseButton={!loading}>
         {/* 头部 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-xl font-semibold text-foreground">
+        <DialogHeader className="border-b px-6 py-5 pr-12">
+          <DialogTitle>
             移动{isFolder ? '文件夹' : '文件'}
-          </h2>
-          <button
-            onClick={onClose}
-            disabled={loading}
-            className="p-1 hover:bg-accent rounded-lg transition-colors disabled:opacity-50"
-          >
-            <XIcon className="w-5 h-5 text-muted-foreground" />
-          </button>
-        </div>
+          </DialogTitle>
+          <DialogDescription>选择新的文件夹位置</DialogDescription>
+        </DialogHeader>
 
         {/* 内容 */}
         <form onSubmit={handleSubmit}>
           <div className="p-6">
-            <label className="block text-sm font-medium text-foreground mb-2">
+            <Label className="mb-2 block">
               选择目标位置
-            </label>
+            </Label>
 
             {loadingFolders ? (
               <Loading size="md" variant="pulse" />
@@ -145,7 +148,7 @@ export default function MoveDialog({ open, onClose, item, isFolder, onSuccess })
           </div>
 
           {/* 底部按钮 */}
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
+          <DialogFooter className="border-t px-6 py-4">
             <Button
               type="button"
               variant="outline"
@@ -160,9 +163,9 @@ export default function MoveDialog({ open, onClose, item, isFolder, onSuccess })
             >
               {loading ? '移动中...' : '确定'}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

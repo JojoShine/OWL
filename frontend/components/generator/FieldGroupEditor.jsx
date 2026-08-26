@@ -119,8 +119,8 @@ export default function FieldGroupEditor({
 
   if (!fieldGroups || fieldGroups.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-8 text-center text-gray-500">
+      <Card className="border-dashed bg-muted/20">
+        <CardContent className="py-12 text-center text-sm text-muted-foreground">
           暂无字段数据，请先生成字段配置
         </CardContent>
       </Card>
@@ -137,7 +137,7 @@ export default function FieldGroupEditor({
           字段分组配置
         </CardTitle>
         {availableGroups.length > 0 && (
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="mt-2 text-sm text-muted-foreground">
             已从SQL中提取 {availableGroups.length} 个表的注释作为分组选项
           </p>
         )}
@@ -152,7 +152,7 @@ export default function FieldGroupEditor({
               if (groupFields.length === 0) return null;
 
               return (
-                <Card key={group.value} className="border-l-4 border-l-blue-500">
+                <Card key={group.value} className="border-l-4 border-l-primary/40">
                   <CardHeader className="py-3">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-medium">{group.label}</h4>
@@ -164,21 +164,21 @@ export default function FieldGroupEditor({
                       {groupFields.map((field) => (
                         <div
                           key={field.originalIndex}
-                          className="flex items-center gap-3 p-2 rounded border bg-gray-50 hover:bg-gray-100"
+                          className="flex items-center gap-3 rounded border bg-muted/30 p-2 hover:bg-muted/60"
                         >
-                          <GripVertical className="h-4 w-4 text-gray-400" />
+                          <GripVertical className="h-4 w-4 text-muted-foreground" />
                           <div className="flex-1">
                             <p className="text-sm font-medium">
                               {field.detail_label}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-muted-foreground">
                               {field.fieldName || field.field_name} ({field.fieldType || field.field_type})
                             </p>
                           </div>
                           <Badge variant={field.show_in_detail ? 'default' : 'secondary'}>
                             {field.show_in_detail ? '显示' : '隐藏'}
                           </Badge>
-                          <span className="text-xs text-gray-500">排序: {field.detail_sort}</span>
+                          <span className="text-xs text-muted-foreground">排序: {field.detail_sort}</span>
                         </div>
                       ))}
                     </div>
@@ -192,24 +192,24 @@ export default function FieldGroupEditor({
         {/* 字段配置列表 */}
         <div className="space-y-4">
           <h3 className="text-sm font-medium">字段详细配置</h3>
-          <div className="border rounded-lg overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="overflow-x-auto rounded-lg border bg-card">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/60">
                 <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">字段名</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">所属分组</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">详情页标签</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">显示</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">排序</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">字段名</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">所属分组</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">详情页标签</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">显示</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">排序</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-border bg-card">
                 {fieldGroups.map((field, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
+                  <tr key={index} className="hover:bg-muted/30">
                     <td className="px-4 py-3">
                       <div>
                         <p className="text-sm font-medium">{field.fieldName || field.field_name}</p>
-                        <p className="text-xs text-gray-500">{field.fieldComment || field.field_comment}</p>
+                        <p className="text-xs text-muted-foreground">{field.fieldComment || field.field_comment}</p>
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -225,7 +225,7 @@ export default function FieldGroupEditor({
                             <SelectItem key={group.value} value={group.value}>
                               {group.label}
                               {group.tableName && (
-                                <span className="text-xs text-gray-500 ml-2">
+                                <span className="ml-2 text-xs text-muted-foreground">
                                   ({group.tableName})
                                 </span>
                               )}
@@ -250,7 +250,7 @@ export default function FieldGroupEditor({
                         type="checkbox"
                         checked={field.show_in_detail}
                         onChange={(e) => handleShowInDetailChange(index, e.target.checked)}
-                        className="h-4 w-4 rounded border-gray-300"
+                        className="h-4 w-4 rounded border-input accent-primary"
                       />
                     </td>
                     <td className="px-4 py-3">

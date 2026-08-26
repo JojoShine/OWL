@@ -5,6 +5,10 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import axios from '@/lib/utils/http-client';
 import { DynamicCrudPage } from '@/components/dynamic-module/DynamicCrudPage';
+import { AlertCircle, ArrowLeft, SearchX } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loading } from '@/components/ui/loading';
+import { PageShell, PageSurface } from '@/components/layout/page-shell';
 
 export default function DynamicModulePage() {
   const { slug } = useParams();
@@ -37,55 +41,66 @@ export default function DynamicModulePage() {
   // 加载中状态
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">加载中...</p>
-        </div>
-      </div>
+      <PageShell>
+        <PageSurface className="flex min-h-[420px] items-center justify-center">
+          <Loading size="lg" text="正在加载模块..." />
+        </PageSurface>
+      </PageShell>
     );
   }
 
   // 错误状态
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold mb-2">页面加载失败</h2>
-          <p className="text-muted-foreground mb-4">{error}</p>
-          <Link
-            href="/dashboard"
-            className="text-primary hover:underline"
-          >
-            返回首页
-          </Link>
-        </div>
-      </div>
+      <PageShell>
+        <PageSurface className="flex min-h-[420px] items-center justify-center p-6">
+          <div className="max-w-md text-center">
+            <div className="mx-auto mb-4 flex size-11 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+              <AlertCircle className="size-5" />
+            </div>
+            <h2 className="text-xl font-semibold">页面加载失败</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+            <Button asChild variant="outline" className="mt-5">
+              <Link href="/dashboard">
+                <ArrowLeft className="size-4" />
+                返回首页
+              </Link>
+            </Button>
+          </div>
+        </PageSurface>
+      </PageShell>
     );
   }
 
   // 模块不存在
   if (!pageConfig) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🔍</div>
-          <h2 className="text-2xl font-bold mb-2">模块不存在</h2>
-          <p className="text-muted-foreground mb-4">
-            找不到模块 &quot;{slug}&quot;
-          </p>
-          <Link
-            href="/dashboard"
-            className="text-primary hover:underline"
-          >
-            返回首页
-          </Link>
-        </div>
-      </div>
+      <PageShell>
+        <PageSurface className="flex min-h-[420px] items-center justify-center p-6">
+          <div className="max-w-md text-center">
+            <div className="mx-auto mb-4 flex size-11 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              <SearchX className="size-5" />
+            </div>
+            <h2 className="text-xl font-semibold">模块不存在</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              找不到模块 &quot;{slug}&quot;
+            </p>
+            <Button asChild variant="outline" className="mt-5">
+              <Link href="/dashboard">
+                <ArrowLeft className="size-4" />
+                返回首页
+              </Link>
+            </Button>
+          </div>
+        </PageSurface>
+      </PageShell>
     );
   }
 
   // 渲染动态CRUD页面
-  return <DynamicCrudPage config={pageConfig} />;
+  return (
+    <PageShell>
+      <DynamicCrudPage config={pageConfig} />
+    </PageShell>
+  );
 }

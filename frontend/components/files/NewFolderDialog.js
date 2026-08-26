@@ -1,10 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { XIcon, FolderPlusIcon } from 'lucide-react';
+import { FolderPlusIcon } from 'lucide-react';
 import { folderApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 /**
  * 新建文件夹对话框
@@ -65,29 +75,24 @@ export default function NewFolderDialog({ open, onClose, parentFolderId, onSucce
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-popover rounded-lg shadow-xl w-full max-w-md">
+    <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) handleClose(); }}>
+      <DialogContent className="max-w-md gap-0 p-0" showCloseButton={!creating}>
         {/* 头部 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <div className="flex items-center gap-2">
+        <DialogHeader className="border-b px-6 py-5 pr-12">
+          <DialogTitle className="flex items-center gap-2">
             <FolderPlusIcon className="w-5 h-5 text-primary" />
-            <h2 className="text-xl font-semibold text-foreground">新建文件夹</h2>
-          </div>
-          <button
-            onClick={handleClose}
-            disabled={creating}
-            className="p-1 hover:bg-accent rounded-lg transition-colors disabled:opacity-50"
-          >
-            <XIcon className="w-5 h-5 text-muted-foreground" />
-          </button>
-        </div>
+            新建文件夹
+          </DialogTitle>
+          <DialogDescription>在当前目录中创建一个新文件夹</DialogDescription>
+        </DialogHeader>
 
         {/* 内容 */}
         <div className="px-6 py-4">
-          <label className="block text-sm font-medium text-foreground mb-2">
+          <Label htmlFor="new-folder-name" className="mb-2 block">
             文件夹名称
-          </label>
-          <input
+          </Label>
+          <Input
+            id="new-folder-name"
             type="text"
             value={folderName}
             onChange={(e) => setFolderName(e.target.value)}
@@ -95,12 +100,11 @@ export default function NewFolderDialog({ open, onClose, parentFolderId, onSucce
             placeholder="输入文件夹名称"
             autoFocus
             disabled={creating}
-            className="w-full px-4 py-2 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
           />
         </div>
 
         {/* 底部按钮 */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
+        <DialogFooter className="border-t px-6 py-4">
           <Button
             variant="outline"
             onClick={handleClose}
@@ -114,8 +118,8 @@ export default function NewFolderDialog({ open, onClose, parentFolderId, onSucce
           >
             {creating ? '创建中...' : '创建'}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

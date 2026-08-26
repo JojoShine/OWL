@@ -55,6 +55,7 @@ import TablesSection from '@/components/generator/TablesSection';
 import ConfigsSection from '@/components/generator/ConfigsSection';
 import HistorySection from '@/components/generator/HistorySection';
 import ConfigDialog from '@/components/generator/ConfigDialog';
+import { PageHeader, PageShell } from '@/components/layout/page-shell';
 
 export default function GeneratorPage() {
   const [activeTab, setActiveTab] = useState('tables');
@@ -593,7 +594,11 @@ export default function GeneratorPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <PageShell>
+      <PageHeader
+        title="代码生成器"
+        description="从数据库表配置并生成前后端模块代码"
+      />
       {/* 标签页 */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
@@ -764,6 +769,6 @@ export default function GeneratorPage() {
         onDeleteCodeDialogOpenChange={(open) => setDeleteCodeDialog({ open, configId: null })}
         onConfirmDeleteCode={handleConfirmDeleteCode}
       />
-    </div>
+    </PageShell>
   );
 }

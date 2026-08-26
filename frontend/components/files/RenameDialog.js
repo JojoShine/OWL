@@ -1,9 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { XIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 /**
  * 重命名对话框组件
@@ -44,29 +52,24 @@ export default function RenameDialog({ open, onClose, item, isFolder, onSuccess 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-popover rounded-lg shadow-xl w-full max-w-md">
+    <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen && !loading) onClose(); }}>
+      <DialogContent className="max-w-md gap-0 p-0" showCloseButton={!loading}>
         {/* 头部 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-xl font-semibold text-foreground">
+        <DialogHeader className="border-b px-6 py-5 pr-12">
+          <DialogTitle>
             重命名{isFolder ? '文件夹' : '文件'}
-          </h2>
-          <button
-            onClick={onClose}
-            disabled={loading}
-            className="p-1 hover:bg-accent rounded-lg transition-colors disabled:opacity-50"
-          >
-            <XIcon className="w-5 h-5 text-muted-foreground" />
-          </button>
-        </div>
+          </DialogTitle>
+          <DialogDescription>输入新的名称并确认保存</DialogDescription>
+        </DialogHeader>
 
         {/* 内容 */}
         <form onSubmit={handleSubmit}>
           <div className="p-6">
-            <label className="block text-sm font-medium text-foreground mb-2">
+            <Label htmlFor="rename-item-name" className="mb-2 block">
               {isFolder ? '文件夹名称' : '文件名'}
-            </label>
+            </Label>
             <Input
+              id="rename-item-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -77,7 +80,7 @@ export default function RenameDialog({ open, onClose, item, isFolder, onSuccess 
           </div>
 
           {/* 底部按钮 */}
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
+          <DialogFooter className="border-t px-6 py-4">
             <Button
               type="button"
               variant="outline"
@@ -92,9 +95,9 @@ export default function RenameDialog({ open, onClose, item, isFolder, onSuccess 
             >
               {loading ? '重命名中...' : '确定'}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

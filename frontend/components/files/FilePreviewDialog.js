@@ -6,6 +6,12 @@ import { fileApi } from '@/lib/api';
 import { formatFileSize, formatDate, isImage, isVideo, isPDF, canPreview } from '@/lib/utils/file';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 /**
  * 文件预览对话框
@@ -89,14 +95,18 @@ export default function FilePreviewDialog({ open, onClose, file, onShare }) {
   const fileCanPreview = canPreview(file.original_name, file.mime_type);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-popover rounded-lg shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col">
+    <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) handleClose(); }}>
+      <DialogContent
+        className="max-h-[85vh] max-w-4xl gap-0 overflow-hidden p-0"
+        showCloseButton={false}
+        overlayClassName="bg-black/55"
+      >
         {/* 头部 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <DialogHeader className="flex-row items-center justify-between border-b px-6 py-4 text-left">
           <div className="flex-1 min-w-0 mr-4">
-            <h2 className="text-lg font-semibold text-foreground truncate">
+            <DialogTitle className="truncate">
               {file.original_name}
-            </h2>
+            </DialogTitle>
             <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
               <span>{formatFileSize(file.size)}</span>
               <span>上传于 {file.createdAt ? formatDate(file.createdAt) : '未知时间'}</span>
@@ -125,10 +135,10 @@ export default function FilePreviewDialog({ open, onClose, file, onShare }) {
               <XIcon className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
-        </div>
+        </DialogHeader>
 
         {/* 预览内容 */}
-        <div className="flex-1 overflow-auto p-6 bg-muted">
+        <div className="min-h-[360px] flex-1 overflow-auto bg-muted p-6">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-muted-foreground">加载中...</div>
@@ -191,7 +201,7 @@ export default function FilePreviewDialog({ open, onClose, file, onShare }) {
             <span>上传于 {file.createdAt ? formatDate(file.createdAt) : '未知时间'}</span>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

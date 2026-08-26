@@ -36,7 +36,7 @@ export default function TablesSection({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* 搜索栏 */}
-        <div className="bg-card rounded-lg px-0 py-4">
+        <div className="rounded-lg border bg-muted/20 p-4">
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[180px]">
               <Input
@@ -54,9 +54,9 @@ export default function TablesSection({
           </div>
         </div>
 
-        <div className="rounded-lg overflow-hidden">
+        <div className="overflow-hidden rounded-lg border bg-card">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-muted/60">
               <TableRow>
                 <TableHead>表名</TableHead>
                 <TableHead>注释</TableHead>
@@ -68,19 +68,19 @@ export default function TablesSection({
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
                     加载中...
                   </TableCell>
                 </TableRow>
               ) : tables.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
                     暂无数据
                   </TableCell>
                 </TableRow>
               ) : (
                 tables.map((table) => (
-                  <TableRow key={table.tableName} className="h-12">
+                  <TableRow key={table.tableName} className="h-12 hover:bg-muted/30">
                     <TableCell className="font-mono">{table.tableName}</TableCell>
                     <TableCell>{table.comment || '-'}</TableCell>
                     <TableCell>{table.columnCount}</TableCell>
