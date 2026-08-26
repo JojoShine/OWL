@@ -74,7 +74,7 @@ class AuthController {
    */
   async getCurrentUser(req, res, next) {
     try {
-      const user = await authService.getCurrentUser(req.user.id);
+      const user = await authService.getCurrentUser(req.user);
       success(res, user, '获取用户信息成功');
     } catch (error) {
       next(error);

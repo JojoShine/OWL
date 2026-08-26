@@ -232,39 +232,36 @@ class AuthService {
   /**
    * 获取当前用户信息
    */
-  async getCurrentUser(userId) {
-    const user = await db.User.findByPk(userId, {
-      include: [
-        {
-          model: db.Role,
-          as: 'roles',
-          through: { attributes: [] },
-          include: [
-            {
-              model: db.Permission,
-              as: 'permissions',
-              through: { attributes: [] },
-            },
-            {
-              model: db.Menu,
-              as: 'menus',
-              through: { attributes: [] },
-            },
-          ],
-        },
-        {
-          model: db.Department,
-          as: 'department',
-          attributes: ['id', 'name'],
-        },
-      ],
-    });
+  async getCurrentUser(authenticatedUser) {
+    const user = authenticatedUser;
 
     if (!user) {
       throw ApiError.notFound('用户不存在');
     }
 
-    return user.toSafeJSON();
+    const safeUser = user.toSafeJSON();
+    const roleIds = (user.roles || []).map((role) => role.id);
+
+    if (roleIds.length === 0) {
+      safeUser.roles = [];
+      return safeUser;
+    }
+
+    // 菜单由 /menus/user-tree 独立加载；这里只查询前端鉴权所需的角色和权限，
+    // 避免权限与菜单同时联表产生笛卡尔积，并复用认证中间件已加载的用户资料。
+    const roles = await db.Role.findAll({
+      where: { id: roleIds },
+      include: [
+        {
+          model: db.Permission,
+          as: 'permissions',
+          through: { attributes: [] },
+        },
+      ],
+    });
+
+    safeUser.roles = roles.map((role) => role.get({ plain: true }));
+    return safeUser;
   }
 
   /**
