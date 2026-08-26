@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { LoaderCircleIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -23,9 +22,9 @@ export function Loading({
   fullHeight = false,
 }) {
   const sizeClasses = {
-    sm: 'h-4 w-4',
-    md: 'h-8 w-8',
-    lg: 'h-12 w-12',
+    sm: 'h-6 w-6',
+    md: 'h-10 w-10',
+    lg: 'h-14 w-14',
   };
 
   const textSizeClasses = {
@@ -45,17 +44,19 @@ export function Loading({
     >
       <div className={cn('flex items-center', isCompact ? 'gap-2' : 'flex-col gap-3')}>
         <span className={cn(
-          'relative flex items-center justify-center rounded-full bg-muted/70 ring-1 ring-border/60',
-          isCompact ? 'h-7 w-7' : size === 'lg' ? 'h-14 w-14' : 'h-11 w-11',
-          variant === 'pulse' && 'animate-pulse'
+          'relative inline-flex shrink-0 items-center justify-center',
+          sizeClasses[size]
         )}>
-          <LoaderCircleIcon
-            className={cn('animate-spin text-foreground/75', sizeClasses[size])}
-            strokeWidth={1.8}
-          />
+          <span className="absolute inset-0 rounded-full border border-border/65" />
+          <span className="absolute inset-[3px] animate-spin rounded-full border-2 border-transparent border-r-foreground/20 border-t-foreground/70 motion-reduce:animate-none" />
+          <span className={cn(
+            'rounded-full bg-foreground/45',
+            size === 'sm' ? 'h-1 w-1' : 'h-1.5 w-1.5',
+            variant === 'pulse' && 'animate-pulse'
+          )} />
         </span>
         {text ? (
-          <span className={cn('font-medium tracking-wide', textSizeClasses[size])}>{text}</span>
+          <span className={cn('font-normal tracking-wide text-muted-foreground/70', textSizeClasses[size])}>{text}</span>
         ) : null}
       </div>
     </div>
