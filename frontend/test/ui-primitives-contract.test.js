@@ -90,7 +90,9 @@ describe('neutral UI primitive contract', () => {
     expect(activeTab).toHaveClass(
       'data-[state=active]:bg-foreground',
       'data-[state=active]:text-background',
-      'data-[state=active]:shadow-[0_1px_3px_rgba(15,23,42,0.22)]'
+      'data-[state=active]:shadow-[0_1px_3px_rgba(15,23,42,0.22)]',
+      'dark:data-[state=active]:bg-white/[0.14]',
+      'dark:data-[state=active]:text-slate-50'
     );
     expect(activeTab).not.toHaveClass('data-[state=active]:bg-primary');
   });

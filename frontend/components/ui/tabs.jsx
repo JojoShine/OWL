@@ -27,7 +27,7 @@ function TabsList({
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        "inline-flex min-h-10 max-w-full items-center gap-1 rounded-lg border border-border bg-muted p-1 text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:bg-muted/45 dark:shadow-none",
+        "inline-flex min-h-10 max-w-full items-center gap-1 rounded-lg border border-border bg-muted p-1 text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
         wrap ? "flex-wrap justify-start" : "h-10",
         stretch
           ? "w-full [&>[data-slot=tabs-trigger]]:min-w-0 [&>[data-slot=tabs-trigger]]:flex-1 [&>[data-slot=tabs-trigger]]:px-2"
@@ -46,7 +46,7 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "inline-flex h-8 min-w-0 flex-none items-center justify-center gap-1.5 overflow-hidden rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap text-ellipsis text-muted-foreground transition-[background-color,color,box-shadow] duration-150 hover:bg-background/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/25 focus-visible:ring-inset data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-[0_1px_3px_rgba(15,23,42,0.22)] data-[state=active]:hover:bg-foreground data-[state=active]:hover:text-background dark:data-[state=active]:shadow-[0_1px_3px_rgba(0,0,0,0.45)] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "inline-flex h-8 min-w-0 flex-none items-center justify-center gap-1.5 overflow-hidden rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap text-ellipsis text-muted-foreground transition-[background-color,color,box-shadow] duration-150 hover:bg-background/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/25 focus-visible:ring-inset data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-[0_1px_3px_rgba(15,23,42,0.22)] data-[state=active]:hover:bg-foreground data-[state=active]:hover:text-background dark:hover:bg-white/[0.07] dark:hover:text-slate-100 dark:focus-visible:ring-white/25 dark:data-[state=active]:bg-white/[0.14] dark:data-[state=active]:text-slate-50 dark:data-[state=active]:shadow-[0_1px_3px_rgba(0,0,0,0.45),inset_0_0_0_1px_rgba(255,255,255,0.11),inset_0_1px_0_rgba(255,255,255,0.09)] dark:data-[state=active]:hover:bg-white/[0.17] dark:data-[state=active]:hover:text-white disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props} />
