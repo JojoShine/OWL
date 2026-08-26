@@ -6,14 +6,40 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTheme } from 'next-themes'
 
 const CHART_COLORS = ['--chart-1', '--chart-2', '--chart-3', '--chart-4', '--chart-5']
+let colorContext
+
+// ECharts 的 zrender 不识别 oklch/color-mix 等 CSS Color 4 语法，
+// 通过浏览器 Canvas 将主题色统一转换为其支持的 RGBA。
+const toEChartsColor = (color) => {
+  if (!color || typeof document === 'undefined') return color
+  if (typeof CSS !== 'undefined' && !CSS.supports('color', color)) return color
+
+  if (!colorContext) {
+    const canvas = document.createElement('canvas')
+    canvas.width = 1
+    canvas.height = 1
+    colorContext = canvas.getContext('2d', { willReadFrequently: true })
+  }
+
+  if (!colorContext) return color
+
+  colorContext.clearRect(0, 0, 1, 1)
+  colorContext.fillStyle = color
+  colorContext.fillRect(0, 0, 1, 1)
+
+  const [red, green, blue, alpha] = colorContext.getImageData(0, 0, 1, 1).data
+  return `rgba(${red}, ${green}, ${blue}, ${Number((alpha / 255).toFixed(3))})`
+}
 
 // 从当前主题的 CSS 变量中读取浏览器已经解析的颜色值。
 const getTailwindColor = (variable) => {
   if (typeof document === 'undefined') return ''
 
-  return getComputedStyle(document.documentElement)
+  const color = getComputedStyle(document.documentElement)
     .getPropertyValue(variable)
     .trim()
+
+  return toEChartsColor(color)
 }
 
 // 饼图使用全局图表色，确保深浅主题和品牌主题使用同一套色阶。
@@ -280,15 +306,15 @@ function DashboardCard({
   // 检查数据是否为空
   if (!data || (Array.isArray(data) && data.length === 0)) {
     return (
-      <Card className="gap-3 py-4 shadow-none">
+      <Card className="gap-3 py-4 shadow-none lg:h-full lg:min-h-0">
         {!hideTitle && (
           <CardHeader className="px-4">
             <CardTitle className="text-base">{title}</CardTitle>
           </CardHeader>
         )}
-        <CardContent className={hideTitle ? 'px-4 pt-4' : 'px-4'}>
+        <CardContent className={`${hideTitle ? 'px-4 pt-4' : 'px-4'} lg:min-h-0 lg:flex-1`}>
           <div
-            className="flex h-[clamp(180px,24vh,240px)] items-center justify-center text-muted-foreground"
+            className="flex h-60 items-center justify-center text-muted-foreground lg:h-full lg:min-h-0"
           >
             暂无数据
           </div>
@@ -298,14 +324,14 @@ function DashboardCard({
   }
 
   return (
-    <Card className="gap-3 py-4 shadow-none">
+    <Card className="gap-3 py-4 shadow-none lg:h-full lg:min-h-0">
       {!hideTitle && (
         <CardHeader className="px-4">
           <CardTitle className="text-base">{title}</CardTitle>
         </CardHeader>
       )}
-      <CardContent className={hideTitle ? 'px-4 pt-4' : 'px-4'}>
-        <div ref={chartRef} className="h-[clamp(180px,24vh,240px)]" />
+      <CardContent className={`${hideTitle ? 'px-4 pt-4' : 'px-4'} lg:min-h-0 lg:flex-1`}>
+        <div ref={chartRef} className="h-60 lg:h-full lg:min-h-0" />
       </CardContent>
     </Card>
   )

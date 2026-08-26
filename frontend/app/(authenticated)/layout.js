@@ -47,7 +47,7 @@ export default function AuthenticatedLayout({ children }) {
 
           <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
             <Header onMenuClick={() => setMobileNavOpen(true)} />
-            <main className="flex-1 overflow-y-auto bg-background p-4 md:p-5 lg:px-4">
+            <main className="min-h-0 flex-1 overflow-y-auto bg-background p-4 md:p-5 lg:px-4">
               {children}
             </main>
           </div>

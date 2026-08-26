@@ -54,7 +54,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <PageShell className="space-y-4">
+      <PageShell className="space-y-4 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:gap-4 lg:space-y-0">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="animate-pulse rounded-lg border bg-card p-4">
@@ -63,11 +63,11 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:min-h-0 lg:flex-1 lg:auto-rows-fr lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="animate-pulse rounded-lg border bg-card p-4">
+            <div key={i} className="flex animate-pulse flex-col rounded-lg border bg-card p-4 lg:h-full lg:min-h-0">
               <div className="mb-3 h-5 w-1/3 rounded bg-muted"></div>
-              <div className="h-[clamp(180px,24vh,240px)] rounded bg-muted"></div>
+              <div className="h-60 rounded bg-muted lg:min-h-0 lg:flex-1"></div>
             </div>
           ))}
         </div>
@@ -80,10 +80,10 @@ export default function DashboardPage() {
   }
 
   return (
-    <PageShell className="space-y-4">
+    <PageShell className="space-y-4 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:gap-4 lg:space-y-0">
       {/* 数字指标行 */}
       {metricWidgets.length > 0 && (
-        <div className={`grid ${getMetricCols(metricWidgets.length)} gap-3`}>
+        <div className={`grid shrink-0 ${getMetricCols(metricWidgets.length)} gap-3`}>
           {metricWidgets.map(({ widget, data, error }) => {
             const value = data?.[0]?.[widget.data_key] ?? '-';
             return (
@@ -104,7 +104,7 @@ export default function DashboardPage() {
 
       {/* 图表网格 */}
       {chartWidgets.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:min-h-0 lg:flex-1 lg:auto-rows-fr lg:grid-cols-3">
           {chartWidgets.map(({ widget, data, error }) => (
             <DashboardCard
               key={widget.id}
