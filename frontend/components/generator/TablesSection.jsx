@@ -9,7 +9,7 @@ import {
   PageToolbar,
   PageWorkspace,
 } from '@/components/layout/page-shell';
-import { PlusCircleIcon, RefreshCwIcon } from 'lucide-react';
+import { PlusCircleIcon, PlusIcon, RefreshCwIcon } from 'lucide-react';
 
 const searchFields = [
   {
@@ -27,6 +27,7 @@ export default function TablesSection({
   onSearch,
   onReset,
   onRefresh,
+  onCreateTable,
   onInitialize,
   onCheckAudit,
   pagination,
@@ -94,10 +95,16 @@ export default function TablesSection({
           onSearch={onSearch}
           onReset={onReset}
           rightActions={(
-            <Button className="h-10" onClick={onRefresh} variant="outline">
-              <RefreshCwIcon className="h-4 w-4" />
-              刷新
-            </Button>
+            <div className="flex gap-2">
+              <Button className="h-10" onClick={onRefresh} variant="outline">
+                <RefreshCwIcon className="h-4 w-4" />
+                刷新
+              </Button>
+              <Button className="h-10" onClick={onCreateTable}>
+                <PlusIcon className="h-4 w-4" />
+                新建业务表
+              </Button>
+            </div>
           )}
         />
       </PageToolbar>

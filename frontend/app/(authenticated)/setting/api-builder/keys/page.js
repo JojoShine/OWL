@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DatePicker } from '@/components/ui/date-picker';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DataTable } from '@/components/common/DataTable';
@@ -194,7 +195,14 @@ export default function ApiKeyManagementPage() {
           <div className="space-y-4">
             <div className="space-y-2"><Label>厂商或应用名称 *</Label><Input value={formData.client_name} onChange={(event) => setFormData((data) => ({ ...data, client_name: event.target.value }))} placeholder="例如：华东仓储系统" /></div>
             <div className="space-y-2"><Label>用途说明</Label><Input value={formData.description} onChange={(event) => setFormData((data) => ({ ...data, description: event.target.value }))} placeholder="说明该密钥的业务用途" /></div>
-            <div className="space-y-2"><Label>有效期至</Label><Input type="date" value={formData.expires_at} onChange={(event) => setFormData((data) => ({ ...data, expires_at: event.target.value }))} /></div>
+            <div className="space-y-2">
+              <Label>有效期至</Label>
+              <DatePicker
+                value={formData.expires_at}
+                onChange={(event) => setFormData((data) => ({ ...data, expires_at: event.target.value }))}
+                placeholder="选择有效期（可选）"
+              />
+            </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between"><Label>授权 SQL 接口 *</Label><span className="text-xs text-muted-foreground">已选 {formData.interface_ids.length} 个</span></div>
               <div className="max-h-64 space-y-1 overflow-y-auto rounded-lg border p-2">

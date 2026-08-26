@@ -7,6 +7,9 @@ export const generatorApi = {
   // 获取表结构详情
   getTableStructure: (tableName) => axios.get(`/generator/tables/${tableName}`),
 
+  // 创建业务表并自动初始化生成配置
+  createBusinessTable: (data) => axios.post('/generator/business-tables', data),
+
   // 获取模块配置列表
   getModuleConfigs: (params) => axios.get('/generator/configs', { params }),
 

@@ -17,6 +17,39 @@ const generatorValidation = {
     }),
   },
 
+  createBusinessTable: {
+    body: Joi.object({
+      table_name: Joi.string().pattern(/^[a-z][a-z0-9_]{0,58}$/).required().messages({
+        'string.pattern.base': '业务表名只能使用小写字母、数字和下划线，并以字母开头',
+        'any.required': '业务表名不能为空',
+      }),
+      table_comment: Joi.string().max(255).allow('', null).optional(),
+      fields: Joi.array().items(Joi.object({
+        name: Joi.string().pattern(/^[a-z][a-z0-9_]{0,62}$/).required(),
+        type: Joi.string().valid(
+          'string', 'text', 'integer', 'bigint', 'decimal',
+          'boolean', 'date', 'datetime', 'json'
+        ).required(),
+        comment: Joi.string().max(255).allow('', null).optional(),
+        nullable: Joi.boolean().default(true),
+        unique: Joi.boolean().default(false),
+        indexed: Joi.boolean().default(false),
+        length: Joi.number().integer().min(1).max(2000).optional(),
+        precision: Joi.number().integer().min(1).max(38).optional(),
+        scale: Joi.number().integer().min(0).max(38).optional(),
+        default_value: Joi.alternatives().try(
+          Joi.string().allow(''),
+          Joi.number(),
+          Joi.boolean(),
+          Joi.object(),
+          Joi.array(),
+          Joi.valid(null)
+        ).optional(),
+        default_current_time: Joi.boolean().default(false),
+      })).min(1).max(100).required(),
+    }),
+  },
+
   // 获取模块配置列表
   getModuleConfigs: {
     query: Joi.object({

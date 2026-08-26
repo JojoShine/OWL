@@ -22,6 +22,18 @@ router.get(
 );
 
 /**
+ * @route   POST /api/generator/business-tables
+ * @desc    创建新的业务表并初始化生成配置
+ * @access  Private
+ */
+router.post(
+  '/business-tables',
+  checkPermission('generator', 'create'),
+  validate(generatorValidation.createBusinessTable),
+  generatorController.createBusinessTable
+);
+
+/**
  * @route   GET /api/generator/tables/:tableName
  * @desc    获取表结构详情
  * @access  Private

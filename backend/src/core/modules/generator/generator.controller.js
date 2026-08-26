@@ -3,9 +3,23 @@ const moduleConfigService = require('./module-config.service');
 const codeGeneratorService = require('./code-generator.service');
 const generationHistoryService = require('./generation-history.service');
 const sqlParserService = require('./sql-parser.service');
+const businessTableService = require('./business-table.service');
 const { success, paginated } = require('../../../utils/response');
 
 class GeneratorController {
+  /**
+   * 创建业务表并初始化生成配置
+   * POST /api/generator/business-tables
+   */
+  async createBusinessTable(req, res, next) {
+    try {
+      const result = await businessTableService.createBusinessTable(req.body, req.user.id);
+      success(res, result, '业务表创建成功，生成配置已初始化', 201);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   /**
    * 获取数据库表列表
    * GET /api/generator/tables

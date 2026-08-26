@@ -55,6 +55,7 @@ import TablesSection from '@/components/generator/TablesSection';
 import ConfigsSection from '@/components/generator/ConfigsSection';
 import HistorySection from '@/components/generator/HistorySection';
 import ConfigDialog from '@/components/generator/ConfigDialog';
+import BusinessTableDialog from '@/components/generator/BusinessTableDialog';
 import { PageHeader, PageShell } from '@/components/layout/page-shell';
 
 export default function GeneratorPage() {
@@ -82,6 +83,7 @@ export default function GeneratorPage() {
   const [configFields, setConfigFields] = useState([]);
   const [jsonInputs, setJsonInputs] = useState({}); // 存储每个字段的JSON输入文本
   const [isLoadingConfig, setIsLoadingConfig] = useState(false); // 仅用于编辑配置的加载状态
+  const [businessTableDialogOpen, setBusinessTableDialogOpen] = useState(false);
 
   // 生成对话框状态
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
@@ -568,6 +570,15 @@ export default function GeneratorPage() {
     setTableQueryVersion(version => version + 1);
   };
 
+  const handleBusinessTableCreated = (moduleConfig) => {
+    setTableQueryVersion(version => version + 1);
+    setSelectedConfig(moduleConfig);
+    setConfigFields(moduleConfig.fields || []);
+    setModuleConfigs(current => [moduleConfig, ...current.filter(item => item.id !== moduleConfig.id)]);
+    setActiveTab('configs');
+    setConfigDialogOpen(true);
+  };
+
   /**
    * 处理模块配置分页变化
    */
@@ -622,6 +633,7 @@ export default function GeneratorPage() {
             onSearch={handleTableSearch}
             onReset={handleTableSearchReset}
             onRefresh={loadTables}
+            onCreateTable={() => setBusinessTableDialogOpen(true)}
             onInitialize={handleInitializeConfig}
             onCheckAudit={handleCheckAndAddAuditFields}
             pagination={tablePagination}
@@ -767,6 +779,11 @@ export default function GeneratorPage() {
         deleteCodeDialogOpen={deleteCodeDialog.open}
         onDeleteCodeDialogOpenChange={(open) => setDeleteCodeDialog({ open, configId: null })}
         onConfirmDeleteCode={handleConfirmDeleteCode}
+      />
+      <BusinessTableDialog
+        open={businessTableDialogOpen}
+        onOpenChange={setBusinessTableDialogOpen}
+        onCreated={handleBusinessTableCreated}
       />
     </PageShell>
   );

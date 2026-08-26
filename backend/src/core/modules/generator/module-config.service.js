@@ -71,8 +71,10 @@ class ModuleConfigService {
   /**
    * 获取单个模块配置详情
    */
-  async getModuleConfigById(id) {
+  async getModuleConfigById(id, options = {}) {
+    const { transaction } = options;
     const config = await db.GeneratedModule.findByPk(id, {
+      transaction,
       include: [
         {
           model: db.GeneratedField,
@@ -92,8 +94,10 @@ class ModuleConfigService {
   /**
    * 根据表名获取模块配置
    */
-  async getModuleConfigByTableName(tableName) {
+  async getModuleConfigByTableName(tableName, options = {}) {
+    const { transaction } = options;
     const config = await db.GeneratedModule.findOne({
+      transaction,
       where: { table_name: tableName },
       include: [
         {
@@ -110,21 +114,22 @@ class ModuleConfigService {
   /**
    * 初始化模块配置（从数据库表结构自动生成）
    */
-  async initializeModuleConfig(tableName) {
+  async initializeModuleConfig(tableName, options = {}) {
+    const { transaction, userId } = options;
     // 检查表是否存在
-    const tableExists = await dbReaderService.tableExists(tableName);
+    const tableExists = await dbReaderService.tableExists(tableName, { transaction });
     if (!tableExists) {
       throw ApiError.notFound(`表 ${tableName} 不存在`);
     }
 
     // 检查是否已经有配置
-    const existingConfig = await this.getModuleConfigByTableName(tableName);
+    const existingConfig = await this.getModuleConfigByTableName(tableName, { transaction });
     if (existingConfig) {
       throw ApiError.badRequest(`表 ${tableName} 已经存在配置`);
     }
 
     // 获取表结构
-    const tableStructure = await dbReaderService.getTableStructure(tableName);
+    const tableStructure = await dbReaderService.getTableStructure(tableName, { transaction });
 
     // 验证表是否有必需的时间戳字段
     this._validateTimestampColumns(tableName, tableStructure.columns);
@@ -146,13 +151,14 @@ class ModuleConfigService {
       enable_batch_delete: true,
       enable_export: false,
       enable_import: true,
-    });
+      created_by: userId || null,
+    }, { transaction });
 
     // 创建字段配置
-    await this._generateFieldConfigs(tableStructure.columns, moduleConfig.id);
+    await this._generateFieldConfigs(tableStructure.columns, moduleConfig.id, { transaction, userId });
 
     // 重新加载包含字段的配置
-    return await this.getModuleConfigById(moduleConfig.id);
+    return await this.getModuleConfigById(moduleConfig.id, { transaction });
   }
 
   /**
@@ -288,7 +294,8 @@ class ModuleConfigService {
   /**
    * 生成字段配置
    */
-  async _generateFieldConfigs(columns, moduleId) {
+  async _generateFieldConfigs(columns, moduleId, options = {}) {
+    const { transaction, userId } = options;
     const fieldConfigs = [];
 
     for (let i = 0; i < columns.length; i++) {
@@ -331,9 +338,10 @@ class ModuleConfigService {
         joi_type: getJoiType(col.type),
         zod_type: getZodType(col.type),
         validation_rules: null,
+        created_by: userId || null,
       };
 
-      const created = await db.GeneratedField.create(fieldConfig);
+      const created = await db.GeneratedField.create(fieldConfig, { transaction });
       fieldConfigs.push(created);
     }
 

@@ -112,24 +112,25 @@ class DbReaderService {
    * @param {String} tableName - 表名
    * @returns {Promise<Object>} 表结构详情
    */
-  async getTableStructure(tableName) {
+  async getTableStructure(tableName, options = {}) {
+    const { transaction } = options;
     try {
       // 获取表注释
       const [tableInfo] = await db.sequelize.query(`
         SELECT obj_description((quote_ident('public') || '.' || quote_ident(:tableName))::regclass) AS table_comment
-      `, { replacements: { tableName } });
+      `, { replacements: { tableName }, transaction });
 
       // 获取字段信息
-      const columns = await this.getTableColumns(tableName);
+      const columns = await this.getTableColumns(tableName, options);
 
       // 获取索引信息
-      const indexes = await this.getTableIndexes(tableName);
+      const indexes = await this.getTableIndexes(tableName, options);
 
       // 获取主键信息
-      const primaryKeys = await this.getPrimaryKeys(tableName);
+      const primaryKeys = await this.getPrimaryKeys(tableName, options);
 
       // 获取外键信息
-      const foreignKeys = await this.getForeignKeys(tableName);
+      const foreignKeys = await this.getForeignKeys(tableName, options);
 
       return {
         tableName,
@@ -150,7 +151,8 @@ class DbReaderService {
    * @param {String} tableName - 表名
    * @returns {Promise<Array>} 字段列表
    */
-  async getTableColumns(tableName) {
+  async getTableColumns(tableName, options = {}) {
+    const { transaction } = options;
     try {
       const [results] = await db.sequelize.query(`
         SELECT
@@ -167,7 +169,7 @@ class DbReaderService {
         WHERE c.table_name = :tableName
           AND c.table_schema = 'public'
         ORDER BY c.ordinal_position
-      `, { replacements: { tableName } });
+      `, { replacements: { tableName }, transaction });
 
       return results.map(col => ({
         name: col.column_name,
@@ -191,7 +193,8 @@ class DbReaderService {
    * @param {String} tableName - 表名
    * @returns {Promise<Array>} 索引列表
    */
-  async getTableIndexes(tableName) {
+  async getTableIndexes(tableName, options = {}) {
+    const { transaction } = options;
     try {
       const [results] = await db.sequelize.query(`
         SELECT
@@ -205,7 +208,7 @@ class DbReaderService {
         WHERE i.tablename = :tableName
           AND i.schemaname = 'public'
         ORDER BY i.indexname
-      `, { replacements: { tableName } });
+      `, { replacements: { tableName }, transaction });
 
       return results.map(idx => ({
         name: idx.index_name,
@@ -223,7 +226,8 @@ class DbReaderService {
    * @param {String} tableName - 表名
    * @returns {Promise<Array>} 主键列名列表
    */
-  async getPrimaryKeys(tableName) {
+  async getPrimaryKeys(tableName, options = {}) {
+    const { transaction } = options;
     try {
       const [results] = await db.sequelize.query(`
         SELECT kcu.column_name
@@ -234,7 +238,7 @@ class DbReaderService {
           AND tc.table_name = :tableName
           AND tc.table_schema = 'public'
         ORDER BY kcu.ordinal_position
-      `, { replacements: { tableName } });
+      `, { replacements: { tableName }, transaction });
 
       return results.map(row => row.column_name);
     } catch (error) {
@@ -248,7 +252,8 @@ class DbReaderService {
    * @param {String} tableName - 表名
    * @returns {Promise<Array>} 外键列表
    */
-  async getForeignKeys(tableName) {
+  async getForeignKeys(tableName, options = {}) {
+    const { transaction } = options;
     try {
       const [results] = await db.sequelize.query(`
         SELECT
@@ -267,7 +272,7 @@ class DbReaderService {
         WHERE tc.constraint_type = 'FOREIGN KEY'
           AND tc.table_name = :tableName
           AND tc.table_schema = 'public'
-      `, { replacements: { tableName } });
+      `, { replacements: { tableName }, transaction });
 
       return results.map(fk => ({
         columnName: fk.column_name,
@@ -287,7 +292,8 @@ class DbReaderService {
    * @param {String} tableName - 表名
    * @returns {Promise<Boolean>} 是否存在
    */
-  async tableExists(tableName) {
+  async tableExists(tableName, options = {}) {
+    const { transaction } = options;
     try {
       const [results] = await db.sequelize.query(`
         SELECT EXISTS (
@@ -296,7 +302,7 @@ class DbReaderService {
           WHERE table_schema = 'public'
             AND table_name = :tableName
         ) AS exists
-      `, { replacements: { tableName } });
+      `, { replacements: { tableName }, transaction });
 
       return results[0].exists;
     } catch (error) {
