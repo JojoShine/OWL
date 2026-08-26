@@ -8,7 +8,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
-import { PageHeader, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 import { toast } from 'sonner';
 import axios from '@/lib/utils/module-client';
 import { usePermission } from '@/lib/hooks/usePermission';
@@ -498,10 +498,11 @@ export function DynamicCrudPage({ config }) {
   };
 
   return (
-    <div className="space-y-5">
+    <PageShell>
       <PageHeader
         title={config.description || config.moduleName}
         description={config.description ? `管理${config.description}` : '管理模块数据'}
+        meta={<span className="text-sm text-muted-foreground">共 {pagination.total} 条记录</span>}
         actions={(
           <>
             {config.features?.batchDelete && selectedRows.length > 0 && canDelete && (
@@ -661,7 +662,7 @@ export function DynamicCrudPage({ config }) {
           </PageToolbar>
         )}
 
-        <PageSurface className="space-y-4 p-5 lg:p-3">
+        <PageSurface className="p-0">
           {/* 数据表格 */}
           <DynamicTable
             data={data}
@@ -682,6 +683,7 @@ export function DynamicCrudPage({ config }) {
           {/* 分页 */}
           {pagination.total > 0 && (
             <Pagination
+              className="border-t px-4 py-3"
               page={pagination.page}
               total={pagination.total}
               pageSize={pagination.pageSize}
@@ -730,6 +732,6 @@ export function DynamicCrudPage({ config }) {
         description={`确定要删除选中的 ${selectedRows.length} 条记录吗？此操作无法撤销。`}
         variant="destructive"
       />
-    </div>
+    </PageShell>
   );
 }

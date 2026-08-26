@@ -4,6 +4,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
+import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { Combobox } from '@/components/ui/combobox';
 import {
   Select,
@@ -50,6 +51,21 @@ function SearchField({ field, value, onChange, variant = 'default' }) {
           <Input
             data-search-filter-enter="true"
             className={controlClassName}
+            placeholder={placeholder || '请输入'}
+            value={value || ''}
+            onChange={(e) => handleChange(e.target.value)}
+          />
+        </div>
+      );
+
+    case 'number':
+      return (
+        <div className="min-w-[150px] flex-1">
+          {renderLabel()}
+          <Input
+            data-search-filter-enter="true"
+            className={controlClassName}
+            type="number"
             placeholder={placeholder || '请输入'}
             value={value || ''}
             onChange={(e) => handleChange(e.target.value)}
@@ -127,6 +143,28 @@ function SearchField({ field, value, onChange, variant = 'default' }) {
               value={value?.end}
               onChange={(e) => handleChange({ ...value, end: e.target.value })}
               placeholder="结束日期"
+              className={`${controlClassName || ''} min-w-0 overflow-hidden`}
+            />
+          </div>
+        </div>
+      );
+
+    case 'dateTimeRange':
+      return (
+        <div className="min-w-0 basis-full flex-1 lg:min-w-[460px] lg:basis-auto">
+          {renderLabel()}
+          <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
+            <DateTimePicker
+              value={value?.start}
+              onChange={(e) => handleChange({ ...value, start: e.target.value })}
+              placeholder="开始时间"
+              className={`${controlClassName || ''} min-w-0 overflow-hidden`}
+            />
+            <span className="hidden text-muted-foreground sm:inline">-</span>
+            <DateTimePicker
+              value={value?.end}
+              onChange={(e) => handleChange({ ...value, end: e.target.value })}
+              placeholder="结束时间"
               className={`${controlClassName || ''} min-w-0 overflow-hidden`}
             />
           </div>

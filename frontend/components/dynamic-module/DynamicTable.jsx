@@ -1,18 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { formatDateTime } from '@/lib/utils/date';
 import { maskByType } from '@/lib/utils/mask';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { TableLoading } from '@/components/ui/table-loading';
-import { EmptyState } from '@/components/ui/empty-state';
+import { DataTable } from '@/components/common/DataTable';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Edit, Trash2, Eye } from 'lucide-react';
@@ -29,7 +19,6 @@ export function DynamicTable({
   onEdit,
   onDelete,
   onView, // 新增：查看回调
-  onBatchDelete,
   selectedRows = [],
   onSelectRows,
   features = {},
@@ -56,7 +45,7 @@ export function DynamicTable({
   };
 
   const isRowSelected = (id) => selectedRows.includes(id);
-  const isAllSelected = data.length > 0 && selectedRows.length === data.length;
+  const isAllSelected = data.length > 0 && data.every((row) => selectedRows.includes(row.id));
 
   // 格式化字段值
   const formatFieldValue = (value, field) => {
@@ -162,130 +151,66 @@ export function DynamicTable({
     }
   };
 
-  if (loading) {
-    return (
-      <div className="rounded-lg overflow-hidden">
-        <Table>
-          <TableBody>
-            <TableLoading colSpan={listFields.length + (features.batchDelete ? 1 : 0) + 1} />
-          </TableBody>
-        </Table>
-      </div>
-    );
-  }
+  const columns = [
+    ...(features.batchDelete ? [{
+      key: '__selection',
+      label: (
+        <Checkbox
+          checked={isAllSelected}
+          onCheckedChange={handleSelectAll}
+          aria-label="全选"
+        />
+      ),
+      width: 50,
+      render: (_, row) => (
+        <Checkbox
+          checked={isRowSelected(row.id)}
+          onCheckedChange={(checked) => handleSelectRow(row.id, checked)}
+          aria-label={`选择行 ${row.id}`}
+        />
+      ),
+    }] : []),
+    ...listFields.map((field) => ({
+      key: field.name,
+      label: field.label,
+      width: field.listWidth,
+      headerClassName: field.listAlign === 'center'
+        ? 'text-center'
+        : field.listAlign === 'right' ? 'text-right' : undefined,
+      cellClassName: field.listAlign === 'center'
+        ? 'text-center'
+        : field.listAlign === 'right' ? 'text-right' : undefined,
+      render: (value) => formatFieldValue(value, field),
+    })),
+  ];
 
-  if (data.length === 0) {
-    return (
-      <div className="rounded-lg p-8">
-        <EmptyState title="暂无数据" description="当前条件下没有可展示的记录" />
-      </div>
-    );
-  }
+  const renderActions = (row) => (
+    <>
+      <Button variant="ghost" size="icon-sm" onClick={() => onView?.(row)} title="查看" aria-label={`查看 ${row.id}`}>
+        <Eye className="h-4 w-4" />
+      </Button>
+      {features.update ? (
+        <Button variant="ghost" size="icon-sm" onClick={() => onEdit?.(row)} title="编辑" aria-label={`编辑 ${row.id}`}>
+          <Edit className="h-4 w-4" />
+        </Button>
+      ) : null}
+      {features.delete ? (
+        <Button variant="ghost" size="icon-sm" onClick={() => onDelete?.(row)} title="删除" aria-label={`删除 ${row.id}`}>
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
+      ) : null}
+    </>
+  );
 
   return (
-    <div className="rounded-lg">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {/* 批量选择列 */}
-            {features.batchDelete && (
-              <TableHead className="w-[50px]">
-                <Checkbox
-                  checked={isAllSelected}
-                  onCheckedChange={handleSelectAll}
-                  aria-label="全选"
-                />
-              </TableHead>
-            )}
-
-            {/* 动态字段列 */}
-            {listFields.map((field) => (
-              <TableHead
-                key={field.name}
-                style={{ width: field.listWidth }}
-                className={
-                  field.listAlign === 'center'
-                    ? 'text-center'
-                    : field.listAlign === 'right'
-                    ? 'text-right'
-                    : ''
-                }
-              >
-                {field.label}
-              </TableHead>
-            ))}
-
-            {/* 操作列 - 查看按钮始终显示 */}
-            <TableHead className="text-right">操作</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((row) => (
-            <TableRow key={row.id}>
-              {/* 批量选择 */}
-              {features.batchDelete && (
-                <TableCell>
-                  <Checkbox
-                    checked={isRowSelected(row.id)}
-                    onCheckedChange={(checked) => handleSelectRow(row.id, checked)}
-                    aria-label={`选择行 ${row.id}`}
-                  />
-                </TableCell>
-              )}
-
-              {/* 动态字段值 */}
-              {listFields.map((field) => (
-                <TableCell
-                  key={field.name}
-                  className={
-                    field.listAlign === 'center'
-                      ? 'text-center'
-                      : field.listAlign === 'right'
-                      ? 'text-right'
-                      : ''
-                  }
-                >
-                  {formatFieldValue(row[field.name], field)}
-                </TableCell>
-              ))}
-
-              {/* 操作按钮 - 查看按钮始终显示 */}
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onView?.(row)}
-                    title="查看"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  {features.update && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit?.(row)}
-                      title="编辑"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  )}
-                  {features.delete && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete?.(row)}
-                      title="删除"
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  )}
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    <DataTable
+      variant="workspace"
+      density="compact"
+      columns={columns}
+      data={data}
+      loading={loading}
+      actions={renderActions}
+      emptyText="暂无数据"
+    />
   );
 }
