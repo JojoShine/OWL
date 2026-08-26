@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,11 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ThemeToggle } from '@/components/layout/theme/theme-toggle';
-import { authApi, systemConfigApi, smsAuthApi } from '@/lib/api';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AuthShell } from '@/components/auth/auth-shell';
+import { authApi, systemConfigApi } from '@/lib/api';
 import { getFileUrl } from '@/lib/utils/image';
 
 // 表单验证规则
@@ -98,51 +95,23 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
-      <div className="absolute right-6 top-6">
-        <ThemeToggle />
-      </div>
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-4">
-          <div className="flex justify-center">
-            {logoUrl ? (
-              <img
-                src={logoUrl}
-                alt="Logo"
-                width={64}
-                height={64}
-                className="rounded-lg dark:invert"
-              />
-            ) : null}
-          </div>
-          <CardTitle className="text-2xl font-bold text-center">
-            {systemName}
-          </CardTitle>
-          <CardDescription className="text-center">
-            创建您的账号以使用系统
-          </CardDescription>
-          {showTechStack && (
-            <div className="flex flex-wrap justify-center gap-2 pt-2">
-              <Badge variant="secondary">Next.js</Badge>
-              <Badge variant="secondary">React</Badge>
-              <Badge variant="secondary">Tailwind CSS</Badge>
-              <Badge variant="secondary">Node.js</Badge>
-              <Badge variant="secondary">PostgreSQL</Badge>
-            </div>
-          )}
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <AuthShell
+      systemName={systemName}
+      logoUrl={logoUrl}
+      description="创建账号以使用管理平台"
+      footer={showTechStack ? '技术支持 · Next.js · React · Tailwind CSS · Node.js · PostgreSQL' : null}
+    >
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {error && (
-              <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded">
-                {error}
-              </div>
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
 
             {success && (
-              <div className="p-3 text-sm text-green-500 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded">
-                注册成功！正在跳转到登录页...
-              </div>
+              <Alert className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
+                <AlertDescription>注册成功，正在跳转到登录页。</AlertDescription>
+              </Alert>
             )}
 
             <div className="space-y-2.5">
@@ -208,14 +177,12 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <div className="mt-4 text-center text-sm">
+          <div className="mt-5 text-center text-sm">
             <span className="text-muted-foreground">已有账号？</span>
             <Link href="/login" className="text-primary hover:underline ml-1">
               立即登录
             </Link>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+    </AuthShell>
   );
 }

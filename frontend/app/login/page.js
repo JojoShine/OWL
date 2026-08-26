@@ -3,7 +3,6 @@
 import { useState, Suspense, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '@/lib/schemas';
@@ -12,16 +11,14 @@ import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { CaptchaInput } from '@/components/ui/captcha-input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ThemeToggle } from '@/components/layout/theme/theme-toggle';
+import { Loading } from '@/components/ui/loading';
+import { AuthShell } from '@/components/auth/auth-shell';
 import SmsLoginForm from '@/components/auth/sms-login-form';
-import { authApi, monitorApi, systemConfigApi } from '@/lib/api';
+import { monitorApi, systemConfigApi } from '@/lib/api';
 import { useAuth } from '@/lib/utils/auth';
 import { getFileUrl } from '@/lib/utils/image';
-import { getPath } from '@/lib/utils/api-url';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
@@ -149,39 +146,19 @@ function LoginForm() {
     }
   };
 
-  const isSplitLayout = loginLayout === 'left-image' || loginLayout === 'right-image';
-
-  const loginCard = (
-    <Card className={`w-full max-w-md bg-[#fafafa] dark:bg-[#1a1a1a] border-0 shadow-none ${loginBgUrl && loginLayout === 'center' ? 'bg-opacity-90' : ''} ${isSplitLayout ? 'border-0 shadow-none' : ''}`}>
-      <CardHeader className="space-y-4">
-        <div className="flex justify-center">
-          {logoUrl ? (
-            <img
-              src={logoUrl}
-              alt="Logo"
-              width={64}
-              height={64}
-              className="rounded-lg dark:invert"
-            />
-          ) : null}
-        </div>
-        <CardTitle className="text-2xl font-bold text-center">
-          {systemName}
-        </CardTitle>
-        <CardDescription className="text-center">
-          请输入您的账号信息登录系统
-        </CardDescription>
-        {showTechStack && (
-          <div className="flex flex-wrap justify-center gap-2 pt-2">
-            <Badge variant="secondary">Next.js</Badge>
-            <Badge variant="secondary">React</Badge>
-            <Badge variant="secondary">Tailwind CSS</Badge>
-            <Badge variant="secondary">Node.js</Badge>
-            <Badge variant="secondary">PostgreSQL</Badge>
-          </div>
-        )}
-      </CardHeader>
-      <CardContent>
+  return (
+    <AuthShell
+      systemName={systemName}
+      logoUrl={logoUrl}
+      description="请输入您的账号信息登录系统"
+      backgroundUrl={loginBgUrl}
+      layout={loginLayout}
+      footer={
+        showTechStack
+          ? '技术支持 · Next.js · React · Tailwind CSS · Node.js · PostgreSQL'
+          : null
+      }
+    >
         {systemStatus && !systemStatus.redis?.available && (
           <Alert className="mb-4 border-yellow-200 bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-800">
             <AlertDescription className="text-sm text-yellow-800 dark:text-yellow-200">
@@ -216,11 +193,11 @@ function LoginForm() {
           {/* 密码登录 */}
           {(loginMethod === 'password' || loginMethod === 'both') && (
             <TabsContent value="password">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 {error && (
-                  <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded">
-                    {error}
-                  </div>
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
                 )}
                 <div className="space-y-2.5">
                   <Label htmlFor="username">用户名或邮箱</Label>
@@ -273,67 +250,15 @@ function LoginForm() {
             </TabsContent>
           )}
         </Tabs>
-      </CardContent>
-    </Card>
-  );
-
-  // 左右布局：图片区域
-  const imagePanel = loginBgUrl ? (
-    <div
-      className="h-full bg-cover bg-center"
-      style={{ backgroundImage: `url(${loginBgUrl})` }}
-    />
-  ) : (
-    <div className="h-full bg-gradient-to-br from-primary/20 to-primary/5" />
-  );
-
-  if (loginLayout === 'left-image' || loginLayout === 'right-image') {
-    return (
-      <div className="min-h-screen flex bg-background">
-        <div className="absolute right-6 top-6 z-10">
-          <ThemeToggle />
-        </div>
-        {loginLayout === 'left-image' ? (
-          <>
-            <div className="w-1/3 min-h-screen">{imagePanel}</div>
-            <div className="w-2/3 flex items-center justify-center p-8">{loginCard}</div>
-          </>
-        ) : (
-          <>
-            <div className="w-2/3 flex items-center justify-center p-8">{loginCard}</div>
-            <div className="w-1/3 min-h-screen">{imagePanel}</div>
-          </>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-background p-4 relative"
-      style={{
-        backgroundImage: loginBgUrl ? `url(${loginBgUrl})` : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-      }}
-    >
-      <div className="absolute right-6 top-6">
-        <ThemeToggle />
-      </div>
-      {loginCard}
-    </div>
+    </AuthShell>
   );
 }
 
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">加载中...</p>
-        </div>
+      <div className="flex min-h-dvh items-center justify-center bg-background">
+        <Loading size="lg" />
       </div>
     }>
       <LoginForm />

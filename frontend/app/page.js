@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/utils/auth';
+import { Loading } from '@/components/ui/loading';
 
 export default function Home() {
   const router = useRouter();
@@ -22,11 +23,8 @@ export default function Home() {
 
   // 显示加载状态
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100 mx-auto"></div>
-        <p className="mt-4 text-sm text-muted-foreground">加载中...</p>
-      </div>
-    </div>
+    <main className="flex min-h-dvh items-center justify-center bg-background">
+      <Loading size="lg" text="正在进入管理平台..." />
+    </main>
   );
 }
