@@ -26,7 +26,7 @@ import { toast } from 'sonner';
 
 const notificationTypes = [
   { value: 'info', label: '信息', color: 'text-blue-500' },
-  { value: 'system', label: '系统', color: 'text-gray-500' },
+  { value: 'system', label: '系统', color: 'text-muted-foreground' },
   { value: 'warning', label: '警告', color: 'text-yellow-500' },
   { value: 'error', label: '错误', color: 'text-red-500' },
   { value: 'success', label: '成功', color: 'text-green-500' },

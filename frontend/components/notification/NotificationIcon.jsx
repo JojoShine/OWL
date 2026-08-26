@@ -24,7 +24,7 @@ import { zhCN } from 'date-fns/locale';
 // 通知类型图标颜色
 const notificationTypeColors = {
   info: 'text-blue-500',
-  system: 'text-gray-500',
+  system: 'text-muted-foreground',
   warning: 'text-yellow-500',
   error: 'text-red-500',
   success: 'text-green-500',

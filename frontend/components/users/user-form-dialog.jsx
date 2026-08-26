@@ -172,7 +172,7 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        overlayClassName="bg-slate-950/35 backdrop-blur-[1px]"
+        overlayClassName="bg-black/35 backdrop-blur-[1px]"
         className="flex max-h-[85vh] max-w-3xl flex-col gap-0 overflow-hidden p-0"
       >
         <DialogHeader className="shrink-0 border-b px-6 py-5">

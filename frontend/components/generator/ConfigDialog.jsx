@@ -240,7 +240,7 @@ export default function ConfigDialog({
                               placeholder={field.field_comment || "如: 状态"}
                               value={displayName.list || ''}
                               onChange={(e) => onFormatOptionChange(index, 'displayName.list', e.target.value)}
-                              className="h-9"
+                              className="h-10"
                             />
                           </div>
                           <div className="space-y-2">
@@ -249,7 +249,7 @@ export default function ConfigDialog({
                               placeholder={field.field_comment || "如: 按状态筛选"}
                               value={displayName.search || ''}
                               onChange={(e) => onFormatOptionChange(index, 'displayName.search', e.target.value)}
-                              className="h-9"
+                              className="h-10"
                             />
                           </div>
                           <div className="space-y-2">
@@ -258,7 +258,7 @@ export default function ConfigDialog({
                               placeholder={field.field_comment || "如: 选择状态"}
                               value={displayName.form || ''}
                               onChange={(e) => onFormatOptionChange(index, 'displayName.form', e.target.value)}
-                              className="h-9"
+                              className="h-10"
                             />
                           </div>
                         </div>
@@ -380,7 +380,7 @@ export default function ConfigDialog({
                               value={formatOptions.displayRule?.maskType || 'mobile'}
                               onValueChange={(val) => onFormatOptionChange(index, 'displayRule.maskType', val)}
                             >
-                              <SelectTrigger className="h-9">
+                              <SelectTrigger className="h-10">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -418,7 +418,7 @@ export default function ConfigDialog({
                                 if (value === undefined) delete updatedRules.minLength;
                                 onFieldChange(index, 'form_rules', updatedRules);
                               }}
-                              className="h-9"
+                              className="h-10"
                             />
                           </div>
                           <div className="space-y-2">
@@ -433,7 +433,7 @@ export default function ConfigDialog({
                                 if (value === undefined) delete updatedRules.maxLength;
                                 onFieldChange(index, 'form_rules', updatedRules);
                               }}
-                              className="h-9"
+                              className="h-10"
                             />
                           </div>
                           <div className="space-y-2">
@@ -448,7 +448,7 @@ export default function ConfigDialog({
                                 if (value === undefined) delete updatedRules.exactLength;
                                 onFieldChange(index, 'form_rules', updatedRules);
                               }}
-                              className="h-9"
+                              className="h-10"
                             />
                           </div>
                         </div>
@@ -463,7 +463,7 @@ export default function ConfigDialog({
                               if (value === undefined) delete updatedRules.pattern;
                               onFieldChange(index, 'form_rules', updatedRules);
                             }}
-                            className="h-9 font-mono text-xs"
+                            className="h-10 font-mono text-xs"
                           />
                         </div>
                         <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">

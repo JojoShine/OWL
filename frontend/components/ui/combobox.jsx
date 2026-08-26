@@ -84,7 +84,7 @@ export function Combobox({
               placeholder={searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-9"
+              className="h-10"
             />
           </div>
 

@@ -32,7 +32,7 @@ export default function AuthenticatedLayout({ children }) {
             <button
               type="button"
               aria-label="关闭导航菜单"
-              className="fixed inset-0 z-40 bg-slate-950/25 md:hidden"
+              className="fixed inset-0 z-40 bg-black/25 md:hidden"
               onClick={() => setMobileNavOpen(false)}
             />
           )}

@@ -332,7 +332,7 @@
 
 /* ========== 页面设计器组件属性配置统一样式 ========== */
 @layer components {
-  /* 统一所有表单控件的高度为 h-9 (36px) */
+  /* 统一所有表单控件的高度为 h-10 (40px) */
   .component-settings input[type="text"],
   .component-settings input[type="number"],
   .component-settings input[type="url"],
@@ -340,7 +340,7 @@
   .component-settings input[type="password"],
   .component-settings select,
   .component-settings button[role="combobox"] {
-    @apply h-9;
+    @apply h-10;
   }
 
   /* Textarea 保持自适应高度，但设置最小高度 */

@@ -89,7 +89,7 @@ export default function VariableSchemaEditor({ value = [], onChange }) {
                         value={variable.name}
                         onChange={(e) => handleChange(index, 'name', e.target.value)}
                         placeholder="例如: userName"
-                        className="mt-1.5 h-9 font-mono"
+                        className="mt-1.5 h-10 font-mono"
                         required
                       />
                     </div>
@@ -99,7 +99,7 @@ export default function VariableSchemaEditor({ value = [], onChange }) {
                         value={variable.type}
                         onValueChange={(val) => handleChange(index, 'type', val)}
                       >
-                        <SelectTrigger className="mt-1.5 h-9">
+                        <SelectTrigger className="mt-1.5 h-10">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -113,7 +113,7 @@ export default function VariableSchemaEditor({ value = [], onChange }) {
                     </div>
                     <div className="col-span-2">
                       <Label className="text-xs">必填</Label>
-                      <div className="mt-1.5 h-9 flex items-center">
+                      <div className="mt-1.5 flex h-10 items-center">
                         <Checkbox
                           checked={variable.required}
                           onCheckedChange={(checked) =>
@@ -144,7 +144,7 @@ export default function VariableSchemaEditor({ value = [], onChange }) {
                         value={variable.label}
                         onChange={(e) => handleChange(index, 'label', e.target.value)}
                         placeholder="例如: 用户名"
-                        className="mt-1.5 h-9"
+                        className="mt-1.5 h-10"
                       />
                     </div>
                     <div>
@@ -153,7 +153,7 @@ export default function VariableSchemaEditor({ value = [], onChange }) {
                         value={variable.defaultValue}
                         onChange={(e) => handleChange(index, 'defaultValue', e.target.value)}
                         placeholder="可选"
-                        className="mt-1.5 h-9"
+                        className="mt-1.5 h-10"
                       />
                     </div>
                   </div>
@@ -165,7 +165,7 @@ export default function VariableSchemaEditor({ value = [], onChange }) {
                       value={variable.description}
                       onChange={(e) => handleChange(index, 'description', e.target.value)}
                       placeholder="变量的用途说明"
-                      className="mt-1.5 h-9"
+                      className="mt-1.5 h-10"
                     />
                   </div>
 
@@ -176,7 +176,7 @@ export default function VariableSchemaEditor({ value = [], onChange }) {
                       value={variable.example}
                       onChange={(e) => handleChange(index, 'example', e.target.value)}
                       placeholder="例如: 张三"
-                      className="mt-1.5 h-9"
+                      className="mt-1.5 h-10"
                     />
                   </div>
                 </div>

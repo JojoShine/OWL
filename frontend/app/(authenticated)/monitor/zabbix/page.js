@@ -34,7 +34,7 @@ import { PageHeader, PageShell, PageToolbar } from '@/components/layout/page-she
 
 // 严重级别映射
 const SEVERITY_MAP = {
-  0: { label: '未分类', color: 'bg-gray-500', text: 'text-gray-500' },
+  0: { label: '未分类', color: 'bg-muted-foreground', text: 'text-muted-foreground' },
   1: { label: '信息', color: 'bg-blue-500', text: 'text-blue-500' },
   2: { label: '警告', color: 'bg-yellow-500', text: 'text-yellow-500' },
   3: { label: '一般严重', color: 'bg-orange-500', text: 'text-orange-500' },
