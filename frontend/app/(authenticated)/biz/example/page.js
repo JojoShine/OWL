@@ -7,7 +7,7 @@
  * 路由路径：/biz/example
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { exampleApi } from '@/lib/api/biz/example.api';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -15,49 +15,37 @@ import { toast } from 'sonner';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
+import { useListQuery } from '@/lib/hooks/use-list-query';
 
 export default function ExamplePage() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchValues, setSearchValues] = useState({});
+  const { draftFilters: searchValues, setDraftFilters: setSearchValues, appliedFilters, pagination, setPagination, submit: handleSearch, reset: handleReset, setTotal } = useListQuery();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 0 });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await exampleApi.getList({
-        keyword: searchValues.keyword || '',
+        keyword: appliedFilters.keyword || '',
         page: pagination.page,
         pageSize: pagination.pageSize,
       });
       setData(response.data?.items || []);
       if (response.data?.pagination) {
-        setPagination(prev => ({ ...prev, total: response.data.pagination.total || 0 }));
+        setTotal(response.data.pagination.total || 0);
       }
     } catch (error) {
       console.error('获取列表失败:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [appliedFilters.keyword, pagination.page, pagination.pageSize, setTotal]);
 
   useEffect(() => {
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.page, pagination.pageSize]);
-
-  const handleSearch = () => {
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchData(), 0);
-  };
-
-  const handleReset = () => {
-    setSearchValues({});
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchData(), 0);
-  };
+  }, [fetchData]);
 
   const handleDelete = async (id) => {
     try {

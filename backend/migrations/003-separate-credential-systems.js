@@ -112,6 +112,9 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
+    if (process.env.ALLOW_DATABASE_RESET !== 'true') {
+      throw new Error('禁止直接回滚凭证体系迁移；开发环境请使用 npm run db:reset:dev');
+    }
     const transaction = await queryInterface.sequelize.transaction();
     try {
       await queryInterface.dropTable('owl_third_party_api_call_logs', { transaction });

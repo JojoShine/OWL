@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
   PlusIcon,
   RefreshCwIcon,
@@ -127,29 +127,7 @@ export default function AlertsPage() {
     ],
   };
 
-  useEffect(() => {
-    loadData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
-
-  // 监听告警历史页码变化
-  useEffect(() => {
-    if (activeTab === 'history') {
-      loadHistory();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [historyPage]);
-
-  const loadData = async () => {
-    if (activeTab === 'rules') {
-      await loadRules();
-    } else {
-      await loadHistory();
-    }
-    await loadStats();
-  };
-
-  const loadRules = async () => {
+  const loadRules = useCallback(async () => {
     try {
       setLoading(true);
       const response = await alertApi.getAllRules();
@@ -160,9 +138,9 @@ export default function AlertsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     try {
       setLoading(true);
       const response = await alertApi.getAlertHistory({
@@ -178,16 +156,26 @@ export default function AlertsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [historyLimit, historyPage]);
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       const response = await alertApi.getAlertStats();
       setStats(response.data);
     } catch (error) {
       console.error('加载统计数据失败:', error);
     }
-  };
+  }, []);
+
+  const loadData = useCallback(async () => {
+    if (activeTab === 'rules') await loadRules();
+    else await loadHistory();
+    await loadStats();
+  }, [activeTab, loadHistory, loadRules, loadStats]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const loadEmailTemplates = async () => {
     try {
@@ -659,7 +647,7 @@ export default function AlertsPage() {
           <div className="space-y-4 py-4">
             {/* 规则名称 */}
             <div className="space-y-2">
-              <Label htmlFor="name">规则名称 *</Label>
+              <Label htmlFor="name">规则名称<span className="ml-1 text-destructive">*</span></Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -809,7 +797,7 @@ export default function AlertsPage() {
                   {/* 邮件模版选择 */}
                   <div className="space-y-2">
                     <Label htmlFor="alert_template">
-                      告警邮件模版 <span className="text-red-500">*</span>
+                      告警邮件模版 <span className="text-destructive">*</span>
                     </Label>
                     <Select
                       value={formData.alert_template_id}
@@ -837,7 +825,7 @@ export default function AlertsPage() {
                   {/* 告警接收人 */}
                   <div className="space-y-2">
                     <Label>
-                      告警接收人 <span className="text-red-500">*</span>
+                      告警接收人 <span className="text-destructive">*</span>
                     </Label>
                     <div className="flex gap-2">
                       <Input

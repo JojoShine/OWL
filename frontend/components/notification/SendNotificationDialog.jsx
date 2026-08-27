@@ -156,7 +156,7 @@ export default function SendNotificationDialog({ open, onOpenChange, onSuccess }
           {/* 选择用户 */}
           <div className="space-y-2">
             <Label htmlFor="user">
-              接收用户 <span className="text-red-500">*</span>
+              接收用户 <span className="text-destructive">*</span>
             </Label>
             <Select
               value={formData.user_id}
@@ -193,7 +193,7 @@ export default function SendNotificationDialog({ open, onOpenChange, onSuccess }
           {/* 通知类型 */}
           <div className="space-y-2">
             <Label htmlFor="type">
-              通知类型 <span className="text-red-500">*</span>
+              通知类型 <span className="text-destructive">*</span>
             </Label>
             <Select
               value={formData.type}
@@ -218,7 +218,7 @@ export default function SendNotificationDialog({ open, onOpenChange, onSuccess }
           {/* 通知标题 */}
           <div className="space-y-2">
             <Label htmlFor="title">
-              通知标题 <span className="text-red-500">*</span>
+              通知标题 <span className="text-destructive">*</span>
             </Label>
             <Input
               id="title"
@@ -239,7 +239,7 @@ export default function SendNotificationDialog({ open, onOpenChange, onSuccess }
           {/* 通知内容 */}
           <div className="space-y-2">
             <Label htmlFor="content">
-              通知内容 <span className="text-red-500">*</span>
+              通知内容 <span className="text-destructive">*</span>
             </Label>
             <Textarea
               id="content"

@@ -1,5 +1,11 @@
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const projectRoot = dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  turbopack: { root: projectRoot },
   // 生产环境部署路径（从环境变量读取）
   basePath: process.env.NODE_ENV === 'production' ? (process.env.NEXT_PUBLIC_BASE_PATH || '') : '',
 

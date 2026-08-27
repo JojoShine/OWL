@@ -13,7 +13,7 @@ class EmailTemplateController {
       paginated(res, result.templates, {
         total: result.total,
         page: result.page,
-        pageSize: result.limit,  // 修复：使用 pageSize 而不是 limit
+        pageSize: result.pageSize,
         totalPages: result.totalPages,
       }, '获取模板列表成功');
     } catch (error) {

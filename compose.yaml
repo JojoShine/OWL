@@ -1,0 +1,84 @@
+name: ${COMPOSE_PROJECT_NAME:-owl-platform}
+
+x-backend-common: &backend-common
+  image: ${BACKEND_IMAGE:-owl-platform-backend:local}
+  build:
+    context: ./backend
+    target: runtime
+  env_file:
+    - path: ${BACKEND_ENV_FILE:-./deploy/env/backend.env}
+      required: true
+  environment:
+    NODE_ENV: production
+    HOST: 0.0.0.0
+    PORT: 3001
+    LOG_TO_STDOUT: "true"
+  extra_hosts:
+    - host.docker.internal:host-gateway
+  init: true
+  networks:
+    - application
+
+services:
+  migration:
+    <<: *backend-common
+    command: ["npm", "run", "db:deploy"]
+    restart: "no"
+
+  backend:
+    <<: *backend-common
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    ports:
+      - ${BIND_ADDRESS:-127.0.0.1}:${BACKEND_PORT:-5002}:3001
+    volumes:
+      - backend_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/health').then((response) => { if (!response.ok) process.exit(1); }).catch(() => process.exit(1));"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    stop_grace_period: 20s
+    security_opt:
+      - no-new-privileges:true
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-owl-platform-frontend:local}
+    build:
+      context: ./frontend
+      target: runtime
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/owl/api}
+        NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-/owl}
+        NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Owl Platform 管理后台}
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+      FRONTEND_HEALTH_PATH: ${NEXT_PUBLIC_BASE_PATH:-/owl}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - ${BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PORT:-7000}:3000
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000' + (process.env.FRONTEND_HEALTH_PATH || '')).then((response) => { if (!response.ok) process.exit(1); }).catch(() => process.exit(1));"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    init: true
+    stop_grace_period: 15s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - application
+
+networks:
+  application:
+    driver: bridge
+
+volumes:
+  backend_logs:

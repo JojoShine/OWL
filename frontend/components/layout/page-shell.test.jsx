@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { PageHeader, PageShell, PageSurface, PageToolbar } from './page-shell';
+import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from './page-shell';
 
 vi.mock('@/lib/utils', () => ({
   cn: (...classNames) => classNames.filter(Boolean).join(' '),
@@ -22,5 +22,21 @@ describe('admin page shell', () => {
     expect(screen.getByText('维护角色及权限范围')).toHaveClass('text-muted-foreground');
     expect(screen.getByTestId('toolbar')).toHaveClass('rounded-lg', 'border', 'bg-card');
     expect(screen.getByTestId('surface')).toHaveClass('overflow-hidden', 'rounded-lg', 'border', 'bg-card');
+  });
+
+  it('separates the mobile toolbar from a transparent list surface', () => {
+    render(
+      <PageWorkspace data-testid="workspace">
+        <PageToolbar>筛选</PageToolbar>
+        <PageSurface>列表</PageSurface>
+      </PageWorkspace>
+    );
+
+    expect(screen.getByTestId('workspace')).toHaveClass(
+      'max-md:space-y-3',
+      'max-md:border-0',
+      'max-md:bg-transparent',
+      '[&>[data-slot=page-surface]]:bg-transparent'
+    );
   });
 });

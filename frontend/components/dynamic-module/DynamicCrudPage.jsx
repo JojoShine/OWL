@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, Download, Upload } from 'lucide-react';
 import { Pagination } from '@/components/ui/pagination';
@@ -12,6 +12,7 @@ import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '
 import { toast } from 'sonner';
 import axios from '@/lib/utils/module-client';
 import { usePermission } from '@/lib/hooks/usePermission';
+import { useListQuery } from '@/lib/hooks/use-list-query';
 import { DynamicFilters } from './DynamicFilters';
 import { DynamicTable } from './DynamicTable';
 import { DynamicForm } from './DynamicForm';
@@ -27,12 +28,17 @@ export function DynamicCrudPage({ config }) {
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filters, setFilters] = useState({});
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pageSize: 10,
-    total: 0,
-  });
+  const {
+    draftFilters: filters,
+    setDraftFilters: setFilters,
+    appliedFilters,
+    pagination,
+    submit: handleSearch,
+    reset: handleResetFilters,
+    setPage: handlePageChange,
+    setPageSize: handlePageSizeChange,
+    setTotal,
+  } = useListQuery();
   const [selectedRows, setSelectedRows] = useState([]);
   const [formDialog, setFormDialog] = useState({
     open: false,
@@ -52,6 +58,7 @@ export function DynamicCrudPage({ config }) {
   const [importProgress, setImportProgress] = useState(0);
   const [batchInfo, setBatchInfo] = useState({ current: 0, total: 0, successCount: 0, errorCount: 0, errors: [] });
   const fileInputRef = useRef(null);
+  const latestRequestId = useRef(0);
 
   // 每批导入行数 & 每批超时时间
   const IMPORT_BATCH_SIZE = 500;
@@ -85,61 +92,40 @@ export function DynamicCrudPage({ config }) {
   const canDelete = resource && checkDelete(resource);
 
   // 加载数据
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    const requestId = ++latestRequestId.current;
     try {
       setLoading(true);
       const response = await axios.get(config.api.list, {
         params: {
-          ...filters,
+          ...appliedFilters,
           page: pagination.page,
           limit: pagination.pageSize,
         },
       });
 
       // 处理不同的响应格式
-      const responseData = response.data || response;
+      const responseData = response.data || {};
       const items = responseData.items || responseData.data || [];
       const total = responseData.pagination?.total || responseData.total || 0;
 
+      if (requestId !== latestRequestId.current) return;
       setData(Array.isArray(items) ? items : []);
-      setPagination((prev) => ({ ...prev, total }));
+      setTotal(total);
     } catch (error) {
+      if (requestId !== latestRequestId.current) return;
       console.error('加载数据失败:', error);
       toast.error('加载数据失败');
       setData([]);
     } finally {
-      setLoading(false);
+      if (requestId === latestRequestId.current) setLoading(false);
     }
-  };
+  }, [appliedFilters, config.api.list, pagination.page, pagination.pageSize, setTotal]);
 
   // 初始加载和分页/筛选变化时加载数据
   useEffect(() => {
     fetchData();
-  }, [pagination.page, pagination.pageSize]);
-
-  // 搜索
-  const handleSearch = () => {
-    setPagination((prev) => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchData(), 0);
-  };
-
-  // 重置筛选
-  const handleResetFilters = () => {
-    setFilters({});
-    setPagination((prev) => ({ ...prev, page: 1 }));
-    // 延迟执行查询，确保状态已更新
-    setTimeout(() => fetchData(), 50);
-  };
-
-  // 分页变化
-  const handlePageChange = (newPage) => {
-    setPagination((prev) => ({ ...prev, page: newPage }));
-  };
-
-  // 每页条数变化
-  const handlePageSizeChange = (newPageSize) => {
-    setPagination((prev) => ({ ...prev, pageSize: newPageSize, page: 1 }));
-  };
+  }, [fetchData]);
 
   // 打开新增对话框
   const handleAdd = () => {

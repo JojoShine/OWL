@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { FolderIcon, HomeIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/ui/loading';
@@ -26,14 +26,7 @@ export default function MoveDialog({ open, onClose, item, isFolder, onSuccess })
   const [loading, setLoading] = useState(false);
   const [loadingFolders, setLoadingFolders] = useState(false);
 
-  useEffect(() => {
-    if (open) {
-      loadFolders();
-      setSelectedFolderId(item?.folder_id || item?.parent_id || null);
-    }
-  }, [open, item]);
-
-  const loadFolders = async () => {
+  const loadFolders = useCallback(async () => {
     try {
       setLoadingFolders(true);
       const response = await folderApi.getFolders({ page: 1, limit: 100 });
@@ -57,7 +50,14 @@ export default function MoveDialog({ open, onClose, item, isFolder, onSuccess })
     } finally {
       setLoadingFolders(false);
     }
-  };
+  }, [isFolder, item]);
+
+  useEffect(() => {
+    if (open) {
+      loadFolders();
+      setSelectedFolderId(item?.folder_id || item?.parent_id || null);
+    }
+  }, [item, loadFolders, open]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

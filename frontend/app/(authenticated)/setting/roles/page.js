@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { roleApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,36 +13,33 @@ import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { usePermission } from '@/lib/hooks/usePermission';
 import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
+import { useListQuery } from '@/lib/hooks/use-list-query';
 
 export default function RolesPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
   const [roles, setRoles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchValues, setSearchValues] = useState({});
+  const { draftFilters: searchValues, setDraftFilters: setSearchValues, appliedFilters, pagination, setPagination, submit: handleSearch, reset: handleReset, setTotal } = useListQuery();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
-  const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 0 });
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState(null);
 
   // 获取角色列表
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await roleApi.getRoles({
-        search: searchValues.keyword || '',
+        search: appliedFilters.keyword || '',
         page: pagination.page,
         limit: pagination.pageSize
       });
-      const rolesData = response.data?.items || response.data || [];
+      const rolesData = response.data?.items || [];
       setRoles(Array.isArray(rolesData) ? rolesData : []);
 
       // 更新分页信息
       if (response.data?.pagination) {
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination.total || 0
-        }));
+        setTotal(response.data.pagination.total || 0);
       }
     } catch (error) {
       console.error('获取角色列表失败:', error);
@@ -50,25 +47,11 @@ export default function RolesPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [appliedFilters.keyword, pagination.page, pagination.pageSize, setTotal]);
 
   useEffect(() => {
     fetchRoles();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.page, pagination.pageSize]);
-
-  // 搜索
-  const handleSearch = () => {
-    setPagination(prev => ({ ...prev, page: 1 })); // 重置到第一页
-    setTimeout(() => fetchRoles(), 0);
-  };
-
-  // 重置
-  const handleReset = () => {
-    setSearchValues({});
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchRoles(), 0);
-  };
+  }, [fetchRoles]);
 
   // 分页变化
   const handlePageChange = (newPage) => {

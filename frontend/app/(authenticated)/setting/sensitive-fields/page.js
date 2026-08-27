@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { sensitiveFieldApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,36 +12,33 @@ import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { usePermission } from '@/lib/hooks/usePermission';
 import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
+import { useListQuery } from '@/lib/hooks/use-list-query';
 
 export default function SensitiveFieldsPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
   const [fields, setFields] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchValues, setSearchValues] = useState({});
+  const { draftFilters: searchValues, setDraftFilters: setSearchValues, appliedFilters, pagination, setPagination, submit: handleSearch, reset: handleReset, setTotal } = useListQuery();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingField, setEditingField] = useState(null);
-  const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 0 });
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [fieldToDelete, setFieldToDelete] = useState(null);
 
   // 获取敏感字段列表
-  const fetchFields = async () => {
+  const fetchFields = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await sensitiveFieldApi.getSensitiveFields({
-        search: searchValues.keyword || '',
+        search: appliedFilters.keyword || '',
         page: pagination.page,
         limit: pagination.pageSize
       });
-      const fieldsData = response.data?.items || response.data || [];
+      const fieldsData = response.data?.items || [];
       setFields(Array.isArray(fieldsData) ? fieldsData : []);
 
       // 更新分页信息
       if (response.data?.pagination) {
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination.total || 0
-        }));
+        setTotal(response.data.pagination.total || 0);
       }
     } catch (error) {
       console.error('获取敏感字段列表失败:', error);
@@ -49,25 +46,11 @@ export default function SensitiveFieldsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [appliedFilters.keyword, pagination.page, pagination.pageSize, setTotal]);
 
   useEffect(() => {
     fetchFields();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.page, pagination.pageSize]);
-
-  // 搜索
-  const handleSearch = () => {
-    setPagination(prev => ({ ...prev, page: 1 })); // 重置到第一页
-    setTimeout(() => fetchFields(), 0);
-  };
-
-  // 重置
-  const handleReset = () => {
-    setSearchValues({});
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchFields(), 0);
-  };
+  }, [fetchFields]);
 
   // 分页变化
   const handlePageChange = (newPage) => {

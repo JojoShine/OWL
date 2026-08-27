@@ -1,19 +1,21 @@
 const path = require('path');
 const fs = require('fs');
 
-// 根据 NODE_ENV 加载对应的环境文件
-const env = process.env.NODE_ENV || 'development';
+// 根据显式运行环境加载配置，数据库命令必须与应用运行环境保持一致
+const env = process.env.NODE_ENV || process.env.APP_ENV || 'development';
+process.env.NODE_ENV = env;
 const envFile = env === 'production' ? '.env.production' : '.env.local';
+const rootDir = __dirname;
 
-if (fs.existsSync(envFile)) {
-  require('dotenv').config({ path: envFile });
-} else if (fs.existsSync('.env')) {
-  require('dotenv').config();
+if (fs.existsSync(path.join(rootDir, envFile))) {
+  require('dotenv').config({ path: path.join(rootDir, envFile), override: false });
+} else if (fs.existsSync(path.join(rootDir, '.env'))) {
+  require('dotenv').config({ path: path.join(rootDir, '.env'), override: false });
 }
 
 module.exports = {
-  'config': path.resolve('src/config', 'database.js'),
-  'models-path': path.resolve('src', 'models'),
-  'seeders-path': path.resolve('seeders'),
-  'migrations-path': path.resolve('migrations')
+  'config': path.join(rootDir, 'src/config/database.js'),
+  'models-path': path.join(rootDir, 'src/models'),
+  'seeders-path': path.join(rootDir, 'seeders'),
+  'migrations-path': path.join(rootDir, 'migrations')
 };

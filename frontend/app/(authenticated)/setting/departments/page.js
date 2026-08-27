@@ -13,7 +13,13 @@ import DepartmentFormDialog from '@/components/departments/department-form-dialo
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
 import { usePermission } from '@/lib/hooks/usePermission';
+import { useListQuery } from '@/lib/hooks/use-list-query';
 import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
+
+const INITIAL_SEARCH_VALUES = {
+  keyword: '',
+  status: 'all',
+};
 
 export default function DepartmentsPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
@@ -24,17 +30,20 @@ export default function DepartmentsPage() {
   const [expandedDepartments, setExpandedDepartments] = useState(new Set());
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [departmentToDelete, setDepartmentToDelete] = useState(null);
-  const [searchValues, setSearchValues] = useState({
-    keyword: '',
-    status: 'all'
-  });
+  const {
+    draftFilters: searchValues,
+    setDraftFilters: setSearchValues,
+    appliedFilters,
+    submit: handleSearch,
+    reset: handleReset,
+  } = useListQuery({ initialFilters: INITIAL_SEARCH_VALUES });
 
   // 获取部门树
   const fetchDepartments = async () => {
     try {
       setIsLoading(true);
       const response = await departmentApi.getDepartmentTree();
-      const departmentsData = response.data?.items || response.data || [];
+      const departmentsData = response.data?.items || [];
       setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
       // 默认展开所有一级部门
       const topLevelIds = (Array.isArray(departmentsData) ? departmentsData : []).map(d => d.id);
@@ -54,12 +63,12 @@ export default function DepartmentsPage() {
   // 搜索过滤逻辑
   const filteredDepartments = useMemo(() => {
     const filterNode = (node) => {
-      const matchKeyword = !searchValues.keyword ||
-        node.name.toLowerCase().includes(searchValues.keyword.toLowerCase()) ||
-        (node.code && node.code.toLowerCase().includes(searchValues.keyword.toLowerCase())) ||
-        (node.description && node.description.toLowerCase().includes(searchValues.keyword.toLowerCase()));
+      const matchKeyword = !appliedFilters.keyword ||
+        node.name.toLowerCase().includes(appliedFilters.keyword.toLowerCase()) ||
+        (node.code && node.code.toLowerCase().includes(appliedFilters.keyword.toLowerCase())) ||
+        (node.description && node.description.toLowerCase().includes(appliedFilters.keyword.toLowerCase()));
 
-      const matchStatus = searchValues.status === 'all' || node.status === searchValues.status;
+      const matchStatus = appliedFilters.status === 'all' || node.status === appliedFilters.status;
 
       const nodeMatches = matchKeyword && matchStatus;
 
@@ -85,7 +94,7 @@ export default function DepartmentsPage() {
     return departments
       .map(dept => filterNode(dept))
       .filter(dept => dept !== null);
-  }, [departments, searchValues]);
+  }, [appliedFilters, departments]);
 
   // 新增部门
   const handleAdd = (parentDepartment = null) => {
@@ -197,12 +206,12 @@ export default function DepartmentsPage() {
           fields={searchFields}
           values={searchValues}
           onChange={setSearchValues}
-          onSearch={() => {}}
-          onReset={() => setSearchValues({ keyword: '', status: 'all' })}
+          onSearch={handleSearch}
+          onReset={handleReset}
         />
         </PageToolbar>
         <PageSurface className="p-5 lg:p-3">
-        <div className="grid grid-cols-2 gap-4 border-b pb-5 text-sm md:grid-cols-4">
+        <div className="grid grid-cols-2 items-center gap-4 border-b pb-5 text-center text-sm md:grid-cols-4">
           <div>
             <p className="text-muted-foreground">部门总数</p>
             <p className="text-xl font-semibold tabular-nums">{countDepartments(departments)}</p>
@@ -249,8 +258,8 @@ export default function DepartmentsPage() {
           </div>
         ) : filteredDepartments.length === 0 ? (
           <EmptyState
-            title={searchValues.keyword || searchValues.status !== 'all' ? '未找到匹配的部门' : '暂无部门'}
-            description={searchValues.keyword || searchValues.status !== 'all' ? '请调整检索条件后重试' : '创建部门后会显示在这里'}
+            title={appliedFilters.keyword || appliedFilters.status !== 'all' ? '未找到匹配的部门' : '暂无部门'}
+            description={appliedFilters.keyword || appliedFilters.status !== 'all' ? '请调整检索条件后重试' : '创建部门后会显示在这里'}
             action={canCreate('department') ? (
               <Button onClick={() => handleAdd()} variant="outline">
                 <Plus className="h-4 w-4 mr-2" />

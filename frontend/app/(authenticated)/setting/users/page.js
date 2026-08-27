@@ -14,24 +14,22 @@ import { DataTable } from '@/components/common/DataTable';
 import { usePermission } from '@/lib/hooks/usePermission';
 import PlainAccessButton from '@/components/sensitive-fields/plain-access-button';
 import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
+import { useListQuery } from '@/lib/hooks/use-list-query';
 
 export default function UsersPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchValues, setSearchValues] = useState({});
-  const [appliedSearch, setAppliedSearch] = useState('');
-  const [queryVersion, setQueryVersion] = useState(0);
+  const { draftFilters: searchValues, setDraftFilters: setSearchValues, appliedFilters, queryVersion, pagination, setPagination, submit: handleSearch, reset: handleReset, setTotal } = useListQuery();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 0 });
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const latestRequestId = useRef(0);
 
   // 获取用户列表
   const fetchUsers = useCallback(async ({
-    search = appliedSearch,
+    search = appliedFilters.keyword?.trim() || '',
     page = pagination.page,
     limit = pagination.pageSize,
   } = {}) => {
@@ -41,15 +39,12 @@ export default function UsersPage() {
       const response = await userApi.getUsers({ search, page, limit });
       if (requestId !== latestRequestId.current) return;
 
-      const usersData = response.data?.items || response.data || [];
+      const usersData = response.data?.items || [];
       setUsers(Array.isArray(usersData) ? usersData : []);
 
       // 更新分页信息
       if (response.data?.pagination) {
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination.total || 0
-        }));
+        setTotal(response.data.pagination.total || 0);
       }
     } catch (error) {
       if (requestId !== latestRequestId.current) return;
@@ -58,30 +53,15 @@ export default function UsersPage() {
     } finally {
       if (requestId === latestRequestId.current) setIsLoading(false);
     }
-  }, [appliedSearch, pagination.page, pagination.pageSize]);
+  }, [appliedFilters.keyword, pagination.page, pagination.pageSize, setTotal]);
 
   useEffect(() => {
     fetchUsers({
-      search: appliedSearch,
+      search: appliedFilters.keyword?.trim() || '',
       page: pagination.page,
       limit: pagination.pageSize,
     });
-  }, [appliedSearch, fetchUsers, pagination.page, pagination.pageSize, queryVersion]);
-
-  // 搜索
-  const handleSearch = () => {
-    setAppliedSearch(searchValues.keyword?.trim() || '');
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setQueryVersion(current => current + 1);
-  };
-
-  // 重置
-  const handleReset = () => {
-    setSearchValues({});
-    setAppliedSearch('');
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setQueryVersion(current => current + 1);
-  };
+  }, [appliedFilters.keyword, fetchUsers, pagination.page, pagination.pageSize, queryVersion]);
 
   // 分页变化
   const handlePageChange = (newPage) => {

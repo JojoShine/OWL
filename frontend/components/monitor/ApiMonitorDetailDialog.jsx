@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -28,13 +28,7 @@ export default function ApiMonitorDetailDialog({ open, onOpenChange, monitor }) 
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (open && monitor?.id) {
-      loadData();
-    }
-  }, [open, monitor]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!monitor?.id) return;
 
     setLoading(true);
@@ -52,7 +46,11 @@ export default function ApiMonitorDetailDialog({ open, onOpenChange, monitor }) 
     } finally {
       setLoading(false);
     }
-  };
+  }, [monitor?.id]);
+
+  useEffect(() => {
+    if (open && monitor?.id) loadData();
+  }, [loadData, monitor?.id, open]);
 
   /**
    * 渲染状态徽章

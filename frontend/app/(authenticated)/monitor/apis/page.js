@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
   PlusIcon,
   PlayIcon,
@@ -47,7 +47,8 @@ import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Loading } from '@/components/ui/loading';
-import { PageHeader, PageShell } from '@/components/layout/page-shell';
+import { PageHeader, PageShell, PageSurface } from '@/components/layout/page-shell';
+import { Pagination } from '@/components/ui/pagination';
 
 export default function ApiMonitorPage() {
   const [loading, setLoading] = useState(false);
@@ -127,7 +128,7 @@ export default function ApiMonitorPage() {
   /**
    * 加载监控列表
    */
-  const loadMonitors = async () => {
+  const loadMonitors = useCallback(async () => {
     try {
       setLoading(true);
       const response = await apiMonitorApi.getAllMonitors({ page, limit });
@@ -139,12 +140,11 @@ export default function ApiMonitorPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit, page]);
 
   useEffect(() => {
     loadMonitors();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [loadMonitors]);
 
   /**
    * 加载接口监控告警类型的邮件模版
@@ -504,11 +504,8 @@ export default function ApiMonitorPage() {
       />
 
       {/* 监控列表 */}
-      <Card>
-        <CardHeader>
-          <CardTitle>监控列表</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <PageSurface className="p-0">
+        <div>
           {loading && monitors.length === 0 ? (
             <Loading size="md" text="正在加载监控配置..." className="py-12" />
           ) : monitors.length === 0 ? (
@@ -613,8 +610,11 @@ export default function ApiMonitorPage() {
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
+          {total > 0 && (
+            <Pagination page={page} total={total} pageSize={limit} onPageChange={setPage} />
+          )}
+        </div>
+      </PageSurface>
 
       {/* 添加/编辑对话框 */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
@@ -631,7 +631,7 @@ export default function ApiMonitorPage() {
           <div className="space-y-4 py-4">
             {/* 基础配置 */}
             <div className="space-y-2">
-              <Label htmlFor="name">监控名称 *</Label>
+              <Label htmlFor="name">监控名称<span className="ml-1 text-destructive">*</span></Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -641,7 +641,7 @@ export default function ApiMonitorPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="url">接口 URL *</Label>
+              <Label htmlFor="url">接口 URL<span className="ml-1 text-destructive">*</span></Label>
               <Input
                 id="url"
                 value={formData.url}
@@ -785,7 +785,7 @@ export default function ApiMonitorPage() {
                   {/* 邮件模版选择 */}
                   <div className="space-y-2">
                     <Label htmlFor="alert_template">
-                      告警邮件模版 <span className="text-red-500">*</span>
+                      告警邮件模版 <span className="text-destructive">*</span>
                     </Label>
                     <Select
                       value={formData.alert_template_id}
@@ -817,7 +817,7 @@ export default function ApiMonitorPage() {
                   {/* 告警接收人 */}
                   <div className="space-y-2">
                     <Label>
-                      告警接收人 <span className="text-red-500">*</span>
+                      告警接收人 <span className="text-destructive">*</span>
                     </Label>
                     <div className="flex gap-2">
                       <Input

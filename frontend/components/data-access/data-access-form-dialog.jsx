@@ -68,7 +68,7 @@ export default function DataAccessFormDialog({ open, onOpenChange, request, onSu
     const fetchSensitiveFields = async () => {
       try {
         const response = await sensitiveFieldApi.getSensitiveFields({ limit: 100 });
-        const fieldsData = response.data?.items || response.data || [];
+        const fieldsData = response.data?.items || [];
         setSensitiveFields(Array.isArray(fieldsData) ? fieldsData : []);
       } catch (error) {
         console.error('获取敏感字段列表失败:', error);
@@ -137,7 +137,7 @@ export default function DataAccessFormDialog({ open, onOpenChange, request, onSu
           {/* 表名 */}
           <div className="space-y-2">
             <Label htmlFor="table_name">
-              表名 <span className="text-red-500">*</span>
+              表名 <span className="text-destructive">*</span>
             </Label>
             <Select
               value={tableNameValue || ''}
@@ -162,7 +162,7 @@ export default function DataAccessFormDialog({ open, onOpenChange, request, onSu
           {/* 字段名 */}
           <div className="space-y-2">
             <Label htmlFor="field_name">
-              字段名 <span className="text-red-500">*</span>
+              字段名 <span className="text-destructive">*</span>
             </Label>
             <Select
               value={watch('field_name') || ''}
@@ -189,7 +189,7 @@ export default function DataAccessFormDialog({ open, onOpenChange, request, onSu
           {/* 申请理由 */}
           <div className="space-y-2">
             <Label htmlFor="reason">
-              申请理由 <span className="text-red-500">*</span>
+              申请理由 <span className="text-destructive">*</span>
             </Label>
             <Textarea
               id="reason"
@@ -205,7 +205,7 @@ export default function DataAccessFormDialog({ open, onOpenChange, request, onSu
           {/* 密码 */}
           <div className="space-y-2">
             <Label htmlFor="password">
-              密码 <span className="text-red-500">*</span>
+              密码 <span className="text-destructive">*</span>
             </Label>
             <Input
               id="password"

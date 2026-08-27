@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { serverMonitorApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,7 +40,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
   });
 
   // 加载服务列表
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
     if (!server || !open) return;
 
     try {
@@ -54,14 +54,13 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [open, server]);
 
   useEffect(() => {
     if (open && server) {
       fetchServices();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, server]);
+  }, [fetchServices, open, server]);
 
   // 添加服务
   const handleAddService = async () => {
@@ -134,7 +133,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
             <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="port">端口号 *</Label>
+                  <Label htmlFor="port">端口号<span className="ml-1 text-destructive">*</span></Label>
                   <Input
                     id="port"
                     type="number"

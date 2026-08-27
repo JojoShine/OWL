@@ -43,8 +43,8 @@ tar -xzf /tmp/owl-backend-v*.tar.gz
 # 清理 macOS 隐藏文件（如果存在）
 find . -name "._*" -type f -delete
 
-# 安装依赖
-npm install
+# 安装锁定版本的生产依赖
+npm ci --omit=dev
 
 # 配置环境变量（首次部署）
 cp .env.production.example .env
@@ -87,14 +87,14 @@ MINIO_BUCKET=common-management
 ### 5. 初始化数据库
 
 ```bash
-# 执行迁移
-npm run db:migrate
+# 全新空库（仅首次部署）
+NODE_ENV=production \
+INITIAL_ADMIN_PASSWORD='请替换为至少12位强密码' \
+DB_BOOTSTRAP_CONFIRM='实际数据库名' \
+npm run db:bootstrap
 
-# 导入初始数据
-npm run db:seed
-
-# 或一键初始化
-npm run db:init
+# 已有数据库升级（后续发布）
+NODE_ENV=production npm run db:deploy
 ```
 
 ### 6. 启动服务
@@ -159,17 +159,14 @@ GRANT ALL PRIVILEGES ON DATABASE common_management TO admin;
 ### 迁移命令
 
 ```bash
-# 执行迁移
-npm run db:migrate
+# 查看迁移状态
+NODE_ENV=production npm run db:status
 
-# 回滚迁移
-npm run db:migrate:down
+# 执行未运行的迁移，不重复导入初始化数据
+NODE_ENV=production npm run db:deploy
 
-# 执行种子数据
-npm run db:seed
-
-# 完整初始化
-npm run db:init
+# 首次初始化只能针对空库执行
+NODE_ENV=production npm run db:bootstrap
 ```
 
 ---
@@ -185,9 +182,9 @@ pm2 stop owl-backend
 pm2 monit
 
 # 数据库
-npm run db:migrate      # 执行迁移
-npm run db:seed         # 导入数据
-npm run db:init         # 完整初始化
+npm run db:status       # 查看迁移状态
+npm run db:deploy       # 升级已有数据库
+npm run db:bootstrap    # 首次初始化空库
 
 # 日志
 pm2 logs owl-backend
@@ -230,7 +227,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO admin;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO admin;
 
 # 查看迁移状态
-npx sequelize-cli db:migrate:status
+NODE_ENV=production npm run db:status
 
 # 如果出现 "._" 开头的文件导致的语法错误，清理这些 macOS 隐藏文件
 find /opt/backend/migrations -name "._*" -type f -delete
@@ -274,8 +271,8 @@ ssh root@121.196.245.95
 pm2 stop owl-backend
 cd /opt && mv backend backend_old && mkdir backend && cd backend
 tar -xzf /tmp/owl-backend-v*.tar.gz
-npm install --production
-npm run db:migrate  # 如果有新迁移
+npm ci --omit=dev
+NODE_ENV=production npm run db:deploy
 pm2 restart owl-backend
 pm2 logs owl-backend
 ```
@@ -286,11 +283,10 @@ pm2 logs owl-backend
 
 - [ ] 本地打包成功：`cd deploy && ./deploy.sh`
 - [ ] 上传成功：`owl-backend-v*.tar.gz`
-- [ ] 依赖安装成功：`npm install`
+- [ ] 依赖安装成功：`npm ci --omit=dev`
 - [ ] `.env` 配置正确
 - [ ] 数据库已创建
-- [ ] 数据库迁移成功：`npm run db:migrate`
-- [ ] 种子数据导入：`npm run db:seed`
+- [ ] 首次安装已执行 `db:bootstrap`，升级已执行 `db:deploy`
 - [ ] PM2 进程运行：`pm2 status`
 - [ ] 端口监听：`netstat -tlnp | grep 5002`
 - [ ] 健康检查通过：`curl http://localhost:5002/api/health`

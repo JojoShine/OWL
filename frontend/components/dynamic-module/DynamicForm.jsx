@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useCallback, useEffect, useMemo } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toDateTimeLocalString, fromDateTimeLocalString, formatDateTime } from '@/lib/utils/date';
@@ -28,6 +28,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+const isDateTimeString = (value) => {
+  if (!value || typeof value !== 'string') return false;
+  return (
+    value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/) ||
+    value.match(/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/)
+  );
+};
+
 /**
  * 动态表单组件
  * 根据字段配置动态渲染表单
@@ -46,19 +54,10 @@ export function DynamicForm({
   const isView = mode === 'view';
 
   // 只显示在表单中的字段
-  const formFields = fields.filter((f) => f.showInForm);
-
-  // 检测字段值是否看起来像日期字符串
-  const isDateTimeString = (value) => {
-    if (!value || typeof value !== 'string') return false;
-    return (
-      value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/) ||
-      value.match(/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/)
-    );
-  };
+  const formFields = useMemo(() => fields.filter((f) => f.showInForm), [fields]);
 
   // 生成验证规则
-  const generateValidationSchema = () => {
+  const generateValidationSchema = useCallback(() => {
     const schema = {};
 
     formFields.forEach((field) => {
@@ -160,12 +159,12 @@ export function DynamicForm({
     });
 
     return z.object(schema);
-  };
+  }, [formFields]);
 
-  const validationSchema = generateValidationSchema();
+  const validationSchema = useMemo(() => generateValidationSchema(), [generateValidationSchema]);
 
   // 生成默认值
-  const generateDefaultValues = () => {
+  const generateDefaultValues = useCallback(() => {
     const defaults = {};
     formFields.forEach((field) => {
       if ((isEdit || isView) && data && data[field.name] !== undefined) {
@@ -190,38 +189,28 @@ export function DynamicForm({
       }
     });
     return defaults;
-  };
+  }, [data, formFields, isEdit, isView]);
+  const defaultValues = useMemo(() => generateDefaultValues(), [generateDefaultValues]);
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
-    setValue,
     watch,
     trigger,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(validationSchema),
-    defaultValues: generateDefaultValues(),
+    defaultValues,
   });
 
   // 当对话框打开或数据变化时重置表单
   useEffect(() => {
     if (open) {
-      reset(generateDefaultValues());
+      reset(defaultValues);
     }
-  }, [open, data]);
-
-  // 为非标准控件（Select/Switch/DateTimePicker）注册字段，确保 RHF 追踪其值
-  useEffect(() => {
-    const defaults = generateDefaultValues();
-    formFields.forEach((field) => {
-      const comp = field.formComponent;
-      if (comp === 'select' || comp === 'switch' || comp === 'date' || comp === 'datetime') {
-        register(field.name, { defaultValue: defaults[field.name] });
-      }
-    });
-  }, [formFields, register, data, isEdit]);
+  }, [defaultValues, open, reset]);
 
   // 格式化显示值（用于查看模式）
   const formatDisplayValue = (field, value) => {
@@ -306,11 +295,17 @@ export function DynamicForm({
         return (
           <div key={field.name} className="flex min-h-10 items-center justify-between rounded-md border bg-muted/20 px-3 py-2">
             <Label htmlFor={field.name}>{field.formLabel || field.label}</Label>
-            <Switch
-              id={field.name}
-              checked={fieldValue}
-              onCheckedChange={(checked) => setValue(field.name, checked)}
-              disabled={field.readonly}
+            <Controller
+              name={field.name}
+              control={control}
+              render={({ field: controlledField }) => (
+                <Switch
+                  id={field.name}
+                  checked={Boolean(controlledField.value)}
+                  onCheckedChange={controlledField.onChange}
+                  disabled={field.readonly}
+                />
+              )}
             />
           </div>
         );
@@ -328,29 +323,28 @@ export function DynamicForm({
               {field.formLabel || field.label}
               {rules.required && <span className="ml-1 text-destructive">*</span>}
             </Label>
-            <Select
-              value={String(fieldValue)}
-              onValueChange={(value) => {
-                // 对于布尔值字段，转换为布尔值
-                if (field.type === 'boolean') {
-                  setValue(field.name, value === 'true');
-                } else {
-                  setValue(field.name, value);
-                }
-              }}
-              disabled={field.readonly}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={`请选择${field.formLabel || field.label}`} />
-              </SelectTrigger>
-              <SelectContent>
-                {selectOptions.map((option) => (
-                  <SelectItem key={option.value} value={String(option.value)}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Controller
+              name={field.name}
+              control={control}
+              render={({ field: controlledField }) => (
+                <Select
+                  value={controlledField.value === undefined || controlledField.value === null ? '' : String(controlledField.value)}
+                  onValueChange={(value) => controlledField.onChange(field.type === 'boolean' ? value === 'true' : value)}
+                  disabled={field.readonly}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={`请选择${field.formLabel || field.label}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectOptions.map((option) => (
+                      <SelectItem key={option.value} value={String(option.value)}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {error && <p className="text-sm text-destructive">{error.message}</p>}
           </div>
         );
@@ -381,15 +375,21 @@ export function DynamicForm({
               {field.formLabel || field.label}
               {rules.required && <span className="ml-1 text-destructive">*</span>}
             </Label>
-            <DateTimePicker
-              value={fieldValue}
-              onChange={(e) => {
-                setValue(field.name, e.target.value);
-                trigger(field.name);
-              }}
-              placeholder={field.placeholder || `请选择${field.formLabel || field.label}`}
-              disabled={field.readonly}
-              showTime={field.formComponent === 'datetime'}
+            <Controller
+              name={field.name}
+              control={control}
+              render={({ field: controlledField }) => (
+                <DateTimePicker
+                  value={controlledField.value}
+                  onChange={(event) => {
+                    controlledField.onChange(event.target.value);
+                    trigger(field.name);
+                  }}
+                  placeholder={field.placeholder || `请选择${field.formLabel || field.label}`}
+                  disabled={field.readonly}
+                  showTime={field.formComponent === 'datetime'}
+                />
+              )}
             />
             {error && <p className="text-sm text-destructive">{error.message}</p>}
           </div>

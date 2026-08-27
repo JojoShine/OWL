@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import DashboardCard from '@/components/dashboard/DashboardCard';
-import { dashboardWidgetApi, menuApi } from '@/lib/api';
+import { dashboardWidgetApi } from '@/lib/api';
 import { PageShell } from '@/components/layout/page-shell';
+import { useAppShellData } from '@/contexts/AppShellDataContext';
 
 function hasPath(menus, targetPath) {
   for (const menu of menus) {
@@ -17,27 +18,29 @@ export default function DashboardPage() {
   const [widgets, setWidgets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(true);
+  const { businessMenus, systemMenus, menusLoading } = useAppShellData();
 
   useEffect(() => {
+    if (menusLoading) return undefined;
+    let active = true;
     const init = async () => {
       try {
-        const response = await menuApi.getUserMenus();
-        const { businessMenus = [], systemMenus = [] } = response.data || {};
         const accessible = hasPath([...businessMenus, ...systemMenus], '/dashboard');
-        setHasAccess(accessible);
+        if (active) setHasAccess(accessible);
 
         if (accessible) {
           const widgetRes = await dashboardWidgetApi.executeAll();
-          setWidgets(widgetRes.data || []);
+          if (active) setWidgets(widgetRes.data || []);
         }
       } catch (error) {
         console.error('Failed to init dashboard:', error);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
     init();
-  }, []);
+    return () => { active = false; };
+  }, [businessMenus, menusLoading, systemMenus]);
 
   const metricWidgets = widgets.filter(({ widget }) => widget.widget_type === 'metric');
   const chartWidgets = widgets.filter(({ widget }) => widget.widget_type === 'chart');

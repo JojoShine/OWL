@@ -1,36 +1,33 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { permissionApi } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
+import { useListQuery } from '@/lib/hooks/use-list-query';
 
 export default function PermissionsPage() {
   const [permissions, setPermissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchValues, setSearchValues] = useState({});
-  const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 0 });
+  const { draftFilters: searchValues, setDraftFilters: setSearchValues, appliedFilters, pagination, setPagination, submit: handleSearch, reset: handleReset, setTotal } = useListQuery();
 
   // 获取权限列表
-  const fetchPermissions = async () => {
+  const fetchPermissions = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await permissionApi.getPermissions({
-        search: searchValues.keyword || '',
+        search: appliedFilters.keyword || '',
         page: pagination.page,
         limit: pagination.pageSize
       });
-      const permissionsData = response.data?.items || response.data || [];
+      const permissionsData = response.data?.items || [];
       setPermissions(Array.isArray(permissionsData) ? permissionsData : []);
 
       // 更新分页信息
       if (response.data?.pagination) {
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination.total || 0
-        }));
+        setTotal(response.data.pagination.total || 0);
       }
     } catch (error) {
       console.error('获取权限列表失败:', error);
@@ -38,25 +35,11 @@ export default function PermissionsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [appliedFilters.keyword, pagination.page, pagination.pageSize, setTotal]);
 
   useEffect(() => {
     fetchPermissions();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.page, pagination.pageSize]);
-
-  // 搜索
-  const handleSearch = () => {
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchPermissions(), 0);
-  };
-
-  // 重置
-  const handleReset = () => {
-    setSearchValues({});
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchPermissions(), 0);
-  };
+  }, [fetchPermissions]);
 
   // 分页变化
   const handlePageChange = (newPage) => {

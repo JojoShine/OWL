@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 const COLOR_THEMES = [
   { value: "default", label: "默认", color: "oklch(0.5 0 0)" },
@@ -53,13 +53,13 @@ export function useColorTheme() {
     localStorage.setItem(STORAGE_KEY, colorTheme)
   }, [colorTheme, mounted])
 
-  const applySystemConfigTheme = (themeColor) => {
+  const applySystemConfigTheme = useCallback((themeColor) => {
     // 从系统配置应用主题色
     if (themeColor && COLOR_THEMES.find(t => t.value === themeColor)) {
       localStorage.setItem(SYSTEM_CONFIG_KEY, themeColor)
       setColorTheme(themeColor)
     }
-  }
+  }, [])
 
   return {
     colorTheme,

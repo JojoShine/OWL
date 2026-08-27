@@ -97,6 +97,8 @@ export default function FileUploader({
         {value ? (
           <>
             {isImage(value) ? (
+              // 上传资源地址由后端动态返回，使用原生图片元素预览。
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={getFileUrl(value)}
                 alt={label}

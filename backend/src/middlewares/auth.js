@@ -2,6 +2,24 @@ const { logger } = require('../config/logger');
 const ApiError = require('../utils/ApiError');
 const db = require('../models');
 const jwtUtil = require('../utils/jwt.util');
+const { authenticatedUserCache } = require('./auth-user-cache');
+
+const loadAuthenticatedUser = (userId) => authenticatedUserCache.get(userId, () => (
+  db.User.findByPk(userId, {
+    include: [
+      {
+        model: db.Role,
+        as: 'roles',
+        through: { attributes: [] },
+      },
+      {
+        model: db.Department,
+        as: 'department',
+        attributes: ['id', 'name'],
+      },
+    ],
+  })
+));
 
 /**
  * JWT认证中间件
@@ -19,20 +37,7 @@ const authenticate = async (req, res, next) => {
     const decoded = jwtUtil.verifyToken(token);
 
     // 从数据库加载完整用户信息和角色
-    const user = await db.User.findByPk(decoded.id, {
-      include: [
-        {
-          model: db.Role,
-          as: 'roles',
-          through: { attributes: [] }, // 不返回中间表字段
-        },
-        {
-          model: db.Department,
-          as: 'department',
-          attributes: ['id', 'name'], // 只返回必要字段
-        },
-      ],
-    });
+    const user = await loadAuthenticatedUser(decoded.id);
 
     if (!user) {
       throw ApiError.unauthorized('用户不存在');
@@ -76,20 +81,7 @@ const optionalAuth = async (req, res, next) => {
     // 有token，执行完整认证流程
     const decoded = jwtUtil.verifyToken(token);
 
-    const user = await db.User.findByPk(decoded.id, {
-      include: [
-        {
-          model: db.Role,
-          as: 'roles',
-          through: { attributes: [] },
-        },
-        {
-          model: db.Department,
-          as: 'department',
-          attributes: ['id', 'name'],
-        },
-      ],
-    });
+    const user = await loadAuthenticatedUser(decoded.id);
 
     if (user && user.status === 'active') {
       req.user = user;
@@ -106,4 +98,6 @@ const optionalAuth = async (req, res, next) => {
 module.exports = {
   authenticate,
   optionalAuth,
+  invalidateAuthenticatedUser: (userId) => authenticatedUserCache.invalidate(userId),
+  clearAuthenticatedUsers: () => authenticatedUserCache.clear(),
 };

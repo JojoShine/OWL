@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { Bell, Check, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +36,8 @@ export default function NotificationIcon() {
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { socket, on, off } = useSocket();
+  const { socket } = useSocket();
+  const hasConnectedRef = useRef(false);
 
   // 获取未读数量
   // 模块归属：通知模块 - NotificationIcon组件
@@ -158,6 +159,7 @@ export default function NotificationIcon() {
   // 只依赖 socket，不依赖 isConnected —— socket.io 重连时自动保留已注册的监听器
   useEffect(() => {
     if (!socket) return;
+    hasConnectedRef.current = Boolean(socket.connected);
 
     const handleNewNotification = (notification) => {
       if (!notification) return;
@@ -181,7 +183,8 @@ export default function NotificationIcon() {
 
     // 重连后重新同步未读数量，防止断连期间遗漏
     const handleReconnect = () => {
-      fetchUnreadCount();
+      if (hasConnectedRef.current) fetchUnreadCount();
+      hasConnectedRef.current = true;
     };
 
     socket.on('notification', handleNewNotification);

@@ -15,6 +15,7 @@ import { zhCN } from 'date-fns/locale';
 import EmailTaskDialog from '@/components/notification/EmailTaskDialog';
 import EmailTemplateFormDialog from '@/components/notification/EmailTemplateFormDialog';
 import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
+import { useListQuery } from '@/lib/hooks/use-list-query';
 
 const frequencyMap = {
   once: '一次',
@@ -36,20 +37,26 @@ export default function EmailManagementPage() {
   // =============== 发送任务相关状态 ===============
   const [tasks, setTasks] = useState([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
-  const [taskSearchValues, setTaskSearchValues] = useState({});
+  const {
+    draftFilters: taskSearchValues, setDraftFilters: setTaskSearchValues,
+    appliedFilters: taskFilters, pagination: taskPagination, setPagination: setTaskPagination,
+    submit: handleTaskSearch, reset: handleTaskReset, setTotal: setTaskTotal,
+  } = useListQuery();
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
-  const [taskPagination, setTaskPagination] = useState({ page: 1, pageSize: 10, total: 0 });
   const [confirmTaskDeleteOpen, setConfirmTaskDeleteOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
 
   // =============== 邮件模板相关状态 ===============
   const [templates, setTemplates] = useState([]);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
-  const [templateSearchValues, setTemplateSearchValues] = useState({});
+  const {
+    draftFilters: templateSearchValues, setDraftFilters: setTemplateSearchValues,
+    appliedFilters: templateFilters, pagination: templatePagination, setPagination: setTemplatePagination,
+    submit: handleTemplateSearch, reset: handleTemplateReset, setTotal: setTemplateTotal,
+  } = useListQuery();
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
-  const [templatePagination, setTemplatePagination] = useState({ page: 1, pageSize: 10, total: 0 });
   const [confirmTemplateDeleteOpen, setConfirmTemplateDeleteOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState(null);
 
@@ -61,15 +68,13 @@ export default function EmailManagementPage() {
       const response = await emailTaskApi.getTasks({
         page: taskPagination.page,
         limit: taskPagination.pageSize,
+        keyword: taskFilters.keyword || '',
       });
-      const tasksData = response.data?.items || response.data || [];
+      const tasksData = response.data?.items || [];
       setTasks(Array.isArray(tasksData) ? tasksData : []);
 
       if (response.data?.pagination) {
-        setTaskPagination(prev => ({
-          ...prev,
-          total: response.data.pagination.total || 0,
-        }));
+        setTaskTotal(response.data.pagination.total || 0);
       }
     } catch (error) {
       console.error('获取邮件任务列表失败:', error);
@@ -78,22 +83,11 @@ export default function EmailManagementPage() {
     } finally {
       setIsLoadingTasks(false);
     }
-  }, [taskPagination.page, taskPagination.pageSize]);
+  }, [taskFilters.keyword, taskPagination.page, taskPagination.pageSize, setTaskTotal]);
 
   useEffect(() => {
     fetchTasks();
-  }, [taskPagination.page, taskPagination.pageSize]);
-
-  const handleTaskSearch = () => {
-    setTaskPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchTasks(), 0);
-  };
-
-  const handleTaskReset = () => {
-    setTaskSearchValues({});
-    setTaskPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchTasks(), 0);
-  };
+  }, [fetchTasks]);
 
   const handleTaskPageChange = (newPage) => {
     setTaskPagination(prev => ({ ...prev, page: newPage }));
@@ -170,15 +164,13 @@ export default function EmailManagementPage() {
       const response = await emailTemplateApi.getTemplates({
         page: templatePagination.page,
         limit: templatePagination.pageSize,
+        keyword: templateFilters.keyword || '',
       });
-      const templatesData = response.data?.items || response.data || [];
+      const templatesData = response.data?.items || [];
       setTemplates(Array.isArray(templatesData) ? templatesData : []);
 
       if (response.data?.pagination) {
-        setTemplatePagination(prev => ({
-          ...prev,
-          total: response.data.pagination.total || 0,
-        }));
+        setTemplateTotal(response.data.pagination.total || 0);
       }
     } catch (error) {
       console.error('获取邮件模板列表失败:', error);
@@ -187,22 +179,11 @@ export default function EmailManagementPage() {
     } finally {
       setIsLoadingTemplates(false);
     }
-  }, [templatePagination.page, templatePagination.pageSize]);
+  }, [templateFilters.keyword, templatePagination.page, templatePagination.pageSize, setTemplateTotal]);
 
   useEffect(() => {
     fetchTemplates();
-  }, [templatePagination.page, templatePagination.pageSize]);
-
-  const handleTemplateSearch = () => {
-    setTemplatePagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchTemplates(), 0);
-  };
-
-  const handleTemplateReset = () => {
-    setTemplateSearchValues({});
-    setTemplatePagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchTemplates(), 0);
-  };
+  }, [fetchTemplates]);
 
   const handleTemplatePageChange = (newPage) => {
     setTemplatePagination(prev => ({ ...prev, page: newPage }));

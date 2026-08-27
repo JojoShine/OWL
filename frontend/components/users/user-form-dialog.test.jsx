@@ -85,7 +85,7 @@ describe('UserFormDialog', () => {
     const basicSection = screen.getByRole('region', { name: '基本信息' });
     const accessSection = screen.getByRole('region', { name: '组织与权限' });
     const emptyRoles = screen.getByText('暂无可用角色');
-    const rolesScroller = emptyRoles.parentElement;
+    const rolesScroller = emptyRoles.closest('.max-h-40');
     const rolesField = rolesScroller.parentElement;
 
     expect(dialog).toHaveClass(

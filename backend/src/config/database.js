@@ -35,11 +35,19 @@ const globalSequelizeConfig = {
   collate: 'utf8mb4_unicode_ci',
 };
 
+const cliStorageConfig = {
+  migrationStorage: 'sequelize',
+  migrationStorageTableName: 'SequelizeMeta',
+  seederStorage: 'sequelize',
+  seederStorageTableName: 'SequelizeData',
+};
+
 module.exports = {
   // 全局 Sequelize 配置（导出供 models/index.js 使用）
   globalSequelizeConfig,
 
   development: {
+    ...cliStorageConfig,
     username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_NAME || 'admin_platform',
@@ -59,6 +67,7 @@ module.exports = {
     },
   },
   test: {
+    ...cliStorageConfig,
     username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_NAME_TEST || 'admin_platform_test',
@@ -68,6 +77,7 @@ module.exports = {
     logging: false, // 测试环境不记录日志
   },
   production: {
+    ...cliStorageConfig,
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,

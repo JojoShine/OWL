@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { authApi } from '../api';
@@ -24,6 +24,19 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  const logout = useCallback(async () => {
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error('登出API调用失败:', error);
+    } finally {
+      localStorage.removeItem(getStorageKey('token'));
+      localStorage.removeItem(getStorageKey('user'));
+      setUser(null);
+      router.push('/login');
+    }
+  }, [router]);
 
   // 初始化：从localStorage加载用户信息
   useEffect(() => {
@@ -71,7 +84,7 @@ export const AuthProvider = ({ children }) => {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [logout]);
 
   // 监听WebSocket事件（被踢出通知）
   useEffect(() => {
@@ -105,10 +118,10 @@ export const AuthProvider = ({ children }) => {
         socket.off('session:kicked', handleSessionKicked);
       };
     }
-  }, [user]);
+  }, [logout, user]);
 
   // 登录
-  const login = async (credentials) => {
+  const login = useCallback(async (credentials) => {
     try {
       const response = await authApi.login(credentials);
       const { token, user: userData } = response.data;
@@ -128,29 +141,10 @@ export const AuthProvider = ({ children }) => {
         error: error.response?.data?.message || '登录失败',
       };
     }
-  };
-
-  // 登出
-  const logout = async () => {
-    try {
-      await authApi.logout();
-    } catch (error) {
-      console.error('登出API调用失败:', error);
-    } finally {
-      // 清除localStorage（使用命名空间化的key）
-      localStorage.removeItem(getStorageKey('token'));
-      localStorage.removeItem(getStorageKey('user'));
-
-      // 清除状态
-      setUser(null);
-
-      // 跳转到登录页
-      router.push('/login');
-    }
-  };
+  }, []);
 
   // 刷新用户信息
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     try {
       const response = await authApi.getCurrentUser();
       const userData = response.data;
@@ -164,15 +158,15 @@ export const AuthProvider = ({ children }) => {
       console.error('刷新用户信息失败:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
   // 检查是否已登录
-  const isAuthenticated = () => {
+  const isAuthenticated = useCallback(() => {
     return !!user && !!localStorage.getItem(getStorageKey('token'));
-  };
+  }, [user]);
 
   // 检查权限
-  const hasPermission = (resource, action) => {
+  const hasPermission = useCallback((resource, action) => {
     if (!user || !user.roles) return false;
 
     // 超级管理员拥有所有权限
@@ -187,15 +181,15 @@ export const AuthProvider = ({ children }) => {
           permission.resource === resource && permission.action === action
       )
     );
-  };
+  }, [user]);
 
   // 检查角色
-  const hasRole = (roleCode) => {
+  const hasRole = useCallback((roleCode) => {
     if (!user || !user.roles) return false;
     return user.roles.some((role) => role.code === roleCode);
-  };
+  }, [user]);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     isLoading,
     login,
@@ -204,7 +198,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     hasPermission,
     hasRole,
-  };
+  }), [hasPermission, hasRole, isAuthenticated, isLoading, login, logout, refreshUser, user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

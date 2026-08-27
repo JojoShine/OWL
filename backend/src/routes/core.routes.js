@@ -30,7 +30,6 @@ const apiBuilderExecutorRoutes = require('../core/modules/api-builder/api-builde
 const generatorRoutes = require('../core/modules/generator/generator.routes');
 const dataSecurityRoutes = require('../core/modules/data-security/data-security.routes');
 const thirdPartyKeysRoutes = require('../core/modules/third_party_keys/third-party-keys.routes');
-const zabbixRoutes = require('../core/modules/zabbix/zabbix.routes');
 const emailTaskRoutes = require('../core/modules/notification/email-task.routes');
 const uploadRoutes = require('../core/modules/upload/upload.routes');
 
@@ -60,7 +59,6 @@ router.use('/api-builder', apiBuilderRoutes);
 router.use('/generator', generatorRoutes);
 router.use('/data-security', dataSecurityRoutes);
 router.use('/third-party-keys', thirdPartyKeysRoutes);
-router.use('/zabbix', zabbixRoutes);
 router.use('/email-tasks', emailTaskRoutes);
 
 module.exports = router;

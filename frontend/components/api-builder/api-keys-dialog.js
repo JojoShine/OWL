@@ -38,7 +38,7 @@ export default function ApiKeysDialog({ open, onOpenChange, interface_ }) {
             <Button variant="outline" size="sm" onClick={download}><Download className="h-4 w-4" />下载文档</Button>
           </div>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <div className="grid gap-3 rounded-lg border bg-muted/30 p-4 text-sm sm:grid-cols-2">
             <div><span className="text-muted-foreground">请求方式</span><p className="mt-1 font-medium">{interface_.method}</p></div>
             <div><span className="text-muted-foreground">版本</span><p className="mt-1 font-medium">V{interface_.version}</p></div>
@@ -52,7 +52,7 @@ export default function ApiKeysDialog({ open, onOpenChange, interface_ }) {
           ) : null}
           <div className="space-y-2">
             <div className="flex items-center justify-between"><span className="text-sm font-medium">cURL 示例</span><Button variant="ghost" size="sm" onClick={copy}><Copy className="h-4 w-4" />复制</Button></div>
-            <pre className="overflow-x-auto rounded-lg border bg-muted/50 p-4 text-xs"><code>{curl}</code></pre>
+            <pre className="max-w-full overflow-hidden whitespace-pre-wrap break-all rounded-lg border bg-muted/50 p-4 text-xs leading-5"><code>{curl}</code></pre>
           </div>
         </div>
       </DialogContent>

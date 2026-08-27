@@ -269,7 +269,7 @@ export default function GeneratorPage() {
           page: historyPagination.page,
           limit: historyPagination.pageSize
         });
-        const historyData = response.data?.items || response.data || [];
+        const historyData = response.data?.items || [];
         setHistory(historyData);
 
         // 更新总数

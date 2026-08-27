@@ -132,7 +132,7 @@ export default function SensitiveFieldFormDialog({ open, onOpenChange, field, on
           {/* 字段名 */}
           <div className="space-y-2">
             <Label htmlFor="field_name">
-              字段名 <span className="text-red-500">*</span>
+              字段名 <span className="text-destructive">*</span>
             </Label>
             <Input
               id="field_name"
@@ -163,7 +163,7 @@ export default function SensitiveFieldFormDialog({ open, onOpenChange, field, on
           {/* 脱敏类型 */}
           <div className="space-y-2">
             <Label>
-              脱敏类型 <span className="text-red-500">*</span>
+              脱敏类型 <span className="text-destructive">*</span>
             </Label>
             <Select
               value={maskTypeValue}

@@ -158,7 +158,7 @@ export default function DepartmentFormDialog({ open, onOpenChange, department, o
             {/* 部门名称 */}
             <div className="space-y-2 col-span-2">
               <Label htmlFor="name">
-                部门名称 <span className="text-red-500">*</span>
+                部门名称 <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="name"

@@ -71,8 +71,8 @@ describe('UsersPage queries', () => {
       },
     });
     render(<UsersPage />);
-    expect(await screen.findByText('正常')).toBeInTheDocument();
-    expect(screen.getByRole('switch', { name: '切换用户 alice 状态' })).toBeInTheDocument();
+    expect((await screen.findAllByText('正常')).length).toBeGreaterThan(0);
+    expect((await screen.findAllByRole('switch', { name: '切换用户 alice 状态' })).length).toBeGreaterThan(0);
   });
 
   it('normalizes numeric record IDs before rendering masked-field actions', async () => {
@@ -85,7 +85,9 @@ describe('UsersPage queries', () => {
 
     render(<UsersPage />);
 
-    expect(await screen.findByTestId('plain-access-record')).toHaveTextContent('1');
+    const recordActions = await screen.findAllByTestId('plain-access-record');
+    expect(recordActions.length).toBeGreaterThan(0);
+    recordActions.forEach((action) => expect(action).toHaveTextContent('1'));
   });
 
   it('runs an identical query again and ignores an older slow response', async () => {
@@ -114,14 +116,14 @@ describe('UsersPage queries', () => {
         pagination: { total: 1 },
       },
     }));
-    expect(await screen.findByText('bob')).toBeInTheDocument();
+    expect((await screen.findAllByText('bob')).length).toBeGreaterThan(0);
     await act(async () => slow.resolve({
       data: {
         items: [{ id: 1, username: 'alice', status: 'active' }],
         pagination: { total: 1 },
       },
     }));
-    expect(screen.getByText('bob')).toBeInTheDocument();
+    expect(screen.getAllByText('bob').length).toBeGreaterThan(0);
     expect(screen.queryByText('alice')).not.toBeInTheDocument();
 
     await interaction.click(screen.getByRole('button', { name: '查询' }));

@@ -13,7 +13,6 @@ const standardPages = [
   'app/(authenticated)/setting/sensitive-fields/page.js',
   'app/(authenticated)/setting/third-party-keys/page.js',
   'app/(authenticated)/setting/email-templates/page.js',
-  'app/(authenticated)/setting/logs/page.js',
   'app/(authenticated)/setting/api-builder/keys/page.js',
 ];
 
@@ -52,7 +51,7 @@ describe('standard admin pages', () => {
     expect(source).toContain('<DialogTitle');
     expect(source).toContain('<DialogDescription');
     expect(source).toContain('<DialogFooter');
-    expect(source).toMatch(/max-h-\[85vh\]/);
+    expect(source).toMatch(/max-h-\[85d?vh\]/);
     expect(source).toMatch(/overflow-y-auto/);
   });
 });

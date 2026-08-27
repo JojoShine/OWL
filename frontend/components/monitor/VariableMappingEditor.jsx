@@ -153,7 +153,7 @@ export default function VariableMappingEditor({ variableSchema = [], value = {},
       <div className="text-xs text-muted-foreground space-y-1 bg-muted/50 p-3 rounded">
         <p className="font-medium">说明：</p>
         <ul className="list-disc list-inside space-y-1">
-          <li>选择数据字段路径，或选择"自定义"手动输入路径</li>
+          <li>选择数据字段路径，或选择“自定义”手动输入路径</li>
           <li>支持嵌套路径，如 <code className="bg-background px-1">lastLog.status</code></li>
           <li>特殊值 <code className="bg-background px-1">__timestamp__</code> 会在运行时自动生成当前时间</li>
         </ul>

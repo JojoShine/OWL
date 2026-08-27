@@ -1,4 +1,5 @@
 const { EmailTemplate } = require('../../../models');
+const { Op } = require('sequelize');
 const handlebars = require('handlebars');
 
 /**
@@ -18,11 +19,13 @@ class EmailTemplateService {
       const {
         page = 1,
         limit = 20,
+        keyword,
       } = options;
 
       const offset = (page - 1) * limit;
 
       const { rows: templates, count: total } = await EmailTemplate.findAndCountAll({
+        where: keyword ? { name: { [Op.iLike]: `%${keyword}%` } } : undefined,
         order: [['created_at', 'DESC']],
         limit: parseInt(limit),
         offset: parseInt(offset),

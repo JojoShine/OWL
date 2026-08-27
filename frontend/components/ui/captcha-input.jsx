@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useCallback, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Input } from './input';
 import { Button } from './button';
@@ -23,7 +23,7 @@ export const CaptchaInput = forwardRef(({ onCaptchaChange, error, disabled, ...p
   const [isLoading, setIsLoading] = useState(false);
 
   // 获取验证码
-  const fetchCaptcha = async () => {
+  const fetchCaptcha = useCallback(async () => {
     try {
       setIsLoading(true);
       const result = await captchaApi.getCaptcha();
@@ -40,25 +40,24 @@ export const CaptchaInput = forwardRef(({ onCaptchaChange, error, disabled, ...p
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // 暴露 refresh 方法给父组件
   useImperativeHandle(ref, () => ({
     refresh: fetchCaptcha,
-  }));
+  }), [fetchCaptcha]);
 
   // 组件挂载时获取验证码
   useEffect(() => {
     fetchCaptcha();
-  }, []);
+  }, [fetchCaptcha]);
 
   // 验证码输入变化时通知父组件
   useEffect(() => {
     if (onCaptchaChange && captchaId) {
       onCaptchaChange(captchaId, captchaCode);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [captchaId, captchaCode]);
+  }, [captchaId, captchaCode, onCaptchaChange]);
 
   // 刷新验证码
   const handleRefresh = () => {
@@ -104,6 +103,8 @@ export const CaptchaInput = forwardRef(({ onCaptchaChange, error, disabled, ...p
           {isLoading ? (
             <Loading size="sm" text="加载中" />
           ) : captchaSvg ? (
+            // 验证码是接口实时生成的内联 SVG。
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={`data:image/svg+xml,${encodeURIComponent(captchaSvg)}`}
               alt="验证码"

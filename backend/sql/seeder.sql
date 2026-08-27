@@ -303,10 +303,7 @@ VALUES ('facc15c9-55a8-4d37-a188-1c7a80227456', '发送邮件', 'email:create', 
 -- ============================================
 -- 初始用户数据
 -- ============================================
--- 默认用户密码（强密码：大小写+数字，10位）
--- admin (超级管理员): R994wjZIIB
--- manager (管理员): ZcXuVI5vnE
--- ceshi (普通用户): Sp9AFxa3E8
+-- 用户密码由正式 Seeder 在同一事务中重新生成；非管理员示例账号默认禁用。
 
 ALTER SEQUENCE IF EXISTS owl_users_id_seq RESTART;
 INSERT INTO public."owl_users" ("id", "username", "email", "password", "real_name", "phone", "avatar", "status",
@@ -1257,51 +1254,16 @@ VALUES ('fbc66f6f-8a0e-45a8-881c-ea1deb6b0de7', 'CPU使用率告警模版', '{{t
 
 -- ============================================
 -- Table: api_keys
--- Records: 1
+-- Records: 0
 -- ============================================
-ALTER SEQUENCE IF EXISTS owl_api_keys_id_seq RESTART;
-INSERT INTO public."owl_api_keys" ("id", "interface_id", "app_name", "api_key", "api_secret", "status", "expires_at",
-                                   "last_used_at", "created_by", "created_at", "updated_at")
-VALUES ('06870ba4-2d33-49a6-ac44-a880df470c5b', NULL, 'myapp',
-        '18e72f9c9a98d9320e9fd027db4249acc3af16ca097b1fd2c09a9940a1176711',
-        '27125a29d6021dab8da65b8f83e61a30e01b971d3525608fec06be15ec222bbc', 'active', NOW() + INTERVAL '30 days', NULL,
-        '99e2337b-8676-4414-b71e-d5aff2008616', NOW(), NOW());
+-- 接口密钥由管理员按厂商或业务用途创建，不预置默认凭证。
 
 
 -- ============================================
 -- Table: api_interfaces
--- Records: 2
--- API Keys must be inserted first (referenced by api_key_id)
+-- Records: 0
 -- ============================================
-ALTER SEQUENCE IF EXISTS owl_api_interfaces_id_seq RESTART;
-INSERT INTO public."owl_api_interfaces" ("id", "name", "description", "sql_query", "method", "endpoint", "version",
-                                         "parameters", "status", "require_auth", "rate_limit", "created_by",
-                                         "created_at", "updated_at", "api_key_id")
-VALUES ('b0d4dcd0-5cc7-4a72-ad1f-1f6a779db1b9', '用户查询接口-测试', '测试用户查询', 'select
-  username,
-  email,
-  phone
-from
-  users
-where
-  status = :status
-limit
-  :limit
-offset
-  ((:offset - 1) * :limit)', 'GET', '/custom/users/active', 1,
-        '[{"name":"status","type":"string","required":true,"description":""},{"name":"limit","type":"string","required":true,"description":""},{"name":"offset","type":"string","required":true,"description":""}]',
-        'active', true, 1000, '99e2337b-8676-4414-b71e-d5aff2008616', '"2025-11-27T09:10:52.951Z"',
-        '"2025-11-28T10:04:30.997Z"', '06870ba4-2d33-49a6-ac44-a880df470c5b');
-INSERT INTO public."owl_api_interfaces" ("id", "name", "description", "sql_query", "method", "endpoint", "version",
-                                         "parameters", "status", "require_auth", "rate_limit", "created_by",
-                                         "created_at", "updated_at", "api_key_id")
-VALUES ('bba45872-1655-4dff-9016-88410a746299', '测试添加', '', 'insert into
-  test_insert (name, age)
-values
-  (:name, :age)', 'POST', '/custom/test-insert', 1,
-        '[{"name":"name","type":"string","required":true,"description":""},{"name":"age","type":"string","required":true,"description":""}]',
-        'active', true, 1000, '99e2337b-8676-4414-b71e-d5aff2008616', '"2025-11-28T07:01:24.653Z"',
-        '"2025-11-28T08:59:46.171Z"', '06870ba4-2d33-49a6-ac44-a880df470c5b');
+-- SQL 接口由管理员按实际业务创建，不预置测试接口。
 
 
 -- api_monitors: Empty

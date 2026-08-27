@@ -28,17 +28,9 @@ export default function DynamicDetailPage({
   const [loading, setLoading] = useState(!data);
 
   useEffect(() => {
-    if (!data && recordId && pageConfig) {
-      // 如果没有传入data，则根据recordId获取
-      fetchRecord();
-    }
-  }, [recordId, pageConfig]);
-
-  const fetchRecord = async () => {
-    // 这里可以调用API获取记录详情
-    // 暂时使用传入的data
+    setRecord(data || null);
     setLoading(false);
-  };
+  }, [data, pageConfig, recordId]);
 
   const handleBack = () => {
     if (onBack) {

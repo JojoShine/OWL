@@ -22,37 +22,30 @@ export default function FilePreviewDialog({ open, onClose, file, onShare }) {
   const [loading, setLoading] = useState(false);
 
 
-  /**
-   * 加载预览
-   */
   useEffect(() => {
-    if (open && file && canPreview(file.original_name, file.mime_type)) {
-      loadPreview();
-    }
-
+    if (!open || !file || !canPreview(file.original_name, file.mime_type)) return undefined;
+    let active = true;
+    let objectUrl = null;
+    setLoading(true);
+    fileApi.previewFile(file.id)
+      .then((response) => {
+        if (!active) return;
+        objectUrl = URL.createObjectURL(response.data);
+        setPreviewUrl(objectUrl);
+      })
+      .catch((error) => {
+        if (!active) return;
+        console.error('Failed to load preview:', error);
+        toast.error('预览加载失败');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
     return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [open, file]);
-
-  const loadPreview = async () => {
-    setLoading(true);
-
-    try {
-      const response = await fileApi.previewFile(file.id);
-      // response.data 已经是 Blob 对象（因为设置了 responseType: 'blob'）
-      // 直接使用它创建 URL
-      const url = URL.createObjectURL(response.data);
-      setPreviewUrl(url);
-    } catch (error) {
-      console.error('Failed to load preview:', error);
-      toast.error('预览加载失败');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   /**
    * 下载文件
@@ -145,6 +138,8 @@ export default function FilePreviewDialog({ open, onClose, file, onShare }) {
           ) : fileCanPreview && previewUrl ? (
             <div className="flex items-center justify-center h-full">
               {isImage(file.original_name, file.mime_type) && (
+                // Blob URL 仅存在于当前浏览器会话，不能交给 Next Image 优化器。
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={previewUrl}
                   alt={file.original_name}

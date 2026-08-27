@@ -1,22 +1,19 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { getMenuIcon } from '@/lib/config/menu-icons';
 import { Loading } from '@/components/ui/loading';
 import { EmptyState } from '@/components/ui/empty-state';
-import { menuApi } from '@/lib/api';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ChevronDown, ChevronRight, LogOut } from 'lucide-react';
-import { useSocket } from '@/contexts/SocketContext';
-import { useColorTheme } from '@/lib/utils/theme';
 import { useAuth } from '@/lib/utils/auth';
-import { systemConfigApi } from '@/lib/api';
 import { getApiBaseUrl } from '@/lib/utils/http-client';
+import { useAppShellData } from '@/contexts/AppShellDataContext';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
@@ -182,77 +179,13 @@ const MenuItemComponent = ({
 
 export default function Sidebar({ onNavigate }) {
   const pathname = usePathname();
-  const [businessMenus, setBusinessMenus] = useState([]);
-  const [systemMenus, setSystemMenus] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { businessMenus, systemMenus, menusLoading: loading, systemConfig } = useAppShellData();
   const [expandedMenus, setExpandedMenus] = useState(new Set());
-  const { socket, isConnected } = useSocket();
-  const { applySystemConfigTheme } = useColorTheme();
-  const [systemName, setSystemName] = useState('Owl管理平台');
-  const [logoUrl, setLogoUrl] = useState(`${basePath}/logo.png`);
-
-  // 获取系统配置并应用主题
-  const fetchSystemConfig = useCallback(async () => {
-    try {
-      const response = await systemConfigApi.getConfig();
-      if (response?.success) {
-        if (response.data?.primary_color) {
-          applySystemConfigTheme(response.data.primary_color);
-        }
-        if (response.data?.system_name) {
-          setSystemName(response.data.system_name);
-        }
-        if (response.data?.logo_url) {
-          const url = response.data.logo_url;
-          const fullUrl = url.startsWith('http')
-            ? url
-            : `${getApiBaseUrl()}${url}`;
-          if (fullUrl) setLogoUrl(fullUrl);
-        }
-      }
-    } catch (error) {
-      console.error('获取系统配置失败:', error);
-    }
-  }, [applySystemConfigTheme]);
-
-  // 获取用户菜单的函数
-  const fetchUserMenus = useCallback(async () => {
-    try {
-      const response = await menuApi.getUserMenus();
-      const { businessMenus: business, systemMenus: system } = response.data || {};
-      setBusinessMenus(business || []);
-      setSystemMenus(system || []);
-    } catch (error) {
-      console.error('获取菜单失败:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // 初始加载菜单和系统配置
-  useEffect(() => {
-    fetchUserMenus();
-    fetchSystemConfig();
-    setExpandedMenus(new Set());
-    // 两个请求仅在挂载时执行；主题 hook 返回的应用函数当前不是稳定引用。
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // 监听WebSocket菜单更新事件
-  useEffect(() => {
-    if (!socket || !isConnected) return;
-
-    const handleMenuUpdated = () => {
-      console.log('Menu updated event received');
-      fetchUserMenus();
-    };
-
-    socket.on('menu:updated', handleMenuUpdated);
-
-    return () => {
-      socket.off('menu:updated', handleMenuUpdated);
-    };
-  }, [socket, isConnected, fetchUserMenus]);
+  const systemName = systemConfig.system_name || 'Owl管理平台';
+  const configuredLogo = systemConfig.logo_url;
+  const logoUrl = configuredLogo
+    ? (configuredLogo.startsWith('http') ? configuredLogo : `${getApiBaseUrl()}${configuredLogo}`)
+    : `${basePath}/logo.png`;
 
   // 切换菜单展开/收起状态
   const toggleMenu = useCallback((menuId) => {

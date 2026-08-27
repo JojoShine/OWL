@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiBuilderApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { getFullApiUrl } from '@/lib/utils/api-url';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
+import { useListQuery } from '@/lib/hooks/use-list-query';
 
 // 格式化日期的辅助函数
 const formatDate = (dateString) => {
@@ -29,8 +30,7 @@ export default function ApiBuilderPage() {
   const router = useRouter();
   const [interfaces, setInterfaces] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchValues, setSearchValues] = useState({});
-  const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 0 });
+  const { draftFilters: searchValues, setDraftFilters: setSearchValues, appliedFilters, pagination, setPagination, submit: handleSearch, reset: handleReset, setTotal } = useListQuery();
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [interfaceToDelete, setInterfaceToDelete] = useState(null);
   const [keysDialogOpen, setKeysDialogOpen] = useState(false);
@@ -38,43 +38,29 @@ export default function ApiBuilderPage() {
   const [selectedInterface, setSelectedInterface] = useState(null);
 
   // 获取接口列表
-  const fetchInterfaces = async () => {
+  const fetchInterfaces = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await apiBuilderApi.getInterfaces({
         page: pagination.page,
         limit: pagination.pageSize,
-        search: searchValues.keyword || '',
-        status: searchValues.status || undefined,
+        search: appliedFilters.keyword || '',
+        status: appliedFilters.status || undefined,
       });
 
       setInterfaces(response.data?.items || []);
-      setPagination((prev) => ({
-        ...prev,
-        total: response.data?.pagination?.total || 0,
-      }));
+      setTotal(response.data?.pagination?.total || 0);
     } catch (error) {
       console.error('获取接口列表失败:', error);
       toast.error('获取接口列表失败');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [appliedFilters.keyword, appliedFilters.status, pagination.page, pagination.pageSize, setTotal]);
 
   useEffect(() => {
     fetchInterfaces();
-  }, [pagination.page, pagination.pageSize]);
-
-  const handleSearch = () => {
-    setPagination((prev) => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchInterfaces(), 0);
-  };
-
-  const handleReset = () => {
-    setSearchValues({});
-    setPagination((prev) => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchInterfaces(), 0);
-  };
+  }, [fetchInterfaces]);
 
   const handleCreate = () => {
     router.push('/setting/api-builder/edit/new');

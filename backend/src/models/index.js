@@ -93,9 +93,6 @@ db.ApiKeyInterface = require('./association/ApiKeyInterface')(sequelize, Sequeli
 // 第三方对接相关模型
 db.ThirdPartyApiKey = require('./third_party/ThirdPartyApiKey')(sequelize, Sequelize.DataTypes);
 db.ThirdPartyApiCallLog = require('./third_party/ThirdPartyApiCallLog')(sequelize, Sequelize.DataTypes);
-db.ZabbixInstance = require('./third_party/ZabbixInstance')(sequelize, Sequelize.DataTypes);
-db.ZabbixHost = require('./third_party/ZabbixHost')(sequelize, Sequelize.DataTypes);
-
 // 动态生成的模型会在代码生成时自动注册到这里
 // (使用原生SQL时无需在此注册)
 

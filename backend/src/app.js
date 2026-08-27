@@ -1,7 +1,9 @@
-require('dotenv').config(); // 默认加载 .env
 if (process.env.NODE_ENV === 'production') {
-  require('dotenv').config({ path: '.env.production', override: true }); // 生产环境覆盖
+  require('dotenv').config({ path: '.env.production', override: false });
 }
+require('dotenv').config({ override: false });
+const { validateRuntimeConfig } = require('./config/runtime');
+validateRuntimeConfig();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -118,6 +120,9 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
+const HOST = process.env.HOST || '127.0.0.1';
+let httpServer = null;
+let isShuttingDown = false;
 
 // 启动服务器
 const startServer = async () => {
@@ -145,20 +150,16 @@ const startServer = async () => {
     const serverMonitorService = require('./core/modules/monitor/server-monitor.service');
     await serverMonitorService.initializeScheduledJobs();
 
-    // 启动Zabbix数据同步调度器
-    const zabbixSyncService = require('./core/modules/zabbix/zabbix-sync.service');
-    zabbixSyncService.startSyncScheduler();
-
     // 创建HTTP服务器（用于Socket.io）
     const http = require('http');
-    const server = http.createServer(app);
+    httpServer = http.createServer(app);
 
     // 初始化Socket.io服务
     const socketService = require('./core/modules/notification/socket.service');
-    socketService.initialize(server);
+    socketService.initialize(httpServer);
 
-    server.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT}`);
+    httpServer.listen(PORT, HOST, () => {
+      logger.info(`Server running at http://${HOST}:${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV}`);
       logger.info(`API URL: http://localhost:${PORT}/api`);
       logger.info(`WebSocket URL: ws://localhost:${PORT}`);
@@ -168,6 +169,51 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+const shutdown = async (signal) => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  logger.info(`Received ${signal}, shutting down gracefully`);
+
+  const forceExitTimer = setTimeout(() => {
+    logger.error('Graceful shutdown timed out');
+    process.exit(1);
+  }, 15000);
+  forceExitTimer.unref();
+
+  try {
+    require('./core/modules/monitor/api-monitor.service').stopAllScheduledJobs();
+    require('./core/modules/monitor/alert.service').stopAlertCheckJob();
+    require('./core/modules/monitor/server-monitor.service').stopAllMonitoring();
+
+    const socketService = require('./core/modules/notification/socket.service');
+    if (socketService.io) {
+      await new Promise((resolve) => socketService.io.close(resolve));
+    }
+
+    if (httpServer?.listening) {
+      await new Promise((resolve, reject) => {
+        httpServer.close((error) => (error ? reject(error) : resolve()));
+      });
+    }
+
+    const { redisClient } = require('./config/redis');
+    if (redisClient.isOpen) await redisClient.quit();
+
+    const db = require('./models');
+    await db.sequelize.close();
+    clearTimeout(forceExitTimer);
+    logger.info('Graceful shutdown complete');
+    process.exit(0);
+  } catch (error) {
+    clearTimeout(forceExitTimer);
+    logger.error('Graceful shutdown failed:', error);
+    process.exit(1);
+  }
+};
+
+process.once('SIGTERM', () => shutdown('SIGTERM'));
+process.once('SIGINT', () => shutdown('SIGINT'));
 
 startServer();
 

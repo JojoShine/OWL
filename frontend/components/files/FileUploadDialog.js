@@ -22,6 +22,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
+const MAX_FILE_SIZE = 100 * 1024 * 1024;
+const isImage = (file) => file.type.startsWith('image/');
+
 /**
  * 文件上传对话框组件
  */
@@ -32,19 +35,10 @@ export default function FileUploadDialog({ open, onClose, folderId, onUploadComp
   const [previewUrls, setPreviewUrls] = useState({}); // 图片预览 URL {fileId: url}
   const fileInputRef = useRef(null);
 
-  const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
-
-  /**
-   * 检查文件是否为图片
-   */
-  const isImage = (file) => {
-    return file.type.startsWith('image/');
-  };
-
   /**
    * 生成图片预览
    */
-  const generateImagePreview = (file, fileId) => {
+  const generateImagePreview = useCallback((file, fileId) => {
     if (!isImage(file)) return;
 
     const reader = new FileReader();
@@ -58,12 +52,12 @@ export default function FileUploadDialog({ open, onClose, folderId, onUploadComp
       console.error('Failed to read image file:', file.name);
     };
     reader.readAsDataURL(file);
-  };
+  }, []);
 
   /**
    * 处理文件选择
    */
-  const handleFileSelect = (selectedFiles) => {
+  const handleFileSelect = useCallback((selectedFiles) => {
     const fileArray = Array.from(selectedFiles);
 
     // 验证文件大小
@@ -95,7 +89,7 @@ export default function FileUploadDialog({ open, onClose, folderId, onUploadComp
     }
 
     setFiles(prev => [...prev, ...validFiles]);
-  };
+  }, [generateImagePreview]);
 
   /**
    * 文件输入变化
@@ -130,7 +124,7 @@ export default function FileUploadDialog({ open, onClose, folderId, onUploadComp
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFileSelect(e.dataTransfer.files);
     }
-  }, []);
+  }, [handleFileSelect]);
 
   /**
    * 移除文件
@@ -342,6 +336,8 @@ export default function FileUploadDialog({ open, onClose, folderId, onUploadComp
                       {/* 文件图标或图片预览 */}
                       {hasPreview ? (
                         <div className="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+                          {/* 本地 FileReader 预览不能使用 Next Image。 */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={previewUrls[fileItem.id]}
                             alt={fileItem.name}

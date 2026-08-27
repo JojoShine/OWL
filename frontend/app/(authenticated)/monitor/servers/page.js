@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { serverMonitorApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,12 +20,12 @@ import {
   PageToolbar,
   PageWorkspace,
 } from '@/components/layout/page-shell';
+import { useListQuery } from '@/lib/hooks/use-list-query';
 
 export default function ServerMonitorPage() {
   const [servers, setServers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchValues, setSearchValues] = useState({});
-  const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 0 });
+  const { draftFilters: searchValues, setDraftFilters: setSearchValues, appliedFilters, pagination, setPagination, submit: handleSearch, reset: handleReset, setTotal } = useListQuery();
   
   // 对话框状态
   const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -38,11 +38,11 @@ export default function ServerMonitorPage() {
   const [selectedServerForServices, setSelectedServerForServices] = useState(null);
 
   // 获取服务器列表
-  const fetchServers = async () => {
+  const fetchServers = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await serverMonitorApi.getAllServers({
-        search: searchValues.keyword || '',
+        search: appliedFilters.keyword || '',
         page: pagination.page,
         limit: pagination.pageSize,
       });
@@ -51,10 +51,7 @@ export default function ServerMonitorPage() {
 
       // 更新分页信息
       if (response.data?.pagination) {
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination.total || 0,
-        }));
+        setTotal(response.data.pagination.total || 0);
       }
     } catch (error) {
       console.error('获取服务器列表失败:', error);
@@ -63,25 +60,11 @@ export default function ServerMonitorPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [appliedFilters.keyword, pagination.page, pagination.pageSize, setTotal]);
 
   useEffect(() => {
     fetchServers();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.page, pagination.pageSize]);
-
-  // 搜索
-  const handleSearch = () => {
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchServers(), 0);
-  };
-
-  // 重置
-  const handleReset = () => {
-    setSearchValues({});
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchServers(), 0);
-  };
+  }, [fetchServers]);
 
   // 分页变化
   const handlePageChange = (newPage) => {
@@ -134,8 +117,7 @@ export default function ServerMonitorPage() {
       await serverMonitorApi.triggerCheck(server.id);
       toast.dismiss();
       toast.success('指标采集成功，请刷新页面查看');
-      // 延迟刷新列表
-      setTimeout(() => fetchServers(), 1000);
+      await fetchServers();
     } catch (error) {
       toast.dismiss();
       console.error('采集指标失败:', error);

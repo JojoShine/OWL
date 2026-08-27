@@ -78,7 +78,7 @@ const logger = winston.createLogger({
 });
 
 // 开发环境添加控制台输出
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production' || process.env.LOG_TO_STDOUT === 'true') {
   logger.add(
     new winston.transports.Console({
       format: combine(colorize(), logFormat),
@@ -121,6 +121,14 @@ const databaseAccessLogger = winston.createLogger({
   ),
   transports: [databaseAccessTransport],
 });
+
+if (process.env.LOG_TO_STDOUT === 'true') {
+  [operationLogger, accessLogger, loginLogger, databaseAccessLogger].forEach((categoryLogger) => {
+    categoryLogger.add(new winston.transports.Console({
+      format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat),
+    }));
+  });
+}
 
 module.exports = {
   logger,

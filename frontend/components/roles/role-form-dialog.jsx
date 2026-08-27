@@ -62,7 +62,7 @@ export default function RoleFormDialog({ open, onOpenChange, role, onSuccess }) 
       try {
         const response = await permissionApi.getAllPermissions();
         // response.data.items 可能是对象（已分组）或数组
-        const permissionsData = response.data?.items || response.data || [];
+        const permissionsData = response.data?.items || [];
         setPermissions(permissionsData);
       } catch (error) {
         console.error('获取权限列表失败:', error);
@@ -79,7 +79,7 @@ export default function RoleFormDialog({ open, onOpenChange, role, onSuccess }) 
       try {
         const response = await menuApi.getMenuTree();
         // response.data.items 是数组
-        const menusData = response.data?.items || response.data || [];
+        const menusData = response.data?.items || [];
         setMenus(Array.isArray(menusData) ? menusData : []);
       } catch (error) {
         console.error('获取菜单列表失败:', error);
@@ -248,7 +248,7 @@ export default function RoleFormDialog({ open, onOpenChange, role, onSuccess }) 
               {/* 角色名称 */}
               <div className="space-y-2">
                 <Label htmlFor="name">
-                  角色名称 <span className="text-red-500">*</span>
+                  角色名称 <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="name"
@@ -263,7 +263,7 @@ export default function RoleFormDialog({ open, onOpenChange, role, onSuccess }) 
               {/* 角色代码 */}
               <div className="space-y-2">
                 <Label htmlFor="code">
-                  角色代码 <span className="text-red-500">*</span>
+                  角色代码 <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="code"

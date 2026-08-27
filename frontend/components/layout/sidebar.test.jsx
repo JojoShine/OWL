@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { menuApi, systemConfigApi } from '@/lib/api';
 import Sidebar from './sidebar';
 
 const stableMocks = vi.hoisted(() => ({
@@ -46,9 +45,25 @@ vi.mock('@/components/ui/loading', () => ({
   Loading: () => <div>加载中</div>,
 }));
 
-vi.mock('@/lib/api', () => ({
-  menuApi: { getUserMenus: vi.fn() },
-  systemConfigApi: { getConfig: vi.fn() },
+vi.mock('@/contexts/AppShellDataContext', () => ({
+  useAppShellData: () => ({
+    businessMenus: [{
+      id: 1,
+      name: '报表中心',
+      path: '/reports',
+      icon: 'Chart',
+      children: [{ id: 11, name: '日报', path: '/reports/daily', icon: 'File', children: [] }],
+    }],
+    systemMenus: [{
+      id: 2,
+      name: '系统工具',
+      path: '#',
+      icon: 'Settings',
+      children: [{ id: 21, name: '用户工具', path: '/tools/users', icon: 'Users', children: [] }],
+    }],
+    menusLoading: false,
+    systemConfig: {},
+  }),
 }));
 
 vi.mock('@/contexts/SocketContext', () => ({
@@ -78,25 +93,6 @@ vi.mock('@/lib/utils/http-client', () => ({
 
 describe('Sidebar nested menu controls', () => {
   beforeEach(() => {
-    menuApi.getUserMenus.mockResolvedValue({
-      data: {
-        businessMenus: [{
-          id: 1,
-          name: '报表中心',
-          path: '/reports',
-          icon: 'Chart',
-          children: [{ id: 11, name: '日报', path: '/reports/daily', icon: 'File', children: [] }],
-        }],
-        systemMenus: [{
-          id: 2,
-          name: '系统工具',
-          path: '#',
-          icon: 'Settings',
-          children: [{ id: 21, name: '用户工具', path: '/tools/users', icon: 'Users', children: [] }],
-        }],
-      },
-    });
-    systemConfigApi.getConfig.mockResolvedValue({ success: true, data: {} });
     stableMocks.applySystemConfigTheme.mockClear();
     stableMocks.logout.mockClear();
   });

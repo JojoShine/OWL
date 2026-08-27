@@ -26,7 +26,6 @@ import * as generatorModule from './system/generator.api';
 import * as statsModule from './system/stats.api';
 import * as fileManagerModule from './system/file-manager.api';
 import * as emailTaskModule from './system/email-task.api';
-import * as zabbixModule from './system/zabbix.api';
 
 // 认证相关
 export const authApi = authModule.authApi;
@@ -66,10 +65,9 @@ export const captchaApi = captchaModule.captchaApi;
 export const sensitiveFieldApi = sensitiveFieldModule.sensitiveFieldApi;
 export const dataAccessApi = dataAccessModule.dataAccessApi;
 export const emailTaskApi = emailTaskModule.emailTaskApi;
-export const zabbixApi = zabbixModule.zabbixApi;
 
 // 默认导出（用于向后兼容）
-export default {
+const api = {
   // 认证相关
   authApi,
   smsAuthApi,
@@ -116,5 +114,6 @@ export default {
   sensitiveFieldApi,
   dataAccessApi,
   emailTaskApi,
-  zabbixApi,
 };
+
+export default api;

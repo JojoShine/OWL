@@ -83,7 +83,7 @@ export default function VariableSchemaEditor({ value = [], onChange }) {
                   <div className="grid grid-cols-12 gap-4 items-start">
                     <div className="col-span-4">
                       <Label className="text-xs">
-                        变量名 <span className="text-red-500">*</span>
+                        变量名 <span className="text-destructive">*</span>
                       </Label>
                       <Input
                         value={variable.name}

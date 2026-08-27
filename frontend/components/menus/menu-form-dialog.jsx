@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -131,8 +131,8 @@ export default function MenuFormDialog({ open, onOpenChange, menu, onSuccess }) 
   };
 
   // 预览权限
-  const handlePreviewPermissions = async () => {
-    const formData = watch();
+  const handlePreviewPermissions = useCallback(async (values) => {
+    const formData = values || watch();
 
     if (!formData.name || !formData.path) {
       toast.error('请先填写菜单名称和路由路径');
@@ -155,21 +155,22 @@ export default function MenuFormDialog({ open, onOpenChange, menu, onSuccess }) 
     } finally {
       setIsPreviewLoading(false);
     }
-  };
+  }, [watch]);
 
   // 监听路径变化，自动预览权限
   useEffect(() => {
+    let timer;
     const subscription = watch((value, { name: fieldName }) => {
       if ((fieldName === 'path' || fieldName === 'name') && value.path && value.name && autoGeneratePermission) {
-        // 延迟预览，避免频繁请求
-        const timer = setTimeout(() => {
-          handlePreviewPermissions();
-        }, 500);
-        return () => clearTimeout(timer);
+        clearTimeout(timer);
+        timer = setTimeout(() => handlePreviewPermissions(value), 500);
       }
     });
-    return () => subscription.unsubscribe();
-  }, [watch, autoGeneratePermission]);
+    return () => {
+      clearTimeout(timer);
+      subscription.unsubscribe();
+    };
+  }, [watch, autoGeneratePermission, handlePreviewPermissions]);
 
   const typeValue = watch('type');
   const statusValue = watch('status');
@@ -190,7 +191,7 @@ export default function MenuFormDialog({ open, onOpenChange, menu, onSuccess }) 
             {/* 菜单名称 */}
             <div className="space-y-2 col-span-2">
               <Label htmlFor="name">
-                菜单名称 <span className="text-red-500">*</span>
+                菜单名称 <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="name"

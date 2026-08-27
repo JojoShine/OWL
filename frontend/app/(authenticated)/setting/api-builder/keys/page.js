@@ -193,7 +193,7 @@ export default function ApiKeyManagementPage() {
             <DialogDescription>配置调用方信息，并选择允许调用的 SQL 接口。</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2"><Label>厂商或应用名称 *</Label><Input value={formData.client_name} onChange={(event) => setFormData((data) => ({ ...data, client_name: event.target.value }))} placeholder="例如：华东仓储系统" /></div>
+            <div className="space-y-2"><Label>厂商或应用名称<span className="ml-1 text-destructive">*</span></Label><Input value={formData.client_name} onChange={(event) => setFormData((data) => ({ ...data, client_name: event.target.value }))} placeholder="例如：华东仓储系统" /></div>
             <div className="space-y-2"><Label>用途说明</Label><Input value={formData.description} onChange={(event) => setFormData((data) => ({ ...data, description: event.target.value }))} placeholder="说明该密钥的业务用途" /></div>
             <div className="space-y-2">
               <Label>有效期至</Label>
@@ -204,7 +204,7 @@ export default function ApiKeyManagementPage() {
               />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between"><Label>授权 SQL 接口 *</Label><span className="text-xs text-muted-foreground">已选 {formData.interface_ids.length} 个</span></div>
+              <div className="flex items-center justify-between"><Label>授权 SQL 接口<span className="ml-1 text-destructive">*</span></Label><span className="text-xs text-muted-foreground">已选 {formData.interface_ids.length} 个</span></div>
               <div className="max-h-64 space-y-1 overflow-y-auto rounded-lg border p-2">
                 {interfaces.map((item) => (
                   <label key={item.id} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 hover:bg-muted/60">

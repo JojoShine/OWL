@@ -2,6 +2,11 @@ const { logger, operationLogger } = require('../config/logger');
 const db = require('../models');
 const { maskValue } = require('../utils/mask.util');
 const plainAccessService = require('../core/modules/data-security/plain-access.service');
+const { createAsyncTtlCache } = require('./dataMasking.cache');
+
+const sensitiveFieldCache = createAsyncTtlCache(loadAllSensitiveFields, {
+  ttlMs: Number(process.env.SENSITIVE_FIELD_CACHE_TTL_MS) || 60_000,
+});
 
 /**
  * 数据脱敏中间件
@@ -128,6 +133,10 @@ async function handleDataMasking(req, res, responseData, originalJson) {
  * 获取所有启用的敏感字段配置（基于字段名全局匹配）
  */
 async function getAllSensitiveFields() {
+  return sensitiveFieldCache.get();
+}
+
+async function loadAllSensitiveFields() {
   // 从数据库查询所有启用的敏感字段
   const fields = await db.SensitiveField.findAll({
     where: {
@@ -151,11 +160,28 @@ async function maskDataWithTracking(data, sensitiveFields, userId) {
   
   if (!data) return { maskedData: data, matchedFields: [] };
 
+  const items = Array.isArray(data) ? data : [data];
+  const permissionEntries = [];
+  items.forEach((item) => {
+    const recordId = item?.id || item?.uuid || item?._id;
+    if (!recordId) return;
+    sensitiveFields.forEach(({ field_name: fieldName }) => {
+      if (Object.prototype.hasOwnProperty.call(item, fieldName) && item[fieldName] != null) {
+        permissionEntries.push({ fieldName, recordId });
+      }
+    });
+  });
+  const plainAccessSet = await plainAccessService.checkPlainAccessPermissions(
+    userId,
+    '*',
+    permissionEntries
+  );
+
   // 处理数组
   if (Array.isArray(data)) {
     const maskedItems = await Promise.all(
       data.map(async (item) => {
-        const { maskedObj, matched } = await maskObjectWithTracking(item, sensitiveFields, userId);
+        const { maskedObj, matched } = await maskObjectWithTracking(item, sensitiveFields, plainAccessSet);
         // 合并匹配字段，去重
         matched.forEach(field => {
           const key = `${field.field_name}_${field.mask_type}`;
@@ -173,7 +199,7 @@ async function maskDataWithTracking(data, sensitiveFields, userId) {
   }
 
   // 处理对象
-  const { maskedObj, matched } = await maskObjectWithTracking(data, sensitiveFields, userId);
+  const { maskedObj, matched } = await maskObjectWithTracking(data, sensitiveFields, plainAccessSet);
   matched.forEach(field => {
     const key = `${field.field_name}_${field.mask_type}`;
     if (!matchedFieldsMap.has(key)) {
@@ -190,7 +216,7 @@ async function maskDataWithTracking(data, sensitiveFields, userId) {
 /**
  * 对单个对象进行脱敏，检查记录级别权限
  */
-async function maskObjectWithTracking(obj, sensitiveFields, userId) {
+async function maskObjectWithTracking(obj, sensitiveFields, plainAccessSet) {
   if (!obj || typeof obj !== 'object') return { maskedObj: obj, matched: [] };
 
   const maskedObj = { ...obj };
@@ -204,18 +230,7 @@ async function maskObjectWithTracking(obj, sensitiveFields, userId) {
     
     if (maskedObj.hasOwnProperty(fieldName) && maskedObj[fieldName] != null) {
       // 只有当有recordId时才检查权限
-      let hasPermission = false;
-      
-      if (recordId) {
-        // 检查用户是否有该记录的明文访问权限
-        const permissionCheck = await plainAccessService.checkPlainAccessPermission(
-          userId, 
-          '*', 
-          fieldName,
-          recordId
-        );
-        hasPermission = permissionCheck.hasPermission;
-      }
+      const hasPermission = Boolean(recordId && plainAccessSet.has(`${fieldName}:${recordId}`));
       
       if (hasPermission) {
         // 有权限，保留明文
@@ -264,5 +279,7 @@ function logAccess(req, userId, matchedFields, requestPath) {
   // 敏感数据的关键操作（明文访问授权、密码验证）已在 plain-access.service.js 中记录
   // 接口请求本身也会被 operation 日志记录
 }
+
+dataMaskingMiddleware.invalidateSensitiveFields = () => sensitiveFieldCache.invalidate();
 
 module.exports = dataMaskingMiddleware;

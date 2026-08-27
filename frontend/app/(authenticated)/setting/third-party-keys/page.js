@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { thirdPartyKeysApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,14 +13,14 @@ import { toast } from 'sonner';
 import { SearchFilter } from '@/components/common/SearchFilter';
 import { DataTable } from '@/components/common/DataTable';
 import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
+import { useListQuery } from '@/lib/hooks/use-list-query';
 
 export default function ThirdPartyKeysPage() {
   const [keys, setKeys] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchValues, setSearchValues] = useState({});
+  const { draftFilters: searchValues, setDraftFilters: setSearchValues, appliedFilters, pagination, setPagination, submit: handleSearch, reset: handleReset, setTotal } = useListQuery();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingKey, setEditingKey] = useState(null);
-  const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 0 });
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [keyToDelete, setKeyToDelete] = useState(null);
   const [secretDialogOpen, setSecretDialogOpen] = useState(false);
@@ -32,25 +32,22 @@ export default function ThirdPartyKeysPage() {
   const [guideOpen, setGuideOpen] = useState(false);
 
   // 获取密钥列表
-  const fetchKeys = async () => {
+  const fetchKeys = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await thirdPartyKeysApi.getKeys({
-        client_name: searchValues.keyword || '',
-        status: searchValues.status === 'all' ? '' : (searchValues.status || ''),
+        client_name: appliedFilters.keyword || '',
+        status: appliedFilters.status === 'all' ? '' : (appliedFilters.status || ''),
         page: pagination.page,
         pageSize: pagination.pageSize
       });
 
-      const keysData = response.data?.items || response.data || [];
+      const keysData = response.data?.items || [];
       setKeys(Array.isArray(keysData) ? keysData : []);
 
       // 更新分页信息
       if (response.data?.pagination) {
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination.total || 0
-        }));
+        setTotal(response.data.pagination.total || 0);
       }
     } catch (error) {
       console.error('获取密钥列表失败:', error);
@@ -58,25 +55,11 @@ export default function ThirdPartyKeysPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [appliedFilters.keyword, appliedFilters.status, pagination.page, pagination.pageSize, setTotal]);
 
   useEffect(() => {
     fetchKeys();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.page, pagination.pageSize]);
-
-  // 搜索
-  const handleSearch = () => {
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchKeys(), 0);
-  };
-
-  // 重置
-  const handleReset = () => {
-    setSearchValues({});
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setTimeout(() => fetchKeys(), 0);
-  };
+  }, [fetchKeys]);
 
   // 分页变化
   const handlePageChange = (newPage) => {

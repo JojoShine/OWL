@@ -132,7 +132,7 @@ export default function PlainAccessDialog({
           {/* 申请理由 */}
           <div className="space-y-2">
             <Label htmlFor="reason">
-              申请理由 <span className="text-red-500">*</span>
+              申请理由 <span className="text-destructive">*</span>
             </Label>
             <Textarea
               id="reason"
@@ -148,7 +148,7 @@ export default function PlainAccessDialog({
           {/* 密码 */}
           <div className="space-y-2">
             <Label htmlFor="password">
-              登录密码 <span className="text-red-500">*</span>
+              登录密码 <span className="text-destructive">*</span>
             </Label>
             <Input
               id="password"

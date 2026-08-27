@@ -1,31 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/utils/auth';
 import { ThemeToggle } from '@/components/layout/theme/theme-toggle';
 import NotificationIcon from '@/components/notification/NotificationIcon';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
-import { systemConfigApi } from '@/lib/api';
+import { useAppShellData } from '@/contexts/AppShellDataContext';
 
 export default function Header({ onMenuClick }) {
   const { user } = useAuth();
-  const [enableThemeSwitch, setEnableThemeSwitch] = useState(true);
-
-  const fetchConfig = useCallback(async () => {
-    try {
-      const response = await systemConfigApi.getConfig();
-      if (response.success) {
-        setEnableThemeSwitch(response.data?.enable_theme_switch ?? true);
-      }
-    } catch (error) {
-      console.error('Failed to fetch system config:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchConfig();
-  }, [fetchConfig]);
+  const { systemConfig } = useAppShellData();
+  const enableThemeSwitch = systemConfig.enable_theme_switch ?? true;
 
   return (
     <header className="flex h-14 items-center justify-between border-b bg-card px-4 md:px-5">

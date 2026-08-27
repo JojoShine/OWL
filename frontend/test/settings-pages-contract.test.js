@@ -9,7 +9,6 @@ const settingsPages = [
   'app/(authenticated)/setting/dashboard-widgets/page.js',
   'app/(authenticated)/setting/notification-settings/page.js',
   'app/(authenticated)/setting/watermark-settings/page.js',
-  'app/(authenticated)/setting/zabbix/page.js',
 ];
 
 describe('settings page surfaces', () => {

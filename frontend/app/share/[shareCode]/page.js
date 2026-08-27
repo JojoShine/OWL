@@ -133,6 +133,8 @@ export default function SharePage() {
           {/* 图片预览 */}
           {isImage && (
             <div className="w-full overflow-hidden rounded-lg border bg-muted">
+              {/* 分享链接是运行时文件地址，无法使用固定 Next Image loader。 */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={getPreviewUrl()}
                 alt={share.file.original_name}

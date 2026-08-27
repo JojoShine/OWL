@@ -146,7 +146,7 @@ export default function BusinessTableDialog({ open, onOpenChange, onCreated }) {
         <div className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="business-table-name">表名 *</Label>
+              <Label htmlFor="business-table-name">表名<span className="ml-1 text-destructive">*</span></Label>
               <div className="flex h-10 overflow-hidden rounded-md border border-input focus-within:border-primary">
                 <span className="flex items-center border-r bg-muted/60 px-3 font-mono text-sm text-muted-foreground">biz_</span>
                 <Input id="business-table-name" value={tableName} onChange={(event) => setTableName(event.target.value.toLowerCase())} className="h-full rounded-none border-0 shadow-none focus-visible:ring-0" placeholder="customer" />
@@ -171,9 +171,9 @@ export default function BusinessTableDialog({ open, onOpenChange, onCreated }) {
             <div className="overflow-x-auto rounded-lg border">
               <div className="min-w-[1060px]">
                 <div className="grid grid-cols-[145px_150px_105px_140px_180px_48px_48px_48px_104px] items-center gap-2 bg-muted/45 px-3 py-2.5 text-xs font-medium text-muted-foreground">
-                  <span>字段名 *</span>
+                  <span>字段名<span className="ml-1 text-destructive">*</span></span>
                   <span>字段说明</span>
-                  <span>类型 *</span>
+                  <span>类型<span className="ml-1 text-destructive">*</span></span>
                   <span>类型参数</span>
                   <span>默认值</span>
                   <span className="text-center">必填</span>

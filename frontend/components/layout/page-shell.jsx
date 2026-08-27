@@ -36,10 +36,10 @@ export function PageWorkspace({ className, ...props }) {
     <section
       data-slot="page-workspace"
       className={cn(
-        'overflow-hidden rounded-lg border bg-card',
-        '[&>[data-slot=page-toolbar]]:rounded-none [&>[data-slot=page-toolbar]]:border-x-0 [&>[data-slot=page-toolbar]]:border-t-0',
-        '[&>[data-slot=page-surface]]:rounded-none [&>[data-slot=page-surface]]:border-0',
-        '[&_[data-slot=data-table]]:rounded-none [&_[data-slot=data-table]]:border-0',
+        'overflow-hidden rounded-lg border bg-card max-md:space-y-3 max-md:overflow-visible max-md:rounded-none max-md:border-0 max-md:bg-transparent',
+        'md:[&>[data-slot=page-toolbar]]:rounded-none md:[&>[data-slot=page-toolbar]]:border-x-0 md:[&>[data-slot=page-toolbar]]:border-t-0',
+        '[&>[data-slot=page-surface]]:border-0 [&>[data-slot=page-surface]]:bg-transparent md:[&>[data-slot=page-surface]]:rounded-none',
+        '[&_[data-slot=data-table]]:border-0 md:[&_[data-slot=data-table]]:rounded-none',
         className
       )}
       {...props}

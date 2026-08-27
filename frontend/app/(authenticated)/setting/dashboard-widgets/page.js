@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { dashboardWidgetApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -73,11 +73,7 @@ export default function DashboardWidgetsPage() {
   const [testResult, setTestResult] = useState(null);
   const [helpOpen, setHelpOpen] = useState(false);
 
-  // fetchWidgets intentionally refreshes only when the visible page changes.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { fetchWidgets(page); }, [page]);
-
-  const fetchWidgets = async (pageNum) => {
+  const fetchWidgets = useCallback(async (pageNum = page) => {
     try {
       setLoading(true);
       const response = await dashboardWidgetApi.getAll();
@@ -93,7 +89,9 @@ export default function DashboardWidgetsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit, page]);
+
+  useEffect(() => { fetchWidgets(page); }, [fetchWidgets, page]);
 
   const openEdit = (widget) => {
     setEditingWidget(widget);

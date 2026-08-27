@@ -88,6 +88,14 @@ appendonly.aof
 
 # Docker volumes
 docker/data/
+deploy/env/*.env
+!deploy/env/*.env.example
+deploy/secrets/*
+!deploy/secrets/README.md
+
+# Docker deployment variables
+.env.docker
+.env.verify
 
 # Vercel
 .vercel

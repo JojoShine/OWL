@@ -1,0 +1,36 @@
+services:
+  migration:
+    pull_policy: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  backend:
+    pull_policy: always
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: ${BACKEND_CPU_LIMIT:-1.5}
+          memory: ${BACKEND_MEMORY_LIMIT:-1536M}
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
+
+  frontend:
+    pull_policy: always
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: ${FRONTEND_CPU_LIMIT:-1.0}
+          memory: ${FRONTEND_MEMORY_LIMIT:-1024M}
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

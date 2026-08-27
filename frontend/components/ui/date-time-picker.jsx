@@ -21,7 +21,6 @@ export function DateTimePicker({
   placeholder = '选择日期和时间',
   className,
   showTime = true, // 是否显示时间选择
-  defaultToToday = true, // 是否默认选择当天
   ...props
 }) {
   const [open, setOpen] = React.useState(false);
@@ -38,37 +37,12 @@ export function DateTimePicker({
     dateValue ? String(dateValue.getMinutes()).padStart(2, '0') : String(now.getMinutes()).padStart(2, '0')
   );
 
-  // 当弹窗打开且没有值时，默认选择当天
-  React.useEffect(() => {
-    if (open && !value && defaultToToday) {
-      const today = new Date();
-      today.setHours(parseInt(hours) || 0);
-      today.setMinutes(parseInt(minutes) || 0);
-      today.setSeconds(0);
-      today.setMilliseconds(0);
-
-      // 转换为本地时间字符串（不转UTC）
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      const hrs = String(today.getHours()).padStart(2, '0');
-      const mins = String(today.getMinutes()).padStart(2, '0');
-      const secs = String(today.getSeconds()).padStart(2, '0');
-      const localTimeString = `${year}-${month}-${day} ${hrs}:${mins}:${secs}`;
-
-      onChange?.({
-        target: {
-          value: localTimeString,
-        },
-      });
-    }
-  }, [open]);
-
   // 当 value 变化时更新时间
   React.useEffect(() => {
-    if (dateValue) {
-      setHours(String(dateValue.getHours()).padStart(2, '0'));
-      setMinutes(String(dateValue.getMinutes()).padStart(2, '0'));
+    const nextDate = value ? new Date(value) : null;
+    if (nextDate && !Number.isNaN(nextDate.getTime())) {
+      setHours(String(nextDate.getHours()).padStart(2, '0'));
+      setMinutes(String(nextDate.getMinutes()).padStart(2, '0'));
     } else {
       // 没有值时使用当前时间
       const now = new Date();

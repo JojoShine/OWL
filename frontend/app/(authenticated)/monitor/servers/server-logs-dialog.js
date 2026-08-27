@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { serverMonitorApi } from '@/lib/api';
 import {
   Dialog,
@@ -20,7 +20,7 @@ export default function ServerLogsDialog({ open, onOpenChange, server }) {
   const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 0 });
 
   // 加载日志
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     if (!server || !open) return;
 
     try {
@@ -42,14 +42,13 @@ export default function ServerLogsDialog({ open, onOpenChange, server }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [open, pagination.page, pagination.pageSize, server]);
 
   useEffect(() => {
     if (open && server) {
       fetchLogs();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, server, pagination.page]);
+  }, [fetchLogs, open, server]);
 
   // 分页变化
   const handlePageChange = (newPage) => {

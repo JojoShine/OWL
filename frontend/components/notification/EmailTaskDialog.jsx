@@ -160,7 +160,7 @@ export default function EmailTaskDialog({ open, onOpenChange, task, onSave }) {
           {/* 任务名称 */}
           <div className="space-y-2">
             <Label htmlFor="name">
-              任务名称 <span className="text-red-500">*</span>
+              任务名称 <span className="text-destructive">*</span>
             </Label>
             <Input
               id="name"
@@ -187,7 +187,7 @@ export default function EmailTaskDialog({ open, onOpenChange, task, onSave }) {
           {/* 邮件模板 */}
           <div className="space-y-2">
             <Label htmlFor="template">
-              邮件模板 <span className="text-red-500">*</span>
+              邮件模板 <span className="text-destructive">*</span>
             </Label>
             <Select
               value={formData.template_id}
@@ -215,7 +215,7 @@ export default function EmailTaskDialog({ open, onOpenChange, task, onSave }) {
           {/* 收件人邮箱 */}
           <div className="space-y-2">
             <Label htmlFor="recipients">
-              收件人邮箱 <span className="text-red-500">*</span>
+              收件人邮箱 <span className="text-destructive">*</span>
             </Label>
             <Input
               id="recipients"
@@ -233,7 +233,7 @@ export default function EmailTaskDialog({ open, onOpenChange, task, onSave }) {
           {/* 发送频率 */}
           <div className="space-y-2">
             <Label htmlFor="frequency">
-              发送频率 <span className="text-red-500">*</span>
+              发送频率 <span className="text-destructive">*</span>
             </Label>
             <Select
               value={formData.frequency}

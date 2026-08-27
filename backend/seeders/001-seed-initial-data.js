@@ -2,6 +2,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 /**
  * Sequelize Seeder: Initial Data
@@ -13,11 +15,14 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const seederFile = path.join(__dirname, 'sql', 'seeder.sql');
 
+    if (process.env.ALLOW_DATABASE_BOOTSTRAP !== 'true') {
+      throw new Error('初始数据只能通过 npm run db:bootstrap 或 db:reset:dev 导入');
+    }
+
     console.log(`\n${'='.repeat(80)}`);
     console.log(`📦 初始数据导入 Seeder`);
     console.log(`${'='.repeat(80)}`);
-    console.log(`\n⚠️  提醒: 确保数据库表结构已经初始化！`);
-    console.log(`请在执行本 Seeder 前运行：npm run db:migrate\n`);
+    console.log(`\n⚠️  此 Seeder 仅由首次初始化流程调用。\n`);
 
     // 检查文件是否存在
     if (!fs.existsSync(seederFile)) {
@@ -26,42 +31,51 @@ module.exports = {
     }
 
     try {
-      const sql = fs.readFileSync(seederFile, 'utf8').trim();
-
-      console.log(`🧹 清空现有数据...\n`);
-
-      // 获取所有表
-      const tables = await queryInterface.showAllTables();
-      const dataTables = tables.filter(t => !t.includes('sequelize') && t !== 'SequelizeMeta');
-
-      // 禁用外键约束
-      await queryInterface.sequelize.query(`SET session_replication_role = replica;`);
-
-      // 清空所有表
-      for (const table of dataTables) {
-        try {
-          await queryInterface.sequelize.query(`TRUNCATE TABLE "${table}" CASCADE;`);
-          console.log(`   ✅ 清空表: ${table}`);
-        } catch (e) {
-          console.log(`   ⚠️  无法清空表 ${table}`);
-        }
+      const sql = fs.readFileSync(seederFile, 'utf8').trim()
+        .replace(/^\s*BEGIN\s*;\s*/i, '')
+        .replace(/\s*COMMIT\s*;\s*$/i, '');
+      const isProduction = process.env.NODE_ENV === 'production';
+      const generatedPassword = crypto.randomBytes(18).toString('base64url');
+      const adminPassword = process.env.INITIAL_ADMIN_PASSWORD || generatedPassword;
+      if (isProduction && !process.env.INITIAL_ADMIN_PASSWORD) {
+        throw new Error('生产环境首次初始化必须设置 INITIAL_ADMIN_PASSWORD');
       }
-
-      // 重新启用外键约束
-      await queryInterface.sequelize.query(`SET session_replication_role = DEFAULT;`);
+      if (adminPassword.length < 12) {
+        throw new Error('INITIAL_ADMIN_PASSWORD 长度不能少于 12 位');
+      }
+      const [adminPasswordHash, disabledAccountHash] = await Promise.all([
+        bcrypt.hash(adminPassword, 12),
+        bcrypt.hash(crypto.randomBytes(24).toString('base64url'), 12),
+      ]);
 
       console.log(`\n⏳ 导入初始数据...\n`);
 
       // 直接执行整个 SQL 文件
       try {
-        await queryInterface.sequelize.query(sql);
+        await queryInterface.sequelize.transaction(async (transaction) => {
+          await queryInterface.sequelize.query(sql, { transaction });
+          const [, updateResult] = await queryInterface.sequelize.query(
+            `UPDATE public."owl_users"
+                SET password = :passwordHash, updated_at = NOW()
+              WHERE username = 'admin'`,
+            { replacements: { passwordHash: adminPasswordHash }, transaction }
+          );
+          if (updateResult.rowCount !== 1) {
+            throw new Error('初始化管理员账号失败');
+          }
+          await queryInterface.sequelize.query(
+            `UPDATE public."owl_users"
+                SET password = :passwordHash, status = 'inactive', updated_at = NOW()
+              WHERE username IN ('manager', 'user')`,
+            { replacements: { passwordHash: disabledAccountHash }, transaction }
+          );
+        });
       } catch (err) {
         console.error('\n❌ SQL 执行错误');
         console.error('错误消息:', err.message);
         console.error('错误代码:', err.code);
         console.error('错误位置:', err.position);
         if (err.sql) {
-          const sqlLines = err.sql.split('\n');
           const startLine = Math.max(0, parseInt(err.position || 0) - 500);
           console.error('\n错误周围的 SQL 内容:');
           console.error(err.sql.substring(startLine, parseInt(err.position || 0) + 200));
@@ -73,16 +87,12 @@ module.exports = {
       console.log(`✅ 初始数据导入完成！`);
       console.log(`${'='.repeat(80)}\n`);
 
-      // 显示默认用户密码
-      console.log(`\n${'⚠️ '.repeat(40)}`);
-      console.log(`📝 默认用户登录信息`);
-      console.log(`${'⚠️ '.repeat(40)}\n`);
-      console.log(`超级管理员用户：`);
-      console.log(`  用户名：admin`);
-      console.log(`  邮箱：admin@example.com`);
-      console.log(`  密码：R994wjZIIB`);
-      console.log(`  \n请妥善保管此密码，首次登录后请立即修改！\n`);
-      console.log(`${'⚠️ '.repeat(40)}\n`);
+      console.log('\n超级管理员用户名：admin');
+      if (isProduction) {
+        console.log('超级管理员密码已使用 INITIAL_ADMIN_PASSWORD 设置，不会输出到日志。');
+      } else if (!process.env.INITIAL_ADMIN_PASSWORD) {
+        console.log(`本地临时管理员密码：${adminPassword}`);
+      }
     } catch (error) {
       console.error(`\n❌ 初始数据导入失败`);
       console.error(`   错误: ${error.message}\n`);
@@ -91,6 +101,9 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
+    if (process.env.ALLOW_DATABASE_RESET !== 'true') {
+      throw new Error('禁止直接回滚初始数据；开发环境请使用 npm run db:reset:dev');
+    }
     console.log('\n⚠️  警告: 回滚 Seeder 将删除所有初始数据！');
     console.log('这将清空所有数据表的内容。\n');
 

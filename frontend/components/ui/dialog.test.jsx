@@ -23,8 +23,12 @@ describe('DialogContent overlayClassName', () => {
     );
 
     expect(document.querySelector('[data-slot="dialog-overlay"]')).toHaveClass(
-      'bg-slate-950/35',
+      'bg-black/35',
       'backdrop-blur-[1px]'
+    );
+    expect(document.querySelector('[data-slot="dialog-content"]')).toHaveClass(
+      'w-[calc(100%-2rem)]',
+      'sm:w-full'
     );
 
     rerender(

@@ -7,6 +7,7 @@ const { getLocationFromIP } = require('../../../utils/geo-ip');
 const { parseUserAgent } = require('../../../utils/user-agent-parser');
 const { notifyKickedSessions } = require('../../../utils/session-handler');
 const jwtUtil = require('../../../utils/jwt.util');
+const { invalidateAuthenticatedUser } = require('../../../middlewares/auth');
 
 class AuthService {
   /**
@@ -284,6 +285,7 @@ class AuthService {
 
     // 更新密码
     await user.update({ password: newPassword });
+    invalidateAuthenticatedUser(userId);
 
     logger.info(`User changed password: ${user.username}`);
 

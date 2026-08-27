@@ -82,7 +82,7 @@ export default function EmailTemplateFormDialog({ open, onOpenChange, template, 
                 {/* 模版名称 */}
                 <div className="space-y-2">
                   <Label htmlFor="template-name">
-                    模版名称 <span className="text-red-500">*</span>
+                    模版名称 <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="template-name"
@@ -102,7 +102,7 @@ export default function EmailTemplateFormDialog({ open, onOpenChange, template, 
                 {/* 邮件主题 */}
                 <div className="space-y-2">
                   <Label htmlFor="template-subject">
-                    邮件主题 <span className="text-red-500">*</span>
+                    邮件主题 <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="template-subject"
@@ -119,7 +119,7 @@ export default function EmailTemplateFormDialog({ open, onOpenChange, template, 
                 {/* 邮件内容 */}
                 <div className="space-y-2">
                   <Label htmlFor="template-content">
-                    邮件内容 <span className="text-red-500">*</span>
+                    邮件内容 <span className="text-destructive">*</span>
                   </Label>
                   <RichTextEditor
                     value={formData.content}

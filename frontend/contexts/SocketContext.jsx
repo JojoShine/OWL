@@ -19,6 +19,7 @@ export const SocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
+  const socketRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
 
@@ -42,8 +43,8 @@ export const SocketProvider = ({ children }) => {
     }
 
     // 如果已经有连接，先断开
-    if (socket) {
-      socket.disconnect();
+    if (socketRef.current) {
+      socketRef.current.disconnect();
     }
 
     // 生产环境使用域名根路径，开发环境使用完整URL
@@ -125,15 +126,17 @@ export const SocketProvider = ({ children }) => {
     });
 
     setSocket(newSocket);
+    socketRef.current = newSocket;
 
     return newSocket;
-  }, [socket, getToken]);
+  }, [getToken]);
 
   // 断开连接
   const disconnectSocket = useCallback(() => {
-    if (socket) {
+    if (socketRef.current) {
       console.log('Disconnecting socket...');
-      socket.disconnect();
+      socketRef.current.disconnect();
+      socketRef.current = null;
       setSocket(null);
       setIsConnected(false);
     }
@@ -142,7 +145,7 @@ export const SocketProvider = ({ children }) => {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
-  }, [socket]);
+  }, []);
 
   // 监听特定事件
   const on = useCallback((event, callback) => {
@@ -178,7 +181,7 @@ export const SocketProvider = ({ children }) => {
     return () => {
       disconnectSocket();
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [connectSocket, disconnectSocket, getToken]);
 
   // 监听token变化（登录/登出）
   useEffect(() => {
@@ -199,8 +202,7 @@ export const SocketProvider = ({ children }) => {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [connectSocket, disconnectSocket]);
 
   const value = {
     socket,

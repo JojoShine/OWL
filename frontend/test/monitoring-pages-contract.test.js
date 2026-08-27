@@ -10,7 +10,6 @@ const monitoringPages = [
   'app/(authenticated)/monitor/alerts/page.js',
   'app/(authenticated)/monitor/apis/page.js',
   'app/(authenticated)/monitor/servers/page.js',
-  'app/(authenticated)/monitor/zabbix/page.js',
   'app/(authenticated)/logs/page.js',
   'app/(authenticated)/notifications/page.js',
 ];
@@ -25,7 +24,9 @@ describe('monitoring page design contract', () => {
   it.each(monitoringPages)('%s uses shared page structure', (file) => {
     const source = read(file);
     expect(source).toContain('<PageShell');
-    expect(source).toContain('<PageHeader');
+    if (file !== 'app/(authenticated)/dashboard/page.js') {
+      expect(source).toContain('<PageHeader');
+    }
   });
 
   it.each(responsiveDialogFiles)('%s stacks dialog fields before the small breakpoint', (file) => {

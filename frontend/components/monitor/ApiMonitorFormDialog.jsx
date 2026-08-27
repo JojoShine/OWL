@@ -154,7 +154,7 @@ export default function ApiMonitorFormDialog({ open, onOpenChange, monitor, onSu
           {/* 监控名称 */}
           <div className="space-y-2">
             <Label htmlFor="name">
-              监控名称 <span className="text-red-500">*</span>
+              监控名称 <span className="text-destructive">*</span>
             </Label>
             <Input
               id="name"
@@ -169,7 +169,7 @@ export default function ApiMonitorFormDialog({ open, onOpenChange, monitor, onSu
           {/* URL */}
           <div className="space-y-2">
             <Label htmlFor="url">
-              接口URL <span className="text-red-500">*</span>
+              接口URL <span className="text-destructive">*</span>
             </Label>
             <Input
               id="url"

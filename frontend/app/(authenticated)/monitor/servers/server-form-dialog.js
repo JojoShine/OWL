@@ -52,7 +52,7 @@ export default function ServerFormDialog({ open, onOpenChange, server, onSuccess
   const fetchEmailTemplates = async () => {
     try {
       const response = await emailTemplateApi.getTemplates({ limit: 100 });
-      setEmailTemplates(response.data?.items || response.data || []);
+      setEmailTemplates(response.data?.items || []);
     } catch (error) {
       console.error('获取邮件模板失败:', error);
     }
@@ -150,7 +150,7 @@ export default function ServerFormDialog({ open, onOpenChange, server, onSuccess
           <TabsContent value="basic" className="space-y-4 mt-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name">服务器名称 *</Label>
+                <Label htmlFor="name">服务器名称<span className="ml-1 text-destructive">*</span></Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -159,7 +159,7 @@ export default function ServerFormDialog({ open, onOpenChange, server, onSuccess
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ip_address">IP地址 *</Label>
+                <Label htmlFor="ip_address">IP地址<span className="ml-1 text-destructive">*</span></Label>
                 <Input
                   id="ip_address"
                   value={formData.ip_address}
@@ -181,7 +181,7 @@ export default function ServerFormDialog({ open, onOpenChange, server, onSuccess
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="username">用户名 *</Label>
+                <Label htmlFor="username">用户名<span className="ml-1 text-destructive">*</span></Label>
                 <Input
                   id="username"
                   value={formData.username}

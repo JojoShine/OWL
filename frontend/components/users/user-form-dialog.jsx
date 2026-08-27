@@ -97,7 +97,7 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
       try {
         const response = await departmentApi.getDepartmentTree();
         // 处理多种可能的返回格式
-        const deptData = response.data?.items || response.data || [];
+        const deptData = response.data?.items || [];
         setDepartments(Array.isArray(deptData) ? deptData : []);
       } catch (error) {
         console.error('获取部门列表失败:', error);
@@ -109,7 +109,7 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
       try {
         const response = await roleApi.getRoles({ limit: 100 });
         // 处理多种可能的返回格式
-        const roleData = response.data?.items || response.data || [];
+        const roleData = response.data?.items || [];
         setRoles(Array.isArray(roleData) ? roleData : []);
       } catch (error) {
         console.error('获取角色列表失败:', error);

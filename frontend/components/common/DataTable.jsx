@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/table';
 import { TableLoading } from '@/components/ui/table-loading';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Loading } from '@/components/ui/loading';
 import { Pagination } from '@/components/ui/pagination';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,20 @@ function TableFrame({ workspace, children }) {
 
 const ROW_TRANSITION_MS = 200;
 const EMPTY_DATA = [];
+
+function renderColumnContent(column, row) {
+  return column.render
+    ? column.render(row[column.key], row)
+    : row[column.key] ?? '-';
+}
+
+function getMobileCardLabel(row, rowId, primaryColumn) {
+  const primaryValue = primaryColumn ? row[primaryColumn.key] : null;
+  if (typeof primaryValue === 'string' || typeof primaryValue === 'number') {
+    return String(primaryValue);
+  }
+  return String(row.name || row.username || row.title || rowId);
+}
 
 /**
  * 数据表格组件 - 通用的数据展示表格
@@ -39,6 +54,9 @@ const EMPTY_DATA = [];
  * @param {Function} props.onPageSizeChange - 每页数量变化回调
  * @param {string} props.rowKey - 行唯一标识字段名，默认 'id'
  * @param {Function} props.renderSubRow - 子行渲染函数 (row) => ReactNode，如果提供则支持展开
+ * @param {boolean} columns[].mobilePrimary - 将该列作为移动端卡片标题
+ * @param {boolean} columns[].mobileHidden - 在移动端卡片中隐藏该列
+ * @param {ReactNode} columns[].mobileLabel - 移动端卡片使用的字段标签
  *
  * @example
  * // 基础用法
@@ -177,20 +195,32 @@ export function DataTable({
   const totalColumns = columns.length + (actions ? 1 : 0) + (hasExpandable ? 1 : 0);
   const isWorkspace = variant === 'workspace';
   const isCompact = density === 'compact';
+  const selectionColumn = columns.find((column) => column.key === '__selection');
+  const mobileColumns = columns.filter(
+    (column) => column.key !== '__selection' && !column.mobileHidden
+  );
+  const mobilePrimaryColumn = mobileColumns.find((column) => column.mobilePrimary)
+    || mobileColumns[0];
+  const mobileDetailColumns = mobileColumns.filter(
+    (column) => column !== mobilePrimaryColumn
+  );
 
   return (
     <div
       data-slot="data-table"
       aria-busy={loading}
       className={cn(
-        isWorkspace ? 'overflow-hidden rounded-lg border bg-card' : 'space-y-4',
+        isWorkspace
+          ? 'overflow-hidden rounded-lg border bg-card max-md:overflow-visible max-md:rounded-none max-md:border-0 max-md:bg-transparent'
+          : 'space-y-4',
         className
       )}
       {...rest}
     >
       {/* 表格 */}
-      <TableFrame workspace={isWorkspace}>
-        <Table>
+      <div className="hidden md:block">
+        <TableFrame workspace={isWorkspace}>
+          <Table>
           <TableHeader className={isWorkspace ? 'bg-muted/60' : undefined}>
             <TableRow className={isWorkspace ? 'hover:bg-muted/60' : undefined}>
               {hasExpandable && (
@@ -270,9 +300,7 @@ export function DataTable({
                             column.cellClassName
                           )}
                         >
-                          {column.render
-                            ? column.render(row[column.key], row)
-                            : row[column.key] ?? '-'}
+                          {renderColumnContent(column, row)}
                         </TableCell>
                       ))}
                       {actions && (
@@ -297,12 +325,121 @@ export function DataTable({
               })
             )}
           </TableBody>
-        </Table>
-      </TableFrame>
+          </Table>
+        </TableFrame>
+      </div>
+
+      {/* 移动端卡片 */}
+      <div className="md:hidden">
+        {loading && !(isPaginationTransition && renderedData.length > 0) ? (
+          <div className="rounded-lg border bg-card py-4">
+            <Loading size="md" />
+          </div>
+        ) : renderedData.length === 0 ? (
+          <div className="rounded-lg border bg-card px-4 py-6">
+            <EmptyState title={emptyText} compact />
+          </div>
+        ) : (
+          <div
+            aria-hidden={!rowsVisible}
+            inert={!rowsVisible}
+            className={cn(
+              'space-y-3 transition-opacity duration-200 ease-out motion-reduce:transition-none',
+              rowsVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
+            )}
+          >
+            {renderedData.map((row, index) => {
+              const rowId = row[rowKey] ?? index;
+              const rowLabel = getMobileCardLabel(row, rowId, mobilePrimaryColumn);
+              const isExpanded = expandedRows.has(rowId);
+
+              return (
+                <article
+                  key={rowId}
+                  data-slot="data-table-mobile-card"
+                  aria-label={rowLabel}
+                  className="overflow-hidden rounded-lg border bg-card"
+                >
+                  <div className="p-4">
+                    <div className="flex min-w-0 items-start gap-3">
+                      {selectionColumn ? (
+                        <div className="flex h-6 shrink-0 items-center">
+                          {renderColumnContent(selectionColumn, row)}
+                        </div>
+                      ) : null}
+                      <div className={cn(
+                        'min-w-0 flex-1 break-words font-medium leading-6',
+                        mobilePrimaryColumn?.numeric && 'tabular-data',
+                        mobilePrimaryColumn?.mobileClassName
+                      )}>
+                        {mobilePrimaryColumn ? renderColumnContent(mobilePrimaryColumn, row) : rowLabel}
+                      </div>
+                      {hasExpandable ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 shrink-0 p-0"
+                          onClick={() => toggleRow(rowId)}
+                          aria-label={isExpanded ? `收起${rowLabel}` : `展开${rowLabel}`}
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </Button>
+                      ) : null}
+                    </div>
+
+                    {mobileDetailColumns.length > 0 ? (
+                      <dl className="mt-3 space-y-2.5 border-t pt-3">
+                        {mobileDetailColumns.map((column) => (
+                          <div
+                            key={column.key}
+                            className="grid grid-cols-[minmax(4.75rem,0.38fr)_minmax(0,1fr)] items-start gap-3"
+                          >
+                            <dt className="pt-0.5 text-xs leading-5 text-muted-foreground/70">
+                              {column.mobileLabel ?? column.label}
+                            </dt>
+                            <dd className={cn(
+                              'min-w-0 break-words text-sm leading-5 [&_code]:whitespace-normal [&_code]:break-all [&_pre]:whitespace-pre-wrap',
+                              column.numeric && 'tabular-data',
+                              column.mobileClassName
+                            )}>
+                              {renderColumnContent(column, row)}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    ) : null}
+                  </div>
+
+                  {isExpanded && renderSubRow ? (
+                    <div className="border-t bg-muted/25 p-4">
+                      {renderSubRow(row)}
+                    </div>
+                  ) : null}
+
+                  {actions ? (
+                    <div className="flex items-center justify-between gap-3 border-t bg-muted/15 px-4 py-2.5">
+                      <span className="text-xs text-muted-foreground/60">{actionsLabel}</span>
+                      <div className="flex flex-wrap justify-end gap-1.5">
+                        {actions(row)}
+                      </div>
+                    </div>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* 分页 */}
       {pagination && (
-        <div className={isWorkspace ? 'border-t px-4 py-3' : undefined}>
+        <div className={isWorkspace
+          ? 'border-t px-4 py-3 max-md:mt-3 max-md:rounded-lg max-md:border max-md:bg-card'
+          : undefined}>
           <Pagination
             page={pagination.page}
             total={pagination.total}

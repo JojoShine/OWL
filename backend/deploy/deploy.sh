@@ -40,15 +40,19 @@ cat > INSTALL.txt << 'EOF'
 1. 解压文件
    tar -xzf owl-backend-*.tar.gz
 
-2. 安装依赖
-   npm install --production
+2. 安装锁定版本的生产依赖
+   npm ci --omit=dev
 
 3. 配置环境变量
    cp .env.example .env.production
    # 编辑 .env.production 文件，配置数据库、Redis 等
 
-4. 初始化数据库
-   npm run db:init
+4. 数据库操作（二选一）
+   # 全新空库：生产环境必须提供管理员密码和库名确认
+   NODE_ENV=production INITIAL_ADMIN_PASSWORD='请替换为强密码' DB_BOOTSTRAP_CONFIRM='实际库名' npm run db:bootstrap
+
+   # 已有数据库升级：只执行未运行的 migration，不灌入初始数据
+   NODE_ENV=production npm run db:deploy
 
 5. 启动服务
    npm run pm2:start
@@ -93,10 +97,8 @@ tar -czf "${DEPLOY_DIR}/${PACKAGE_NAME}" \
   package-lock.json \
   ecosystem.config.js \
   .env.example \
-  .env.production \
   .sequelizerc \
-  INSTALL.txt \
-  README.md 2>/dev/null || true
+  INSTALL.txt 2>/dev/null
 
 # 清理临时文件
 rm -f INSTALL.txt

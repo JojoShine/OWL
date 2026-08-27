@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { DataTable } from './DataTable';
@@ -44,8 +44,10 @@ describe('DataTable workspace variant', () => {
       />
     );
 
-    expect(screen.getByText('暂无数据').closest('[data-slot="table-cell"]')).toHaveClass('py-12');
-    expect(screen.getByRole('table').parentElement.parentElement).toHaveClass('overflow-hidden', 'rounded-lg', 'border', 'bg-card');
+    const desktopEmptyState = screen.getAllByText('暂无数据')
+      .find((element) => element.closest('[data-slot="table-cell"]'));
+    expect(desktopEmptyState.closest('[data-slot="table-cell"]')).toHaveClass('py-12');
+    expect(screen.getByRole('table').closest('[data-slot="data-table"]')).toHaveClass('overflow-hidden', 'rounded-lg', 'border', 'bg-card');
     expect(screen.getByText('共 0 条记录').parentElement.parentElement.parentElement).toHaveClass('border-t', 'px-4', 'py-3');
   });
 
@@ -57,7 +59,9 @@ describe('DataTable workspace variant', () => {
       />
     );
 
-    expect(screen.getByText('2026-08-25 10:30:00').closest('[data-slot="table-cell"]')).toHaveClass('tabular-data');
+    const desktopValue = screen.getAllByText('2026-08-25 10:30:00')
+      .find((element) => element.closest('[data-slot="table-cell"]'));
+    expect(desktopValue.closest('[data-slot="table-cell"]')).toHaveClass('tabular-data');
   });
 
   it('keeps the current rows while the next page fades in', () => {
@@ -88,20 +92,24 @@ describe('DataTable workspace variant', () => {
         onPageChange={vi.fn()}
       />
     );
-    expect(screen.getByText('用户')).toBeInTheDocument();
+    const desktopUser = screen.getAllByText('用户')
+      .find((element) => element.closest('[data-slot="table-body"]'));
+    expect(desktopUser).toBeInTheDocument();
     expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
-    expect(screen.getByText('用户').closest('[data-slot="table-body"]')).toHaveClass('opacity-0');
+    expect(desktopUser.closest('[data-slot="table-body"]')).toHaveClass('opacity-0');
   });
 
   it('uses a zero row key and exposes the expand control name', async () => {
     const interaction = userEvent.setup();
     const rows = [{ id: 8, name: '八号用户' }, { id: 0, name: '零号用户' }];
     const { rerender } = render(<DataTable columns={[{ key: 'name', label: '名称' }]} data={rows} rowKey="id" renderSubRow={(row) => <div>{row.name}详情</div>} variant="workspace" />);
-    await interaction.click(screen.getByRole('button', { name: '展开零号用户' }));
-    expect(screen.getByText('零号用户详情')).toBeInTheDocument();
+    let zeroCard = screen.getByRole('article', { name: '零号用户' });
+    await interaction.click(within(zeroCard).getByRole('button', { name: '展开零号用户' }));
+    expect(within(zeroCard).getByText('零号用户详情')).toBeInTheDocument();
     rerender(<DataTable columns={[{ key: 'name', label: '名称' }]} data={[rows[1], rows[0]]} rowKey="id" renderSubRow={(row) => <div>{row.name}详情</div>} variant="workspace" />);
-    expect(screen.getByText('零号用户详情')).toBeInTheDocument();
-    expect(screen.queryByText('八号用户详情')).not.toBeInTheDocument();
+    zeroCard = screen.getByRole('article', { name: '零号用户' });
+    expect(within(zeroCard).getByText('零号用户详情')).toBeInTheDocument();
+    expect(within(screen.getByRole('article', { name: '八号用户' })).queryByText('八号用户详情')).not.toBeInTheDocument();
   });
 
   it('keeps the total visible when only one page exists', () => {
@@ -121,5 +129,47 @@ describe('DataTable workspace variant', () => {
       '[&>nav]:max-w-full',
       '[&>nav]:overflow-x-auto'
     );
+  });
+
+  it('renders each row as a labelled mobile card without duplicating the primary field', () => {
+    const { container } = render(
+      <DataTable
+        columns={[
+          { key: 'name', label: '名称' },
+          { key: 'email', label: '邮箱', mobileLabel: '联系邮箱' },
+          { key: 'internal', label: '内部字段', mobileHidden: true },
+        ]}
+        data={[{ id: 1, name: '林海', email: 'lin@example.com', internal: 'hidden' }]}
+        actions={() => <button>编辑</button>}
+      />
+    );
+
+    const card = container.querySelector('[data-slot="data-table-mobile-card"]');
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveAttribute('aria-label', '林海');
+    expect(within(card).getAllByText('林海')).toHaveLength(1);
+    expect(within(card).getByText('联系邮箱')).toBeInTheDocument();
+    expect(within(card).getByText('lin@example.com')).toBeInTheDocument();
+    expect(within(card).queryByText('内部字段')).not.toBeInTheDocument();
+    expect(within(card).queryByText('hidden')).not.toBeInTheDocument();
+    expect(within(card).getByRole('button', { name: '编辑' })).toBeInTheDocument();
+  });
+
+  it('uses an explicitly marked column as the mobile card primary content', () => {
+    const { container } = render(
+      <DataTable
+        columns={[
+          { key: 'code', label: '代码' },
+          { key: 'name', label: '名称', mobilePrimary: true },
+        ]}
+        data={[{ id: 1, code: 'ROLE_ADMIN', name: '管理员' }]}
+      />
+    );
+
+    const card = container.querySelector('[data-slot="data-table-mobile-card"]');
+    expect(card).toHaveAttribute('aria-label', '管理员');
+    expect(within(card).getAllByText('管理员')).toHaveLength(1);
+    expect(within(card).getByText('代码')).toBeInTheDocument();
+    expect(within(card).getByText('ROLE_ADMIN')).toBeInTheDocument();
   });
 });

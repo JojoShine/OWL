@@ -7,7 +7,6 @@ import {
   FolderIcon,
   UploadIcon,
   PlusIcon,
-  SearchIcon,
   GridIcon,
   ListIcon,
   HardDriveIcon,
@@ -17,10 +16,21 @@ import { folderApi, fileApi } from '@/lib/api';
 import { formatFileSize } from '@/lib/utils/file';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { SearchFilter } from '@/components/common/SearchFilter';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 import FileList from '@/components/files/FileList';
+import { useListQuery } from '@/lib/hooks/use-list-query';
+
+const FILE_SEARCH_FIELDS = [
+  {
+    type: 'text',
+    name: 'keyword',
+    placeholder: '搜索文件或文件夹...',
+  },
+];
+
+const INITIAL_FILE_FILTERS = { keyword: '' };
 
 // 对话框组件动态导入 - 仅在需要时加载
 const FileUploadDialog = dynamic(() => import('@/components/files/FileUploadDialog'), {
@@ -62,7 +72,13 @@ export default function FilesPage() {
   const [stats, setStats] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const {
+    draftFilters: searchValues,
+    setDraftFilters: setSearchValues,
+    appliedFilters,
+    submit: handleSearch,
+    reset: handleReset,
+  } = useListQuery({ initialFilters: INITIAL_FILE_FILTERS });
   const [selectedItems, setSelectedItems] = useState([]);
 
   // 对话框状态
@@ -114,9 +130,19 @@ export default function FilesPage() {
 
   // 初始化：加载存储统计和根目录内容
   useEffect(() => {
-    loadInitialData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    let active = true;
+    fileApi.getStats()
+      .then((response) => {
+        if (active) setStats(response.data || {});
+      })
+      .catch((error) => {
+        if (!active) return;
+        console.error('Failed to load initial data:', error);
+        toast.error('加载数据失败');
+      });
+    loadRootContents();
+    return () => { active = false; };
+  }, [loadRootContents]);
 
   // 当前文件夹变化时，加载文件夹内容（仅在非初始化状态下触发）
   useEffect(() => {
@@ -124,20 +150,6 @@ export default function FilesPage() {
       loadFolderContents(currentFolderInfo.id);
     }
   }, [currentFolderInfo, loadFolderContents]);
-
-  const loadInitialData = async () => {
-    try {
-      setLoading(true);
-      const statsResponse = await fileApi.getStats();
-      setStats(statsResponse.data || {});
-      await loadRootContents();
-    } catch (error) {
-      console.error('Failed to load initial data:', error);
-      toast.error('加载数据失败');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleRefresh = useCallback(() => {
     if (currentFolderInfo) {
@@ -293,7 +305,8 @@ export default function FilesPage() {
   };
 
   const getFilteredItems = () => {
-    if (!searchQuery.trim()) {
+    const searchQuery = appliedFilters.keyword?.trim() || '';
+    if (!searchQuery) {
       return { folders, files };
     }
     const query = searchQuery.toLowerCase();
@@ -360,32 +373,32 @@ export default function FilesPage() {
           </Button>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="relative min-w-[240px] flex-1 lg:flex-none">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="搜索文件或文件夹..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 lg:w-72"
-            />
-          </div>
-          <div className="flex items-center gap-0.5 border border-border rounded-md p-0.5">
-            <Button
-              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-              size="icon-sm"
-              onClick={() => setViewMode('grid')}
-            >
-              <GridIcon />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-              size="icon-sm"
-              onClick={() => setViewMode('list')}
-            >
-              <ListIcon />
-            </Button>
-          </div>
+          <SearchFilter
+            variant="toolbar"
+            fields={FILE_SEARCH_FIELDS}
+            values={searchValues}
+            onChange={setSearchValues}
+            onSearch={handleSearch}
+            onReset={handleReset}
+            rightActions={(
+              <div className="flex items-center gap-0.5 rounded-md border border-border p-0.5">
+                <Button
+                  variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                  size="icon-sm"
+                  onClick={() => setViewMode('grid')}
+                >
+                  <GridIcon />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                  size="icon-sm"
+                  onClick={() => setViewMode('list')}
+                >
+                  <ListIcon />
+                </Button>
+              </div>
+            )}
+          />
         </div>
         </PageToolbar>
 

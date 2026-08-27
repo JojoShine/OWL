@@ -13,7 +13,14 @@ import MenuFormDialog from '@/components/menus/menu-form-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
 import { usePermission } from '@/lib/hooks/usePermission';
+import { useListQuery } from '@/lib/hooks/use-list-query';
 import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
+
+const INITIAL_SEARCH_VALUES = {
+  keyword: '',
+  type: 'all',
+  status: 'all',
+};
 
 export default function MenusPage() {
   const { canCreate, canUpdate, canDelete } = usePermission();
@@ -24,18 +31,20 @@ export default function MenusPage() {
   const [expandedMenus, setExpandedMenus] = useState(new Set());
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [menuToDelete, setMenuToDelete] = useState(null);
-  const [searchValues, setSearchValues] = useState({
-    keyword: '',
-    type: 'all',
-    status: 'all'
-  });
+  const {
+    draftFilters: searchValues,
+    setDraftFilters: setSearchValues,
+    appliedFilters,
+    submit: handleSearch,
+    reset: handleReset,
+  } = useListQuery({ initialFilters: INITIAL_SEARCH_VALUES });
 
   // 获取菜单树
   const fetchMenus = async () => {
     try {
       setIsLoading(true);
       const response = await menuApi.getMenuTree();
-      const menusData = response.data?.items || response.data || [];
+      const menusData = response.data?.items || [];
       setMenus(Array.isArray(menusData) ? menusData : []);
       // 默认展开所有一级菜单
       const topLevelIds = (Array.isArray(menusData) ? menusData : []).map(m => m.id);
@@ -55,12 +64,12 @@ export default function MenusPage() {
   // 搜索过滤逻辑
   const filteredMenus = useMemo(() => {
     const filterNode = (node) => {
-      const matchKeyword = !searchValues.keyword ||
-        node.name.toLowerCase().includes(searchValues.keyword.toLowerCase()) ||
-        (node.path && node.path.toLowerCase().includes(searchValues.keyword.toLowerCase()));
+      const matchKeyword = !appliedFilters.keyword ||
+        node.name.toLowerCase().includes(appliedFilters.keyword.toLowerCase()) ||
+        (node.path && node.path.toLowerCase().includes(appliedFilters.keyword.toLowerCase()));
 
-      const matchType = searchValues.type === 'all' || node.type === searchValues.type;
-      const matchStatus = searchValues.status === 'all' || node.status === searchValues.status;
+      const matchType = appliedFilters.type === 'all' || node.type === appliedFilters.type;
+      const matchStatus = appliedFilters.status === 'all' || node.status === appliedFilters.status;
 
       const nodeMatches = matchKeyword && matchType && matchStatus;
 
@@ -86,7 +95,7 @@ export default function MenusPage() {
     return menus
       .map(menu => filterNode(menu))
       .filter(menu => menu !== null);
-  }, [menus, searchValues]);
+  }, [appliedFilters, menus]);
 
   // 新增菜单
   const handleAdd = (parentMenu = null) => {
@@ -209,12 +218,12 @@ export default function MenusPage() {
           fields={searchFields}
           values={searchValues}
           onChange={setSearchValues}
-          onSearch={() => {}}
-          onReset={() => setSearchValues({ keyword: '', type: 'all', status: 'all' })}
+          onSearch={handleSearch}
+          onReset={handleReset}
         />
         </PageToolbar>
         <PageSurface className="p-5 lg:p-3">
-        <div className="grid grid-cols-2 gap-4 border-b pb-5 text-sm md:grid-cols-4">
+        <div className="grid grid-cols-2 items-center gap-4 border-b pb-5 text-center text-sm md:grid-cols-4">
           <div>
             <p className="text-muted-foreground">菜单总数</p>
             <p className="text-xl font-semibold tabular-nums">{countMenus(menus)}</p>
@@ -253,8 +262,8 @@ export default function MenusPage() {
           </div>
         ) : filteredMenus.length === 0 ? (
           <EmptyState
-            title={searchValues.keyword || searchValues.type !== 'all' || searchValues.status !== 'all' ? '未找到匹配的菜单' : '暂无菜单'}
-            description={searchValues.keyword || searchValues.type !== 'all' || searchValues.status !== 'all' ? '请调整检索条件后重试' : '创建菜单后会显示在这里'}
+            title={appliedFilters.keyword || appliedFilters.type !== 'all' || appliedFilters.status !== 'all' ? '未找到匹配的菜单' : '暂无菜单'}
+            description={appliedFilters.keyword || appliedFilters.type !== 'all' || appliedFilters.status !== 'all' ? '请调整检索条件后重试' : '创建菜单后会显示在这里'}
             action={canCreate('menu') ? (
               <Button onClick={() => handleAdd()} variant="outline">
                 <Plus className="h-4 w-4 mr-2" />

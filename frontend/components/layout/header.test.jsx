@@ -1,8 +1,7 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import Header from './header';
-import { systemConfigApi } from '@/lib/api';
 
 globalThis.React = React;
 
@@ -15,19 +14,15 @@ vi.mock('@/components/notification/NotificationIcon', () => ({
 vi.mock('@/components/layout/theme/theme-toggle', () => ({
   ThemeToggle: () => <button>切换主题</button>,
 }));
-vi.mock('@/lib/api', () => ({ systemConfigApi: { getConfig: vi.fn() } }));
+vi.mock('@/contexts/AppShellDataContext', () => ({
+  useAppShellData: () => ({ systemConfig: { enable_theme_switch: false } }),
+}));
 
 describe('Header', () => {
   it('keeps the mobile navigation entry and respects a disabled theme switch', async () => {
-    systemConfigApi.getConfig.mockResolvedValue({
-      success: true,
-      data: { enable_theme_switch: false },
-    });
-
     render(<Header onMenuClick={vi.fn()} />);
 
     expect(screen.getByRole('button', { name: '打开导航菜单' })).toBeInTheDocument();
-    await waitFor(() => expect(systemConfigApi.getConfig).toHaveBeenCalled());
     expect(screen.queryByRole('button', { name: '切换主题' })).not.toBeInTheDocument();
   });
 });

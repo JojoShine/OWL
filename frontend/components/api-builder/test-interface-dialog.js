@@ -83,7 +83,7 @@ export default function TestInterfaceDialog({ open, onOpenChange, interface_ }) 
                   <div key={paramDef.name}>
                     <Label className="text-base font-medium">
                       {paramDef.name}
-                      {paramDef.required && <span className="text-red-500 ml-1">*</span>}
+                      {paramDef.required && <span className="ml-1 text-destructive">*</span>}
                       <span className="text-sm text-muted-foreground ml-2">({paramDef.type})</span>
                     </Label>
                     <Input

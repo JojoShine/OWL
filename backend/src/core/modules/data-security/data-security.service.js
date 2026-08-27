@@ -3,6 +3,7 @@ const db = require('../../../models');
 const ApiError = require('../../../utils/ApiError');
 const { logger, operationLogger } = require('../../../config/logger');
 const { validateSortField, validateOrder } = require('../../../utils/query-validator');
+const dataMaskingMiddleware = require('../../../middlewares/dataMasking');
 
 class DataSecurityService {
   /**
@@ -89,6 +90,7 @@ class DataSecurityService {
       description: data.description,
       is_active: data.is_active !== false,
     });
+    dataMaskingMiddleware.invalidateSensitiveFields();
 
     logger.info(`创建敏感字段配置: ${data.table_name}.${data.field_name}`);
 
@@ -118,6 +120,7 @@ class DataSecurityService {
     if (data.table_name && data.table_name !== oldTableName) {
       await field.update({ table_name: data.table_name });
     }
+    dataMaskingMiddleware.invalidateSensitiveFields();
 
     logger.info(`更新敏感字段配置: ${field.id}`);
 
@@ -135,6 +138,7 @@ class DataSecurityService {
     }
 
     await field.destroy();
+    dataMaskingMiddleware.invalidateSensitiveFields();
 
     logger.info(`删除敏感字段配置: ${id}`);
 

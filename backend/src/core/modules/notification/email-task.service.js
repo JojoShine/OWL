@@ -1,4 +1,5 @@
 const cron = require('node-cron');
+const { Op } = require('sequelize');
 const { EmailTask, EmailTemplate } = require('../../../models');
 const { logger } = require('../../../config/logger');
 const emailService = require('./email.service');
@@ -203,13 +204,14 @@ class EmailTaskService {
    */
   async getAllTasks(filters = {}) {
     try {
-      const { page = 1, limit = 20, enabled } = filters;
+      const { page = 1, limit = 20, enabled, keyword } = filters;
       const offset = (page - 1) * limit;
 
       const where = { deleted_at: null };
       if (enabled !== undefined) {
         where.enabled = enabled;
       }
+      if (keyword) where.name = { [Op.iLike]: `%${keyword}%` };
 
       const { count, rows } = await EmailTask.findAndCountAll({
         where,

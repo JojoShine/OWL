@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -31,14 +31,7 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
   const [selectedRoleId, setSelectedRoleId] = useState('');
   const [selectedPermission, setSelectedPermission] = useState('read');
 
-  useEffect(() => {
-    if (open && item) {
-      loadPermissions();
-      loadRoles();
-    }
-  }, [open, item]);
-
-  const loadPermissions = async () => {
+  const loadPermissions = useCallback(async () => {
     try {
       setLoading(true);
       const api = isFolder ? folderApi : fileApi;
@@ -51,16 +44,23 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isFolder, item]);
 
-  const loadRoles = async () => {
+  const loadRoles = useCallback(async () => {
     try {
       const rolesRes = await roleApi.getRoles({ limit: 100 });
       setRoles(rolesRes.data?.items || []);
     } catch (error) {
       console.error('Failed to load roles:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (open && item) {
+      loadPermissions();
+      loadRoles();
+    }
+  }, [item, loadPermissions, loadRoles, open]);
 
   const handleAddPermission = async () => {
     if (!selectedRoleId) {

@@ -121,7 +121,7 @@ export default function KeyFormDialog({ open, onOpenChange, editingKey, onSucces
           {/* 客户端名称 */}
           <div className="space-y-2">
             <Label htmlFor="client_name">
-              客户端名称 <span className="text-red-500">*</span>
+              客户端名称 <span className="text-destructive">*</span>
             </Label>
             <Input
               id="client_name"
@@ -160,7 +160,7 @@ export default function KeyFormDialog({ open, onOpenChange, editingKey, onSucces
           </div>
 
           <div className="space-y-2">
-            <Label>权限范围 *</Label>
+            <Label>权限范围<span className="ml-1 text-destructive">*</span></Label>
             <div className="space-y-1 rounded-lg border p-2">
               {scopeOptions.map((scope) => {
                 const selected = watch('scopes').includes(scope.value);

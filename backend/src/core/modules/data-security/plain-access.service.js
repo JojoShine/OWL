@@ -229,6 +229,47 @@ class PlainAccessService {
       return false;
     }
   }
+
+  async checkPlainAccessPermissions(userId, tableName, entries) {
+    if (!isRedisAvailable() || !Array.isArray(entries) || entries.length === 0) {
+      return new Set();
+    }
+
+    const uniqueEntries = Array.from(
+      new Map(
+        entries
+          .filter(({ fieldName, recordId }) => fieldName && recordId)
+          .map((entry) => [`${entry.fieldName}:${entry.recordId}`, entry])
+      ).entries()
+    );
+
+    if (uniqueEntries.length === 0) return new Set();
+
+    const keys = uniqueEntries.map(([, { fieldName, recordId }]) => (
+      this.getCacheKey(userId, tableName, fieldName, recordId)
+    ));
+
+    databaseAccessLogger.info(JSON.stringify({
+      type: 'redis',
+      action: 'mget',
+      business_type: 'plain_access_batch_check',
+      key_count: keys.length,
+      user_id: userId,
+      timestamp: new Date().toISOString(),
+    }));
+
+    try {
+      const values = await redisClient.mGet(keys);
+      return new Set(
+        uniqueEntries
+          .filter((_, index) => Boolean(values[index]))
+          .map(([identity]) => identity)
+      );
+    } catch (error) {
+      logger.error('批量检查明文访问权限失败:', { message: error.message });
+      return new Set();
+    }
+  }
 }
 
 module.exports = new PlainAccessService();

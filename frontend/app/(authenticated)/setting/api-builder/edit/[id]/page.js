@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTheme } from 'next-themes';
 import { useRouter, useParams } from 'next/navigation';
 import { apiBuilderApi } from '@/lib/api';
@@ -69,13 +69,7 @@ export default function ApiBuilderEditPage() {
     status: 'active', // 默认状态
   });
 
-  useEffect(() => {
-    if (!isNewMode) {
-      fetchInterface();
-    }
-  }, []);
-
-  const fetchInterface = async () => {
+  const fetchInterface = useCallback(async () => {
     try {
       const response = await apiBuilderApi.getInterfaceById(id);
       const interfaceData = response.data || {};
@@ -105,7 +99,11 @@ export default function ApiBuilderEditPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id, router]);
+
+  useEffect(() => {
+    if (!isNewMode) fetchInterface();
+  }, [fetchInterface, isNewMode]);
 
   // 自动识别SQL中的参数
   const extractedParams = useMemo(() => {
@@ -309,7 +307,7 @@ export default function ApiBuilderEditPage() {
             <TabsContent value="basic" className="space-y-4 mt-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-base">接口名称 *</Label>
+                  <Label className="text-base">接口名称<span className="ml-1 text-destructive">*</span></Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => handleFieldChange('name', e.target.value)}
@@ -318,7 +316,7 @@ export default function ApiBuilderEditPage() {
                   />
                 </div>
                 <div>
-                  <Label className="text-base">接口端点 *</Label>
+                  <Label className="text-base">接口端点<span className="ml-1 text-destructive">*</span></Label>
                   <Input
                     value={formData.endpoint}
                     onChange={(e) => handleFieldChange('endpoint', e.target.value)}
@@ -396,7 +394,7 @@ export default function ApiBuilderEditPage() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <Label className="text-base">SQL语句 *</Label>
+                    <Label className="text-base">SQL语句<span className="ml-1 text-destructive">*</span></Label>
                     <p className="text-sm text-muted-foreground">支持 SELECT、INSERT、UPDATE、DELETE 操作，参数使用 :paramName 格式。禁止 DROP、TRUNCATE、ALTER 等危险操作。</p>
                   </div>
                   <div className="flex gap-2">
@@ -456,7 +454,7 @@ export default function ApiBuilderEditPage() {
                           <div key={param.name} className="grid grid-cols-2 gap-2">
                             <label className="flex items-center text-base text-foreground">
                               {param.name}
-                              <span className="text-red-400 ml-1">*</span>
+                              <span className="ml-1 text-destructive">*</span>
                             </label>
                             <Input
                               type="text"

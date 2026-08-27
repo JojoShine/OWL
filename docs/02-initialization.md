@@ -169,6 +169,11 @@ DB_NAME=owl_prod
 DB_USER=owl_db_user
 DB_PASSWORD=strong_database_password_here
 
+# 首次建库时使用，至少 12 位；不会输出到日志
+INITIAL_ADMIN_PASSWORD=replace_with_a_strong_password
+# 首次建库确认值，必须与 DB_NAME 完全一致
+DB_BOOTSTRAP_CONFIRM=owl_prod
+
 # Redis - 生产环境
 REDIS_HOST=your_production_redis_host
 REDIS_PORT=6379
@@ -227,25 +232,43 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 ### 4. 初始化数据库
 
-**首次初始化（推荐）**
+**首次初始化（仅限全新空库）**
 
 ```bash
 cd backend
 
-# 完整初始化：删除旧表 → 建立新表 → 导入初始数据
-npm run db:reset
+# 开发环境全新空库
+npm run db:bootstrap
+
+# 生产环境全新空库：必须明确环境、管理员密码和目标库名
+NODE_ENV=production \
+INITIAL_ADMIN_PASSWORD='请替换为至少12位强密码' \
+DB_BOOTSTRAP_CONFIRM='owl_prod' \
+npm run db:bootstrap
 ```
 
 **更新现有数据库**
 
-如果已有数据库且只需要运行新的迁移/seeder：
+已有数据库升级只执行新增 Migration，不会重复导入初始化数据：
 
 ```bash
-# 仅运行未执行过的迁移和 seeder
-npm run db:init
+# 本地开发数据库升级
+npm run db:deploy
+
+# 生产数据库升级
+NODE_ENV=production npm run db:deploy
 ```
 
-> **注意**：`npm run db:reset` 会清空所有数据，添加新的 SQL 文件后首次初始化必须使用此命令，确保新表被正确创建。
+> **注意**：首次建库和版本升级是两条独立流程。已投入使用的数据库只能新增 Migration，不能修改 `001-initial-schema` 或重新执行 Seeder。
+
+**开发数据库重置**
+
+```bash
+# 仅允许 development/test，确认值必须与 DB_NAME 完全一致
+DB_RESET_CONFIRM='admin_platform' npm run db:reset:dev
+```
+
+生产环境会强制拒绝重置命令。
 
 ### 5. 启动服务
 
@@ -269,17 +292,21 @@ npm run dev
 
 | 命令 | 说明 | 场景 |
 |------|------|------|
-| `npm run db:reset` | **完整重置** — 删表 → 建表 → 导入数据 | ✅ 首次初始化、添加新 SQL 后、完全重置 |
-| `npm run db:init` | 建表 + 导入初始数据（仅运行未执行的迁移/seeder） | 表已存在，只需更新代码后的迁移/seeder |
-| `npm run db:migrate` | 仅执行建表 migration | 不需要初始数据 |
-| `npm run db:seed` | 仅导入初始数据 | 表已存在 |
-| `npm run db:migrate:undo` | 回滚表结构 | 需要重新创建表 |
-| `npm run db:seed:undo` | 回滚初始数据 | 清空初始数据但保留表结构 |
+| `npm run db:bootstrap` | 建立全新空库并导入初始化数据 | 仅首次安装 |
+| `npm run db:init` | `db:bootstrap` 的兼容别名 | 仅首次安装 |
+| `npm run db:deploy` | 只执行未运行的 Migration | 日常发布、生产升级 |
+| `npm run db:migrate` | `db:deploy` 的兼容别名 | 日常发布、生产升级 |
+| `npm run db:status` | 查看 Migration 状态 | 发布前检查 |
+| `npm run db:reset:dev` | 删除开发库 public schema 后重新初始化 | 仅开发/测试环境 |
 
 **重要提示**：
-- 🔴 **新开发者拿到项目**：使用 `npm run db:reset`（完整初始化）
-- 🟡 **添加了新的 SQL 文件后**：如果 001 migration 已执行过，必须使用 `npm run db:reset`，否则新表不会被创建
-- 🟢 **只是更新代码中的 migration/seeder**：可以使用 `npm run db:init`
+- 🔴 **生产环境**：只允许首次使用 `db:bootstrap`，后续一律使用 `db:deploy`
+- 🟡 **结构或基础权限变化**：新增独立 Migration，禁止修改已经执行过的文件
+- 🟢 **开发环境需要清库**：明确提供 `DB_RESET_CONFIRM` 后使用 `db:reset:dev`
+
+### Docker 部署建议
+
+前后端容器化后，数据库迁移应作为一次性 Job/初始化容器运行：先执行 `npm run db:deploy`，成功后再启动后端容器。不要在每个后端副本启动时自动迁移，避免多副本并发和应用启动循环。首次安装单独执行一次 `db:bootstrap`。
 
 ---
 

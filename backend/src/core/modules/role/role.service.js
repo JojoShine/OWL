@@ -3,6 +3,7 @@ const db = require('../../../models');
 const ApiError = require('../../../utils/ApiError');
 const { logger } = require('../../../config/logger');
 const { clearCache } = require('../../../config/rbac');
+const { clearAuthenticatedUsers } = require('../../../middlewares/auth');
 const { validateSortField, validateOrder } = require('../../../utils/query-validator');
 
 class RoleService {
@@ -161,6 +162,7 @@ class RoleService {
 
     // 清除RBAC缓存
     clearCache();
+    clearAuthenticatedUsers();
     logger.info(`Role created: ${name}`);
 
     return this.getRoleById(role.id);
@@ -247,6 +249,7 @@ class RoleService {
 
     // 清除RBAC缓存
     clearCache();
+    clearAuthenticatedUsers();
     logger.info(`Role updated: ${role.name}`);
 
     return this.getRoleById(id);
@@ -277,6 +280,7 @@ class RoleService {
 
     // 清除RBAC缓存
     clearCache();
+    clearAuthenticatedUsers();
     logger.info(`Role deleted: ${role.name}`);
 
     return { message: '角色删除成功' };

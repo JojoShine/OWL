@@ -3,6 +3,7 @@ const db = require('../../../models');
 const ApiError = require('../../../utils/ApiError');
 const { logger } = require('../../../config/logger');
 const { validateSortField, validateOrder } = require('../../../utils/query-validator');
+const { invalidateAuthenticatedUser } = require('../../../middlewares/auth');
 
 class UserService {
   /**
@@ -235,6 +236,7 @@ class UserService {
       }
     }
 
+    invalidateAuthenticatedUser(id);
     logger.info(`User updated: ${user.username}`);
 
     return this.getUserById(id);
@@ -253,6 +255,7 @@ class UserService {
     // 软删除
     await user.destroy();
 
+    invalidateAuthenticatedUser(id);
     logger.info(`User deleted: ${user.username}`);
 
     return { message: '用户删除成功' };
@@ -270,6 +273,7 @@ class UserService {
 
     await user.update({ password: newPassword });
 
+    invalidateAuthenticatedUser(id);
     logger.info(`User password reset: ${user.username}`);
 
     return { message: '密码重置成功' };
