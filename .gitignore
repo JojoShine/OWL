@@ -104,5 +104,8 @@ deploy/secrets/*
 backend/public/uploads/*
 !backend/public/uploads/.gitkeep
 
-# reference files
-/reference/
+# 工具与设计过程产物
+.qoder/
+artifacts/
+references/
+docs/superpowers/
