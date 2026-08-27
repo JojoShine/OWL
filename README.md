@@ -1,5 +1,7 @@
 # Owl Platform
 
+> 项目文档统一维护在 [docs 文档中心](./docs/README.md)，代码目录内不再保留独立说明文档。
+
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: light)" srcset="./frontend/public/logo.png">
@@ -395,16 +397,18 @@ owl_platform/
 │   │   └── middleware/      # Express 中间件
 │   ├── migrations/          # 数据库迁移脚本
 │   ├── seeders/             # 初始化数据脚本
-│   ├── deploy/              # 部署脚本
-│   └── docs/                # API 文档
+│   └── deploy/              # 部署脚本
 ├── nginx/                    # Nginx 配置示例
 │   ├── owl.conf.example     # HTTPS 生产配置
 │   ├── owl-http.conf.example # HTTP 配置
 │   └── owl-dev.conf.example # 本地开发配置
 ├── docs/                     # 项目文档
+│   ├── README.md             # 统一文档入口
 │   ├── 01-overview.md       # 项目总览
 │   ├── 02-initialization.md # 初始化指南
 │   ├── 03-development-guide.md # 开发指南
+│   ├── architecture/         # 架构结果
+│   ├── deployment/           # 部署说明
 │   └── features/            # 功能文档
 └── README.md
 ```
@@ -415,9 +419,12 @@ owl_platform/
 
 | 文档 | 说明 |
 |------|------|
+| [文档中心](./docs/README.md) | 全部正式文档入口与维护规则 |
 | [项目总览](./docs/01-overview.md) | 项目背景、定位与架构设计 |
 | [系统初始化](./docs/02-initialization.md) | 完整的安装、配置、部署指南 |
 | [开发指南](./docs/03-development-guide.md) | 开发规范、目录结构、最佳实践 |
+| [架构文档](./docs/architecture/) | 前后端结构、模型与公共能力 |
+| [部署文档](./docs/deployment/) | Docker 与传统部署方式 |
 | [功能文档](./docs/features/) | 各个功能模块的详细说明 |
 
 ---

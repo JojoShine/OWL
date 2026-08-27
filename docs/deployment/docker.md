@@ -33,7 +33,7 @@ docker compose --env-file .env.docker logs -f backend frontend
 
 ## 二、Docker 提供中间件
 
-先在 `deploy/secrets` 创建四个凭证文件，文件名见该目录 README。然后启动中间件：
+先按照 [Docker Secrets 配置](./secrets.md) 在 `deploy/secrets` 创建四个凭证文件，然后启动中间件：
 
 ```bash
 docker compose --env-file .env.docker \
