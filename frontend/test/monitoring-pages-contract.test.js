@@ -46,6 +46,16 @@ describe('monitoring page design contract', () => {
     ].forEach((label) => expect(source).toContain(label));
   });
 
+  it('uses the shared Select for server port protocols', () => {
+    const source = read('app/(authenticated)/monitor/servers/server-services-dialog.js');
+
+    expect(source).toContain("from '@/components/ui/select'");
+    expect(source).toContain('<SelectTrigger id="protocol"');
+    expect(source).toContain('<SelectItem value="tcp">TCP</SelectItem>');
+    expect(source).toContain('<SelectItem value="udp">UDP</SelectItem>');
+    expect(source).not.toContain('<select');
+  });
+
   it('keeps decorative metrics neutral while retaining semantic series, method, and alert colors', () => {
     const metric = read('components/dashboard/CountMetric.jsx');
     expect(metric).not.toMatch(/bg-(blue|purple|cyan)-/);

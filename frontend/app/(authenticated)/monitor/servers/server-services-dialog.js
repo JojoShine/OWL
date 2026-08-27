@@ -7,6 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Loading } from '@/components/ui/loading';
 import { Plus, Trash2, CheckCircle, XCircle } from 'lucide-react';
@@ -153,15 +160,18 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="protocol">协议</Label>
-                  <select
-                    id="protocol"
+                  <Select
                     value={newService.protocol}
-                    onChange={(e) => setNewService({ ...newService, protocol: e.target.value })}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
+                    onValueChange={(protocol) => setNewService({ ...newService, protocol })}
                   >
-                    <option value="tcp">TCP</option>
-                    <option value="udp">UDP</option>
-                  </select>
+                    <SelectTrigger id="protocol" className="w-full">
+                      <SelectValue placeholder="选择协议" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="tcp">TCP</SelectItem>
+                      <SelectItem value="udp">UDP</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="flex gap-2">
