@@ -17,6 +17,7 @@
     "db:init:full": "node scripts/database-cli.js reset-dev",
     "db:export": "node scripts/export-dev-data.js",
     "db:generate-seeder": "node scripts/generate-complete-seeder.js",
+    "pass": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config -e \"const password = process.env.INITIAL_ADMIN_PASSWORD; if (!password) { console.error('未在 .env.local 中配置 INITIAL_ADMIN_PASSWORD'); process.exit(1); } console.log('admin密码：' + password);\"",
     "pm2:start": "pm2 start ecosystem.config.js --env production",
     "pm2:stop": "pm2 stop owl-backend",
     "pm2:restart": "pm2 restart owl-backend",
