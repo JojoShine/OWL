@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { matchRoutes } from 'react-router-dom';
-import baseline from '../../../docs/architecture/local-menu-baseline.json';
+import baseline from '../../test/fixtures/initialized-menus.json';
 import { routes } from './routes';
 
 describe('initialized local backend menu routes', () => {

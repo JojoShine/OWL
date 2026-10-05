@@ -1,8 +1,8 @@
 const enabled=process.env.OWL_DATABASE_TEST==='1';
 (enabled?describe:describe.skip)('dynamic modules and SQL API PostgreSQL migration',()=>{
- let db;
- beforeAll(async()=>{require('dotenv').config();process.env.DB_NAME_TEST=process.env.DB_NAME;const {PrismaService}=require('../../dist/nest/database/prisma.service');db=new PrismaService();await db.$connect();});
- afterAll(async()=>{await db?.$disconnect();});
+ let db, originalPepper;
+ beforeAll(async()=>{require('dotenv').config();originalPepper=process.env.API_KEY_PEPPER;process.env.API_KEY_PEPPER=require('node:crypto').randomBytes(32).toString('hex');process.env.DB_NAME_TEST=process.env.DB_NAME;const {PrismaService}=require('../../dist/nest/database/prisma.service');db=new PrismaService();await db.$connect();});
+ afterAll(async()=>{await db?.$disconnect();if(originalPepper===undefined)delete process.env.API_KEY_PEPPER;else process.env.API_KEY_PEPPER=originalPepper;});
  it('preserves DATE, timestamp timezone semantics and decimal scale in the public SQL response contract',async()=>{
   const {SqlService}=require('../../dist/nest/dynamic/sql.service');const sql=new SqlService(db);
   const query="SELECT DATE '2026-10-05' AS day, TIMESTAMP '2026-10-05 12:34:56' AS local_time, TIMESTAMPTZ '2026-10-05 12:34:56+08' AS instant, 12.50::numeric AS amount, 9223372036854775806::bigint AS large, ARRAY[DATE '2026-10-05'] AS days, ARRAY[12.50::numeric] AS amounts";

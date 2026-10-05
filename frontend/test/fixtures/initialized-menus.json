@@ -1,0 +1,124 @@
+{
+  "menus": [
+    {
+      "name": "概览",
+      "path": "/dashboard",
+      "status": "active"
+    },
+    {
+      "name": "用户管理",
+      "path": "/setting/users",
+      "status": "active"
+    },
+    {
+      "name": "监控概览",
+      "path": "/monitor",
+      "status": "active"
+    },
+    {
+      "name": "接口监控",
+      "path": "/monitor/apis",
+      "status": "active"
+    },
+    {
+      "name": "文件管理",
+      "path": "/files",
+      "status": "active"
+    },
+    {
+      "name": "角色管理",
+      "path": "/setting/roles",
+      "status": "active"
+    },
+    {
+      "name": "权限管理",
+      "path": "/setting/permissions",
+      "status": "active"
+    },
+    {
+      "name": "服务器监控",
+      "path": "/monitor/servers",
+      "status": "active"
+    },
+    {
+      "name": "菜单管理",
+      "path": "/setting/menus",
+      "status": "active"
+    },
+    {
+      "name": "部门管理",
+      "path": "/setting/departments",
+      "status": "active"
+    },
+    {
+      "name": "接口开发",
+      "path": "/setting/api-builder",
+      "status": "active"
+    },
+    {
+      "name": "水印设置",
+      "path": "/setting/watermark-settings",
+      "status": "active"
+    },
+    {
+      "name": "日志管理",
+      "path": "/logs",
+      "status": "active"
+    },
+    {
+      "name": "监控系统",
+      "path": null,
+      "status": "active"
+    },
+    {
+      "name": "消息中心",
+      "path": "/notifications",
+      "status": "active"
+    },
+    {
+      "name": "邮件管理",
+      "path": "/setting/email-templates",
+      "status": "active"
+    },
+    {
+      "name": "通知设置",
+      "path": "/setting/notification-settings",
+      "status": "active"
+    },
+    {
+      "name": "第三方密钥",
+      "path": "/setting/third-party-keys",
+      "status": "active"
+    },
+    {
+      "name": "数据访问管理",
+      "path": "/setting/sensitive-fields",
+      "status": "active"
+    },
+    {
+      "name": "配置管理",
+      "path": "/setting/config-management",
+      "status": "active"
+    },
+    {
+      "name": "概览配置",
+      "path": "/setting/dashboard-widgets",
+      "status": "active"
+    },
+    {
+      "name": "系统工具",
+      "path": null,
+      "status": "active"
+    },
+    {
+      "name": "代码生成器",
+      "path": "/generator",
+      "status": "active"
+    },
+    {
+      "name": "系统管理",
+      "path": null,
+      "status": "active"
+    }
+  ]
+}
