@@ -1,6 +1,7 @@
 'use strict';
 
 const METADATA_TABLES = new Set([
+  '_prisma_migrations',
   'SequelizeMeta',
   'SequelizeData',
   'owl_SequelizeMeta',

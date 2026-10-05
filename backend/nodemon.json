@@ -1,14 +1,19 @@
 {
   "watch": [
-    "src"
+    "src",
+    "prisma",
+    "scripts",
+    "prisma.config.ts"
   ],
   "ignore": [
     "node_modules/",
     "logs/",
     "*.test.js",
-    "*.spec.js"
+    "*.spec.js",
+    "src/generated/**",
+    "dist/**"
   ],
-  "ext": "js,json",
+  "ext": "js,ts,json,prisma",
   "env": {
     "NODE_ENV": "development"
   },

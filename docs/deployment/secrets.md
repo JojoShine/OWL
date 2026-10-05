@@ -1,19 +1,5 @@
-# Docker Secrets 配置
+# 部署凭证
 
-使用 `compose.middleware.yaml` 启动 PostgreSQL、Redis 和 MinIO 前，在项目根目录创建 `deploy/secrets`，并准备以下文件：
+默认部署统一使用部署目录的 `.env`，它已被 Git 忽略；不要将真实配置放入镜像或仓库。配置项见根目录 `.env.example`，使用方式见 [Docker 部署](docker.md)。
 
-```text
-deploy/secrets/
-├── postgres_password
-├── redis_password
-├── minio_access_key
-└── minio_secret_key
-```
-
-每个文件只保存一个凭证值，不添加变量名或引号。限制文件只允许部署账号读取：
-
-```bash
-chmod 600 deploy/secrets/*
-```
-
-`deploy/secrets` 已被 Git 忽略，不应提交任何真实凭证。生产环境可以替换为外部 Secrets 管理服务，无需重新构建应用镜像。
+镜像入口仍兼容 `DB_PASSWORD_FILE`、`JWT_SECRET_FILE` 等文件凭证，供有外部密钥管理需求的部署使用；默认流程无需 Docker Secrets 或另一份 Compose。本地和服务器均使用相同镜像。

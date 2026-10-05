@@ -13,12 +13,10 @@
 node_modules/
 .pnp
 .pnp.js
-package-lock.json
 pnpm-lock.yaml
 yarn.lock
 
 # 构建输出
-.next/
 dist/
 build/
 out/
@@ -109,3 +107,15 @@ backend/public/uploads/*
 artifacts/
 references/
 docs/superpowers/
+
+# Nest / generated Prisma client
+backend/dist/
+backend/src/generated/
+
+# 本地运行日志与迁移过程记录
+backend/logs/
+docs/architecture/backend-nest-migration.md
+docs/architecture/frontend-menu-audit.md
+docs/architecture/frontend-react-migration.md
+docs/architecture/frontend-ui-pilot.md
+docs/architecture/local-menu-baseline.json

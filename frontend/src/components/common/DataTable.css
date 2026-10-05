@@ -1,0 +1,8 @@
+.owl-data-table { min-width: 0; }
+.owl-data-table .ant-table-container { border-radius: 0; }
+.owl-data-table .ant-table-cell { overflow-wrap: anywhere; }
+.owl-data-table .ant-table-placeholder > .ant-table-cell { padding: 32px 16px; }
+.owl-data-table .ant-table-expanded-row > .ant-table-cell { padding: 0; }
+.owl-data-table .ant-table-thead th.text-left { text-align: left; }
+.owl-data-table .ant-table-thead th.text-center { text-align: center; }
+.owl-data-table .ant-table-thead th.text-right { text-align: right; }

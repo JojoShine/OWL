@@ -1,0 +1,13 @@
+.owl-breadcrumbs.ant-breadcrumb { line-height: 22px; }
+.owl-breadcrumbs.ant-breadcrumb ol { align-items: center; }
+.owl-breadcrumbs.ant-breadcrumb li,
+.owl-breadcrumbs.ant-breadcrumb .ant-breadcrumb-link,
+.owl-breadcrumbs.ant-breadcrumb .ant-breadcrumb-separator {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+}
+.owl-breadcrumbs.ant-breadcrumb .ant-breadcrumb-separator svg {
+  display: block;
+  flex-shrink: 0;
+}

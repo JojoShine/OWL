@@ -1,0 +1,1079 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model owl_system_configs {
+  id                   BigInt    @id
+  logo_url             String?   @db.VarChar(500)
+  login_bg_url         String?   @db.VarChar(500)
+  company_name         String    @default("Owl Platform") @db.VarChar(100)
+  system_name          String    @default("Owl Platform") @db.VarChar(100)
+  show_tech_stack      Boolean   @default(true)
+  registration_enabled Boolean   @default(true)
+  tech_stack_info      Json?
+  enable_theme_switch  Boolean   @default(true)
+  theme_mode           String?   @default("auto") @db.VarChar(20)
+  primary_color        String?   @default("default") @db.VarChar(20)
+  created_by           String?   @db.Uuid
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz(6)
+  login_layout         String    @default("center") @db.VarChar(20)
+  login_method         String?   @default("both") @db.VarChar(10)
+  registration_method  String?   @default("both") @db.VarChar(10)
+  updated_by           String?   @db.Uuid
+  deleted_by           String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_system_configs_created_by")
+}
+
+model owl_users {
+  id            String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username      String                 @db.VarChar(50)
+  email         String                 @db.VarChar(100)
+  password      String?                @db.VarChar(255)
+  real_name     String?                @db.VarChar(50)
+  phone         String?                @db.VarChar(20)
+  avatar        String?                @db.VarChar(255)
+  status        enum_owl_users_status? @default(active)
+  last_login_at DateTime?              @db.Timestamptz(6)
+  last_login_ip String?                @db.VarChar(45)
+  createdAt     DateTime               @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime               @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime?              @map("deleted_at") @db.Timestamptz(6)
+  department_id String?                @db.Uuid
+  access_level  String?                @default("SELF") @db.VarChar(30)
+  created_by    String?                @db.Uuid
+  updated_by    String?                @db.Uuid
+  deleted_by    String?                @db.Uuid
+
+  @@index([created_by], map: "idx_owl_users_created_by")
+  @@index([department_id], map: "idx_owl_users_department_id")
+  @@index([email], map: "idx_owl_users_email")
+  @@index([phone], map: "idx_owl_users_phone")
+  @@index([status], map: "idx_owl_users_status")
+  @@index([username], map: "idx_owl_users_username")
+}
+
+model owl_roles {
+  id          String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String                 @db.VarChar(50)
+  code        String                 @db.VarChar(50)
+  description String?                @db.VarChar(255)
+  status      enum_owl_roles_status? @default(active)
+  sort        Int?                   @default(0)
+  createdAt   DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime?              @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?              @map("deleted_at") @db.Timestamptz(6)
+  created_by  String?                @db.Uuid
+  updated_by  String?                @db.Uuid
+  deleted_by  String?                @db.Uuid
+
+  @@index([code], map: "idx_owl_roles_code")
+  @@index([created_by], map: "idx_owl_roles_created_by")
+  @@index([status], map: "idx_owl_roles_status")
+}
+
+model owl_permissions {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String    @db.VarChar(50)
+  code        String    @db.VarChar(50)
+  resource    String    @db.VarChar(50)
+  action      String    @db.VarChar(50)
+  description String?   @db.VarChar(255)
+  category    String?   @db.VarChar(50)
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+  created_by  String?   @db.Uuid
+  updated_by  String?   @db.Uuid
+  deleted_by  String?   @db.Uuid
+
+  @@index([code], map: "idx_owl_permissions_code")
+  @@index([created_by], map: "idx_owl_permissions_created_by")
+  @@index([resource], map: "idx_owl_permissions_resource")
+}
+
+model owl_menus {
+  id              String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parent_id       String?                @db.Uuid
+  name            String                 @db.VarChar(50)
+  path            String?                @db.VarChar(255)
+  component       String?                @db.VarChar(255)
+  icon            String?                @db.VarChar(50)
+  type            enum_owl_menus_type?   @default(menu)
+  visible         Boolean?               @default(true)
+  sort            Int?                   @default(0)
+  status          enum_owl_menus_status? @default(active)
+  permission_code String?                @db.VarChar(50)
+  createdAt       DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime?              @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime?              @map("deleted_at") @db.Timestamptz(6)
+  menu_type       String?                @default("business") @db.VarChar(20)
+  created_by      String?                @db.Uuid
+  updated_by      String?                @db.Uuid
+  deleted_by      String?                @db.Uuid
+
+  @@index([created_by], map: "idx_owl_menus_created_by")
+  @@index([parent_id], map: "idx_owl_menus_parent_id")
+  @@index([status], map: "idx_owl_menus_status")
+  @@index([type], map: "idx_owl_menus_type")
+}
+
+model owl_departments {
+  id          String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parent_id   String?                      @db.Uuid
+  name        String                       @db.VarChar(100)
+  code        String?                      @db.VarChar(50)
+  leader_id   String?                      @db.Uuid
+  description String?
+  sort        Int?                         @default(0)
+  status      enum_owl_departments_status? @default(active)
+  createdAt   DateTime?                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime?                    @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?                    @map("deleted_at") @db.Timestamptz(6)
+  created_by  String?                      @db.Uuid
+  updated_by  String?                      @db.Uuid
+  deleted_by  String?                      @db.Uuid
+
+  @@index([code], map: "idx_owl_departments_code")
+  @@index([created_by], map: "idx_owl_departments_created_by")
+  @@index([leader_id], map: "idx_owl_departments_leader_id")
+  @@index([parent_id], map: "idx_owl_departments_parent_id")
+  @@index([status], map: "idx_owl_departments_status")
+}
+
+model owl_user_roles {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String    @db.Uuid
+  role_id    String    @db.Uuid
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
+  created_by String?   @db.Uuid
+  updated_by String?   @db.Uuid
+  deleted_by String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_user_roles_created_by")
+  @@index([role_id], map: "idx_owl_user_roles_role_id")
+  @@index([user_id], map: "idx_owl_user_roles_user_id")
+}
+
+model owl_role_permissions {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role_id       String    @db.Uuid
+  permission_id String    @db.Uuid
+  createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(6)
+  created_by    String?   @db.Uuid
+  updated_by    String?   @db.Uuid
+  deleted_by    String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_role_permissions_created_by")
+  @@index([permission_id], map: "idx_owl_role_permissions_permission_id")
+  @@index([role_id], map: "idx_owl_role_permissions_role_id")
+}
+
+model owl_role_menus {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role_id    String    @db.Uuid
+  menu_id    String    @db.Uuid
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
+  created_by String?   @db.Uuid
+  updated_by String?   @db.Uuid
+  deleted_by String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_role_menus_created_by")
+  @@index([menu_id], map: "idx_owl_role_menus_menu_id")
+  @@index([role_id], map: "idx_owl_role_menus_role_id")
+}
+
+model owl_user_sessions {
+  id             String                         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String                         @db.Uuid
+  session_token  String                         @db.VarChar(255)
+  device_info    Json
+  location_info  Json
+  login_at       DateTime                       @default(now()) @db.Timestamptz(6)
+  last_active_at DateTime                       @default(now()) @db.Timestamptz(6)
+  kicked_at      DateTime?                      @db.Timestamptz(6)
+  status         enum_owl_user_sessions_status? @default(active)
+  createdAt      DateTime                       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime                       @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime?                      @map("deleted_at") @db.Timestamptz(6)
+  created_by     String?                        @db.Uuid
+  updated_by     String?                        @db.Uuid
+  deleted_by     String?                        @db.Uuid
+
+  @@index([created_by], map: "idx_owl_user_sessions_created_by")
+  @@index([session_token], map: "idx_owl_user_sessions_token")
+  @@index([user_id, status], map: "idx_owl_user_sessions_user_id_status")
+}
+
+model owl_files {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  filename            String    @db.VarChar(255)
+  original_name       String    @db.VarChar(255)
+  mime_type           String?   @db.VarChar(100)
+  size                BigInt?
+  path                String    @db.VarChar(500)
+  bucket              String    @db.VarChar(100)
+  folder_id           String?   @db.Uuid
+  uploaded_by         String    @db.Uuid
+  createdAt           DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt           DateTime? @map("deleted_at") @db.Timestamptz(6)
+  inherit_permissions Boolean?  @default(true)
+  created_by          String?   @db.Uuid
+  updated_by          String?   @db.Uuid
+  deleted_by          String?   @db.Uuid
+
+  @@index([createdAt], map: "idx_owl_files_created_at")
+  @@index([created_by], map: "idx_owl_files_created_by")
+  @@index([folder_id], map: "idx_owl_files_folder_id")
+  @@index([mime_type], map: "idx_owl_files_mime_type")
+  @@index([original_name], map: "idx_owl_files_original_name")
+  @@index([uploaded_by], map: "idx_owl_files_uploaded_by")
+}
+
+model owl_folders {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String    @db.VarChar(255)
+  parent_id           String?   @db.Uuid
+  created_by          String    @db.Uuid
+  createdAt           DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt           DateTime? @map("deleted_at") @db.Timestamptz(6)
+  inherit_permissions Boolean?  @default(true)
+  updated_by          String?   @db.Uuid
+  deleted_by          String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_folders_created_by")
+  @@index([name], map: "idx_owl_folders_name")
+  @@index([parent_id], map: "idx_owl_folders_parent_id")
+}
+
+model owl_file_permissions {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  resource_type String    @db.VarChar(20)
+  resource_id   String    @db.Uuid
+  user_id       String?   @db.Uuid
+  role_id       String?   @db.Uuid
+  permission    String    @db.VarChar(20)
+  granted_by    String?   @db.Uuid
+  createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(6)
+  created_by    String?   @db.Uuid
+  updated_by    String?   @db.Uuid
+  deleted_by    String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_file_permissions_created_by")
+  @@index([granted_by], map: "idx_owl_file_permissions_granted_by")
+  @@index([resource_type, resource_id], map: "idx_owl_file_permissions_resource")
+  @@index([role_id], map: "idx_owl_file_permissions_role")
+  @@index([user_id], map: "idx_owl_file_permissions_user")
+}
+
+model owl_file_shares {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  file_id    String    @db.Uuid
+  share_code String    @db.VarChar(100)
+  expires_at DateTime? @db.Timestamptz(6)
+  created_by String    @db.Uuid
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
+  updated_by String?   @db.Uuid
+  deleted_by String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_file_shares_created_by")
+  @@index([expires_at], map: "idx_owl_file_shares_expires_at")
+  @@index([file_id], map: "idx_owl_file_shares_file_id")
+  @@index([share_code], map: "idx_owl_file_shares_share_code")
+}
+
+model owl_sensitive_fields {
+  id          String                              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  table_name  String                              @db.VarChar(100)
+  field_name  String                              @db.VarChar(100)
+  mask_type   enum_owl_sensitive_fields_mask_type @default(custom)
+  mask_rule   Json?
+  description String?                             @db.VarChar(255)
+  is_active   Boolean                             @default(true)
+  createdAt   DateTime                            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime                            @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?                           @map("deleted_at") @db.Timestamptz(6)
+  created_by  String?                             @db.Uuid
+  updated_by  String?                             @db.Uuid
+  deleted_by  String?                             @db.Uuid
+
+  @@index([created_by], map: "idx_owl_sensitive_fields_created_by")
+  @@index([is_active], map: "idx_owl_sensitive_fields_is_active")
+  @@index([table_name], map: "idx_owl_sensitive_fields_table_name")
+  @@index([is_active], map: "owl_sensitive_fields_is_active")
+}
+
+model owl_third_party_api_keys {
+  id                            String                          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  api_key                       String                          @unique @db.VarChar(100)
+  secret_ciphertext             String
+  secret_iv                     String                          @db.VarChar(32)
+  secret_auth_tag               String                          @db.VarChar(32)
+  scopes                        Json                            @default("[]")
+  client_name                   String                          @db.VarChar(255)
+  description                   String?
+  status                        String                          @default("active") @db.VarChar(20)
+  last_used_at                  DateTime?                       @db.Timestamp(6)
+  expires_at                    DateTime?                       @db.Timestamp(6)
+  created_by                    String?                         @db.Uuid
+  updated_by                    String?                         @db.Uuid
+  deleted_by                    String?                         @db.Uuid
+  remark                        String?
+  createdAt                     DateTime?                       @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt                     DateTime?                       @default(now()) @map("updated_at") @db.Timestamp(6)
+  deletedAt                     DateTime?                       @map("deleted_at") @db.Timestamptz(6)
+  owl_third_party_api_call_logs owl_third_party_api_call_logs[]
+
+  @@index([api_key], map: "idx_owl_third_party_api_keys_api_key")
+  @@index([client_name], map: "idx_owl_third_party_api_keys_client_name")
+  @@index([created_by], map: "idx_owl_third_party_api_keys_created_by")
+  @@index([status], map: "idx_owl_third_party_api_keys_status")
+}
+
+model owl_notifications {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String    @db.Uuid
+  title      String    @db.VarChar(255)
+  content    String?
+  type       String?   @default("info") @db.VarChar(50)
+  link       String?   @db.VarChar(500)
+  is_read    Boolean?  @default(false)
+  read_at    DateTime? @db.Timestamptz(6)
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
+  created_by String?   @db.Uuid
+  updated_by String?   @db.Uuid
+  deleted_by String?   @db.Uuid
+
+  @@index([createdAt], map: "idx_owl_notifications_created_at")
+  @@index([created_by], map: "idx_owl_notifications_created_by")
+  @@index([is_read], map: "idx_owl_notifications_is_read")
+  @@index([type], map: "idx_owl_notifications_type")
+  @@index([user_id], map: "idx_owl_notifications_user_id")
+  @@index([is_read, user_id], map: "idx_owl_notifications_user_read")
+}
+
+model owl_notification_settings {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id              String    @db.Uuid
+  email_enabled        Boolean?  @default(true)
+  push_enabled         Boolean?  @default(true)
+  system_notification  Boolean?  @default(true)
+  warning_notification Boolean?  @default(true)
+  error_notification   Boolean?  @default(true)
+  createdAt            DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz(6)
+  created_by           String?   @db.Uuid
+  updated_by           String?   @db.Uuid
+  deleted_by           String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_notification_settings_created_by")
+  @@index([user_id], map: "idx_owl_notification_settings_user_id")
+}
+
+model owl_email_templates {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String    @db.VarChar(100)
+  subject         String    @db.VarChar(255)
+  content         String
+  variables       Json?     @db.Json
+  description     String?
+  createdAt       DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+  template_type   String?   @default("GENERAL_NOTIFICATION") @db.VarChar(50)
+  variable_schema Json?     @db.Json
+  tags            Json?     @default("[]") @db.Json
+  created_by      String?   @db.Uuid
+  updated_by      String?   @db.Uuid
+  deleted_by      String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_email_templates_created_by")
+  @@index([name], map: "idx_owl_email_templates_name")
+  @@index([template_type], map: "idx_owl_email_templates_type")
+}
+
+model owl_email_logs {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  to_email      String    @db.VarChar(255)
+  subject       String    @db.VarChar(255)
+  content       String?
+  template_name String?   @db.VarChar(100)
+  status        String?   @default("pending") @db.VarChar(20)
+  error_message String?
+  retry_count   Int?      @default(0)
+  sent_at       DateTime? @db.Timestamptz(6)
+  createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(6)
+  created_by    String?   @db.Uuid
+  updated_by    String?   @db.Uuid
+  deleted_by    String?   @db.Uuid
+
+  @@index([createdAt], map: "idx_owl_email_logs_created_at")
+  @@index([created_by], map: "idx_owl_email_logs_created_by")
+  @@index([status], map: "idx_owl_email_logs_status")
+  @@index([template_name], map: "idx_owl_email_logs_template_name")
+  @@index([to_email], map: "idx_owl_email_logs_to_email")
+}
+
+model owl_email_tasks {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String    @db.VarChar(100)
+  description        String?
+  template_id        String    @db.Uuid
+  recipients         String
+  frequency          String    @default("once") @db.VarChar(50)
+  enabled            Boolean?  @default(true)
+  template_variables Json?     @default("{}") @db.Json
+  last_executed_at   DateTime? @db.Timestamptz(6)
+  next_execution_at  DateTime? @db.Timestamptz(6)
+  execution_count    Int?      @default(0)
+  last_status        String?   @default("pending") @db.VarChar(50)
+  last_error         String?
+  createdAt          DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt          DateTime? @map("deleted_at") @db.Timestamptz(6)
+  created_by         String?   @db.Uuid
+  updated_by         String?   @db.Uuid
+  deleted_by         String?   @db.Uuid
+
+  @@index([createdAt], map: "idx_owl_email_tasks_created_at")
+  @@index([created_by], map: "idx_owl_email_tasks_created_by")
+  @@index([enabled], map: "idx_owl_email_tasks_enabled")
+  @@index([template_id], map: "idx_owl_email_tasks_template_id")
+}
+
+model owl_api_monitors {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String    @db.VarChar(100)
+  url               String    @db.VarChar(500)
+  method            String?   @default("GET") @db.VarChar(10)
+  headers           Json?     @db.Json
+  body              String?
+  interval          Int?      @default(60)
+  timeout           Int?      @default(30)
+  expect_status     Int?      @default(200)
+  expect_response   String?
+  enabled           Boolean?  @default(true)
+  created_by        String    @db.Uuid
+  createdAt         DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(6)
+  alert_enabled     Boolean   @default(false)
+  alert_template_id String?   @db.Uuid
+  alert_recipients  Json?     @db.Json
+  variable_mapping  Json?     @db.Json
+  alert_interval    Int       @default(1800)
+  updated_by        String?   @db.Uuid
+  deleted_by        String?   @db.Uuid
+
+  @@index([alert_enabled], map: "idx_owl_api_monitors_alert_enabled")
+  @@index([alert_template_id], map: "idx_owl_api_monitors_alert_template")
+  @@index([created_by], map: "idx_owl_api_monitors_created_by")
+  @@index([enabled], map: "idx_owl_api_monitors_enabled")
+}
+
+model owl_api_monitor_logs {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  monitor_id    String    @db.Uuid
+  status        String    @db.VarChar(20)
+  status_code   Int?
+  response_time Int?
+  response_body String?
+  error_message String?
+  createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(6)
+  created_by    String?   @db.Uuid
+  updated_by    String?   @db.Uuid
+  deleted_by    String?   @db.Uuid
+
+  @@index([createdAt], map: "idx_owl_api_monitor_logs_created_at")
+  @@index([created_by], map: "idx_owl_api_monitor_logs_created_by")
+  @@index([monitor_id], map: "idx_owl_api_monitor_logs_monitor_id")
+  @@index([status], map: "idx_owl_api_monitor_logs_status")
+}
+
+model owl_alert_rules {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String    @db.VarChar(100)
+  metric_type       String    @db.VarChar(50)
+  condition         String    @db.VarChar(20)
+  threshold         Decimal   @db.Decimal
+  duration          Int?
+  enabled           Boolean?  @default(true)
+  createdAt         DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(6)
+  metric_name       String    @db.VarChar(50)
+  level             String?   @default("warning") @db.VarChar(20)
+  alert_enabled     Boolean   @default(false)
+  alert_template_id String?   @db.Uuid
+  alert_recipients  Json?     @db.Json
+  alert_interval    Int       @default(1800)
+  created_by        String?   @db.Uuid
+  updated_by        String?   @db.Uuid
+  deleted_by        String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_alert_rules_created_by")
+  @@index([enabled], map: "idx_owl_alert_rules_enabled")
+  @@index([metric_type], map: "idx_owl_alert_rules_metric_type")
+  @@index([enabled], map: "owl_alert_rules_enabled")
+  @@index([metric_type], map: "owl_alert_rules_metric_type")
+}
+
+model owl_alert_history {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rule_id     String    @db.Uuid
+  message     String
+  level       String?   @default("warning") @db.VarChar(20)
+  status      String?   @default("pending") @db.VarChar(20)
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+  resolved_at DateTime? @db.Timestamptz(6)
+  created_by  String?   @db.Uuid
+  updated_by  String?   @db.Uuid
+  deleted_by  String?   @db.Uuid
+
+  @@index([createdAt], map: "idx_owl_alert_history_created_at")
+  @@index([created_by], map: "idx_owl_alert_history_created_by")
+  @@index([level], map: "idx_owl_alert_history_level")
+  @@index([rule_id], map: "idx_owl_alert_history_rule_id")
+  @@index([status], map: "idx_owl_alert_history_status")
+}
+
+model owl_server_monitors {
+  id                       String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                     String                     @db.VarChar(100)
+  ip_address               String                     @db.VarChar(45)
+  port                     Int?                       @default(22)
+  username                 String                     @db.VarChar(100)
+  password                 String?
+  private_key              String?
+  auth_type                String?                    @default("password") @db.VarChar(20)
+  interval                 Int?                       @default(60)
+  timeout                  Int?                       @default(30)
+  cpu_threshold            Decimal?                   @default(90.00) @db.Decimal(5, 2)
+  memory_threshold         Decimal?                   @default(90.00) @db.Decimal(5, 2)
+  disk_threshold           Decimal?                   @default(90.00) @db.Decimal(5, 2)
+  enabled                  Boolean?                   @default(true)
+  alert_enabled            Boolean?                   @default(false)
+  alert_template_id        String?                    @db.Uuid
+  alert_recipients         Json?                      @db.Json
+  alert_interval           Int?                       @default(1800)
+  last_check_at            DateTime?                  @db.Timestamptz(6)
+  status                   String?                    @default("unknown") @db.VarChar(20)
+  last_metrics             Json?                      @default("{}")
+  created_by               String?                    @db.Uuid
+  updated_by               String?                    @db.Uuid
+  deleted_by               String?                    @db.Uuid
+  createdAt                DateTime?                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime?                  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt                DateTime?                  @map("deleted_at") @db.Timestamptz(6)
+  owl_server_monitor_logs  owl_server_monitor_logs[]
+  owl_server_monitor_ports owl_server_monitor_ports[]
+
+  @@index([enabled], map: "idx_server_monitors_enabled")
+  @@index([ip_address], map: "idx_server_monitors_ip")
+  @@index([status], map: "idx_server_monitors_status")
+}
+
+model owl_server_monitor_ports {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  server_id           String              @db.Uuid
+  port                Int
+  service_name        String?             @db.VarChar(100)
+  protocol            String?             @default("tcp") @db.VarChar(10)
+  enabled             Boolean?            @default(true)
+  last_check_status   String?             @db.VarChar(20)
+  last_checked_at     DateTime?           @db.Timestamptz(6)
+  createdAt           DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime?           @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt           DateTime?           @map("deleted_at") @db.Timestamptz(6)
+  owl_server_monitors owl_server_monitors @relation(fields: [server_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([port], map: "idx_server_monitor_ports_port")
+  @@index([server_id], map: "idx_server_monitor_ports_server_id")
+}
+
+model owl_server_monitor_logs {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  server_id           String              @db.Uuid
+  cpu_usage           Decimal?            @db.Decimal(5, 2)
+  memory_usage        Decimal?            @db.Decimal(5, 2)
+  memory_used_mb      Decimal?            @db.Decimal(10, 2)
+  memory_total_mb     Decimal?            @db.Decimal(10, 2)
+  disk_usage          Decimal?            @db.Decimal(5, 2)
+  disk_used_gb        Decimal?            @db.Decimal(10, 2)
+  disk_total_gb       Decimal?            @db.Decimal(10, 2)
+  load_avg_1m         Decimal?            @db.Decimal(5, 2)
+  load_avg_5m         Decimal?            @db.Decimal(5, 2)
+  load_avg_15m        Decimal?            @db.Decimal(5, 2)
+  network_rx_kbs      Decimal?            @db.Decimal(15, 2)
+  network_tx_kbs      Decimal?            @db.Decimal(15, 2)
+  check_status        String?             @default("success") @db.VarChar(20)
+  error_message       String?
+  checked_at          DateTime?           @default(now()) @db.Timestamptz(6)
+  createdAt           DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime?           @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt           DateTime?           @map("deleted_at") @db.Timestamptz(6)
+  owl_server_monitors owl_server_monitors @relation(fields: [server_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([checked_at(sort: Desc)], map: "idx_server_monitor_logs_checked_at")
+  @@index([server_id], map: "idx_server_monitor_logs_server_id")
+}
+
+model owl_api_interfaces {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                   String                   @db.VarChar(255)
+  description            String?
+  sql_query              String
+  method                 String?                  @default("GET") @db.VarChar(20)
+  endpoint               String                   @db.VarChar(255)
+  version                Int?                     @default(1)
+  parameters             Json?
+  status                 String?                  @default("active") @db.VarChar(20)
+  require_auth           Boolean?                 @default(true)
+  rate_limit             Int?                     @default(1000)
+  created_by             String                   @db.Uuid
+  createdAt              DateTime?                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime?                @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt              DateTime?                @map("deleted_at") @db.Timestamptz(6)
+  updated_by             String?                  @db.Uuid
+  deleted_by             String?                  @db.Uuid
+  owl_api_key_interfaces owl_api_key_interfaces[]
+
+  @@unique([endpoint, version])
+  @@index([created_by], map: "idx_owl_api_interfaces_created_by")
+  @@index([endpoint], map: "idx_owl_api_interfaces_endpoint")
+  @@index([status], map: "idx_owl_api_interfaces_status")
+}
+
+model owl_api_keys {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  client_name            String                   @db.VarChar(255)
+  key_prefix             String                   @db.VarChar(24)
+  key_hash               String                   @unique @db.VarChar(64)
+  description            String?
+  status                 String?                  @default("active") @db.VarChar(20)
+  expires_at             DateTime                 @db.Timestamptz(6)
+  last_used_at           DateTime?                @db.Timestamp(6)
+  created_by             String                   @db.Uuid
+  updated_by             String?                  @db.Uuid
+  deleted_by             String?                  @db.Uuid
+  createdAt              DateTime?                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime?                @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt              DateTime?                @map("deleted_at") @db.Timestamptz(6)
+  owl_api_key_interfaces owl_api_key_interfaces[]
+
+  @@index([created_by], map: "idx_owl_api_keys_created_by")
+  @@index([expires_at], map: "idx_owl_api_keys_expires_at")
+  @@index([key_hash], map: "idx_owl_api_keys_key_hash")
+}
+
+model owl_api_key_interfaces {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  api_key_id         String             @db.Uuid
+  interface_id       String             @db.Uuid
+  created_by         String?            @db.Uuid
+  createdAt          DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime?          @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt          DateTime?          @map("deleted_at") @db.Timestamptz(6)
+  owl_api_keys       owl_api_keys       @relation(fields: [api_key_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  owl_api_interfaces owl_api_interfaces @relation(fields: [interface_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([api_key_id, interface_id], map: "uq_owl_api_key_interfaces_key_interface")
+  @@index([interface_id], map: "idx_owl_api_key_interfaces_interface_id")
+}
+
+model owl_api_call_logs {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  interface_id   String    @db.Uuid
+  api_key_id     String?   @db.Uuid
+  request_method String?   @db.VarChar(20)
+  request_params Json?
+  response_code  Int?
+  response_time  Int?
+  error_message  String?   @db.VarChar(500)
+  ip_address     String?   @db.VarChar(45)
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt      DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
+  created_by     String?   @db.Uuid
+  updated_by     String?   @db.Uuid
+  deleted_by     String?   @db.Uuid
+
+  @@index([api_key_id], map: "idx_owl_api_call_logs_api_key_id")
+  @@index([createdAt], map: "idx_owl_api_call_logs_created_at")
+  @@index([created_by], map: "idx_owl_api_call_logs_created_by")
+  @@index([interface_id], map: "idx_owl_api_call_logs_interface_id")
+}
+
+model owl_generated_modules {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  table_name          String    @db.VarChar(100)
+  module_name         String    @db.VarChar(100)
+  module_path         String    @db.VarChar(200)
+  description         String?
+  menu_name           String?   @db.VarChar(100)
+  menu_icon           String?   @db.VarChar(50)
+  menu_parent_id      String?   @db.Uuid
+  menu_sort           Int?      @default(0)
+  enable_create       Boolean?  @default(true)
+  enable_update       Boolean?  @default(true)
+  enable_delete       Boolean?  @default(true)
+  enable_batch_delete Boolean?  @default(true)
+  enable_export       Boolean?  @default(false)
+  enable_import       Boolean?  @default(false)
+  generated_files     Json?     @db.Json
+  created_by          String?   @db.Uuid
+  createdAt           DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt           DateTime? @map("deleted_at") @db.Timestamptz(6)
+  page_config         Json?
+  custom_sql          String?
+  sql_parameters      Json?     @default("[]")
+  sql_primary_key     String?   @default("id") @db.VarChar(50)
+  detail_display_mode String?   @default("dialog") @db.VarChar(20)
+  detail_url_pattern  String?   @db.VarChar(200)
+  updated_by          String?   @db.Uuid
+  deleted_by          String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_generated_modules_created_by")
+  @@index([table_name], map: "idx_owl_generated_modules_table_name")
+}
+
+model owl_generated_fields {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  module_id        String    @db.Uuid
+  field_name       String    @db.VarChar(100)
+  field_type       String?   @db.VarChar(50)
+  field_comment    String?   @db.VarChar(255)
+  is_searchable    Boolean?  @default(false)
+  search_type      String?   @db.VarChar(20)
+  search_component String?   @db.VarChar(50)
+  show_in_list     Boolean?  @default(true)
+  list_sort        Int?      @default(0)
+  list_width       String?   @db.VarChar(20)
+  list_align       String?   @default("left") @db.VarChar(10)
+  format_type      String?   @db.VarChar(50)
+  format_options   Json?     @db.Json
+  show_in_form     Boolean?  @default(true)
+  form_component   String?   @db.VarChar(50)
+  form_rules       Json?     @db.Json
+  is_readonly      Boolean?  @default(false)
+  createdAt        DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz(6)
+  field_group      String?   @default("default") @db.VarChar(50)
+  show_in_detail   Boolean?  @default(true)
+  detail_sort      Int?      @default(0)
+  detail_label     String?   @db.VarChar(100)
+  detail_component String?   @db.VarChar(50)
+  created_by       String?   @db.Uuid
+  updated_by       String?   @db.Uuid
+  deleted_by       String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_generated_fields_created_by")
+  @@index([list_sort], map: "idx_owl_generated_fields_list_sort")
+  @@index([module_id], map: "idx_owl_generated_fields_module_id")
+}
+
+model owl_generation_history {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  module_id       String?   @db.Uuid
+  table_name      String?   @db.VarChar(100)
+  module_name     String?   @db.VarChar(100)
+  action          String?   @db.VarChar(20)
+  files_generated Json?     @db.Json
+  created_by      String?   @db.Uuid
+  createdAt       DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+  success         Boolean?  @default(true)
+  error_message   String?
+  operation_type  String?   @db.VarChar(20)
+  generated_by    String?   @db.Uuid
+  updated_by      String?   @db.Uuid
+  deleted_by      String?   @db.Uuid
+
+  @@index([createdAt], map: "idx_owl_generation_history_created_at")
+  @@index([created_by], map: "idx_owl_generation_history_created_by")
+  @@index([module_id], map: "idx_owl_generation_history_module_id")
+}
+
+model owl_dashboard_widgets {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String    @db.VarChar(100)
+  widget_type String    @default("chart") @db.VarChar(20)
+  chart_type  String?   @default("bar") @db.VarChar(20)
+  sql_query   String
+  x_key       String?   @db.VarChar(100)
+  data_key    String?   @db.VarChar(100)
+  unit        String?   @db.VarChar(20)
+  sort_order  Int       @default(0)
+  enabled     Boolean   @default(true)
+  created_by  String?   @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+  updated_by  String?   @db.Uuid
+  deleted_by  String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_dashboard_widgets_created_by")
+}
+
+model owl_third_party_api_call_logs {
+  id                       String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  third_party_key_id       String?                   @db.Uuid
+  client_name              String?                   @db.VarChar(255)
+  request_method           String                    @db.VarChar(12)
+  request_path             String                    @db.VarChar(500)
+  ip_address               String?                   @db.VarChar(45)
+  response_code            Int
+  response_time            Int
+  failure_reason           String?                   @db.VarChar(100)
+  createdAt                DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime?                 @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt                DateTime?                 @map("deleted_at") @db.Timestamptz(6)
+  owl_third_party_api_keys owl_third_party_api_keys? @relation(fields: [third_party_key_id], references: [id], onUpdate: NoAction)
+
+  @@index([createdAt], map: "idx_third_party_call_logs_created_at")
+  @@index([third_party_key_id], map: "idx_third_party_call_logs_key_id")
+}
+
+model owl_watermark_config {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  enabled       Boolean?  @default(true)
+  lines         Json?
+  font_size     Int?      @default(24)
+  font_weight   Int?      @default(400)
+  color         String?   @default("#000000") @db.VarChar(7)
+  opacity       Decimal?  @default(0.15) @db.Decimal(3, 2)
+  rotation      Int?      @default(45)
+  spacing       Int?      @default(150)
+  masking_rules Json?
+  createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt     DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(6)
+  created_by    String?   @db.Uuid
+  updated_by    String?   @db.Uuid
+  deleted_by    String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_watermark_config_created_by")
+  @@index([enabled], map: "idx_owl_watermark_config_enabled")
+}
+
+
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model owl_dictionary {
+  id          String    @db.VarChar(36)
+  dict_type   String    @db.VarChar(50)
+  dict_code   String    @db.VarChar(50)
+  dict_name   String    @db.VarChar(100)
+  dict_value  String?   @db.VarChar(255)
+  parent_code String?   @db.VarChar(50)
+  sort_order  Int?      @default(0)
+  is_active   Boolean?  @default(true)
+  remark      String?
+  created_at  DateTime  @db.Timestamptz(6)
+  updated_at  DateTime  @db.Timestamptz(6)
+  deleted_at  DateTime? @db.Timestamptz(6)
+  created_by  String?   @db.Uuid
+  updated_by  String?   @db.Uuid
+  deleted_by  String?   @db.Uuid
+
+  @@index([created_by], map: "idx_owl_dictionary_created_by")
+  @@ignore
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model owl_monitor_metrics {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  metric_type String    @db.VarChar(50)
+  metric_name String    @db.VarChar(100)
+  value       Decimal   @db.Decimal
+  unit        String?   @db.VarChar(20)
+  tags        Json?     @db.Json
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime? @default(now()) @db.Timestamptz(6)
+  deleted_at  DateTime? @db.Timestamptz(6)
+  created_by  String?   @db.Uuid
+  updated_by  String?   @db.Uuid
+  deleted_by  String?   @db.Uuid
+
+  @@index([created_at], map: "idx_owl_monitor_metrics_created_at")
+  @@index([created_by], map: "idx_owl_monitor_metrics_created_by")
+  @@index([metric_type], map: "idx_owl_monitor_metrics_type")
+  @@index([metric_name, metric_type], map: "idx_owl_monitor_metrics_type_name")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model test_generate {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title        String    @db.VarChar(100)
+  content      String?
+  status       String    @default("draft") @db.VarChar(20)
+  priority     Int?      @default(0)
+  amount       Decimal?  @db.Decimal(10, 2)
+  is_published Boolean?  @default(false)
+  published_at DateTime? @db.Timestamptz(6)
+  tags         String?   @db.VarChar(255)
+  remark       String?
+  created_by   String?   @db.Uuid
+  updated_by   String?   @db.Uuid
+  deleted_by   String?   @db.Uuid
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at   DateTime? @db.Timestamptz(6)
+
+  @@index([is_published], map: "idx_test_generate_is_published")
+  @@index([status], map: "idx_test_generate_status")
+}
+
+enum enum_owl_departments_status {
+  active
+  inactive
+}
+
+enum enum_owl_menus_status {
+  active
+  inactive
+}
+
+enum enum_owl_menus_type {
+  menu
+  button
+  link
+}
+
+enum enum_owl_roles_status {
+  active
+  inactive
+}
+
+enum enum_owl_user_sessions_status {
+  active
+  kicked
+  expired
+}
+
+enum enum_owl_users_status {
+  active
+  inactive
+  banned
+}
+
+enum enum_owl_sensitive_fields_mask_type {
+  phone
+  email
+  id_card
+  bank_card
+  name
+  address
+  custom
+}
+
+enum enum_owl_email_logs_status {
+  pending
+  sent
+  failed
+}
+
+enum enum_owl_notifications_type {
+  info
+  system
+  warning
+  error
+  success
+}
+
+enum enum_owl_api_interfaces_method {
+  GET
+  POST
+  PUT
+  DELETE
+}
+
+enum enum_owl_api_interfaces_status {
+  active
+  inactive
+}
+
+enum enum_owl_api_keys_status {
+  active
+  inactive
+}
+
+enum enum_owl_dashboard_widgets_chart_type {
+  line
+  bar
+  area
+  pie
+}
+
+enum enum_owl_dashboard_widgets_widget_type {
+  metric
+  chart
+}
+
+enum enum_owl_menus_menu_type {
+  business
+  system
+}
+
+enum enum_owl_system_configs_login_layout {
+  center
+  left_image  @map("left-image")
+  right_image @map("right-image")
+}
+
+enum enum_owl_system_configs_login_method {
+  password
+  sms
+  both
+}
+
+enum enum_owl_system_configs_registration_method {
+  password
+  sms
+  both
+}
+
+enum enum_owl_system_configs_theme_mode {
+  light
+  dark
+  auto
+}
+
+enum enum_owl_third_party_api_keys_status {
+  active
+  inactive
+  expired
+}

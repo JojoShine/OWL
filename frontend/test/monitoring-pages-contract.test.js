@@ -5,26 +5,26 @@ import { describe, expect, it } from 'vitest';
 const read = (file) => readFileSync(resolve(process.cwd(), file), 'utf8');
 
 const monitoringPages = [
-  'app/(authenticated)/dashboard/page.js',
-  'app/(authenticated)/monitor/page.js',
-  'app/(authenticated)/monitor/alerts/page.js',
-  'app/(authenticated)/monitor/apis/page.js',
-  'app/(authenticated)/monitor/servers/page.js',
-  'app/(authenticated)/logs/page.js',
-  'app/(authenticated)/notifications/page.js',
+  'src/pages/dashboard/index.jsx',
+  'src/pages/monitor/index.jsx',
+  'src/pages/monitor/alerts/index.jsx',
+  'src/pages/monitor/apis/index.jsx',
+  'src/pages/monitor/servers/index.jsx',
+  'src/pages/logs/index.jsx',
+  'src/pages/notifications/index.jsx',
 ];
 
 const responsiveDialogFiles = [
-  'app/(authenticated)/monitor/alerts/page.js',
-  'app/(authenticated)/monitor/apis/page.js',
-  'components/monitor/ApiMonitorDetailDialog.jsx',
+  'src/pages/monitor/alerts/index.jsx',
+  'src/pages/monitor/apis/index.jsx',
+  'src/components/monitor/ApiMonitorDetailDialog.jsx',
 ];
 
 describe('monitoring page design contract', () => {
   it.each(monitoringPages)('%s uses shared page structure', (file) => {
     const source = read(file);
     expect(source).toContain('<PageShell');
-    if (file !== 'app/(authenticated)/dashboard/page.js') {
+    if (file !== 'src/pages/dashboard/index.jsx') {
       expect(source).toContain('<PageHeader');
     }
   });
@@ -36,7 +36,7 @@ describe('monitoring page design contract', () => {
   });
 
   it('gives every server row icon action a specific accessible name', () => {
-    const source = read('app/(authenticated)/monitor/servers/page.js');
+    const source = read('src/pages/monitor/servers/index.jsx');
     [
       'aria-label={`管理 ${row.name} 的服务`}',
       'aria-label={`立即检查 ${row.name}`}',
@@ -47,7 +47,7 @@ describe('monitoring page design contract', () => {
   });
 
   it('uses the shared Select for server port protocols', () => {
-    const source = read('app/(authenticated)/monitor/servers/server-services-dialog.js');
+    const source = read('src/pages/monitor/servers/server-services-dialog.js');
 
     expect(source).toContain("from '@/components/ui/select'");
     expect(source).toContain('<SelectTrigger id="protocol"');
@@ -57,17 +57,17 @@ describe('monitoring page design contract', () => {
   });
 
   it('keeps decorative metrics neutral while retaining semantic series, method, and alert colors', () => {
-    const metric = read('components/dashboard/CountMetric.jsx');
+    const metric = read('src/components/dashboard/CountMetric.jsx');
     expect(metric).not.toMatch(/bg-(blue|purple|cyan)-/);
     expect(metric).toContain('tabular-data');
-    expect(read('components/dashboard/DashboardCard.jsx')).toContain('const CHART_COLORS');
-    expect(read('components/monitor/ApiMonitorTable.jsx')).toContain("PATCH: 'bg-purple-100");
-    expect(read('app/(authenticated)/monitor/alerts/page.js')).toContain("critical: { className: 'bg-red-100");
+    expect(read('src/components/dashboard/DashboardCard.jsx')).toContain('const CHART_COLORS');
+    expect(read('src/components/monitor/ApiMonitorTable.jsx')).toContain("PATCH: 'bg-purple-100");
+    expect(read('src/pages/monitor/alerts/index.jsx')).toContain("critical: { className: 'bg-red-100");
   });
 
   it('uses resolved theme tokens for monitoring chart structure colors', () => {
-    const monitor = read('app/(authenticated)/monitor/page.js');
-    const dashboardCard = read('components/dashboard/DashboardCard.jsx');
+    const monitor = read('src/pages/monitor/index.jsx');
+    const dashboardCard = read('src/components/dashboard/DashboardCard.jsx');
 
     expect(monitor).not.toMatch(/hsl\((?:var\(--|--)/);
     expect(monitor).toContain("backgroundColor: 'var(--card)'");

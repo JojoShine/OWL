@@ -1,87 +1,74 @@
-# Docker 部署
+# 同一镜像部署到本地与服务器
 
-项目使用同一套前后端镜像支持两种部署方式：当前验证环境连接已有 PostgreSQL、Redis、MinIO；后续单机环境可叠加 Docker 中间件配置。
+后端只维护一份 Dockerfile、一份 `compose.yaml` 和一份 `.env.example`。CI 构建一次 `用户名/owl-backend`，本地验收和服务器部署使用相同版本（建议固定 digest），只修改各自 `.env` 中的连接地址、凭证、域名和宿主机端口。无需按环境重新打包，也不把 `.env` 放入镜像。
 
-## 一、当前验证环境
+镜像提供 amd64 / arm64 两种架构的同版本内容，Docker 按机器架构选择。容器统一以 production 模式运行；本地容器连接测试库并不需要改成 development。源码热更新的 `npm run dev` 是独立开发方式，不是另一套部署镜像。
 
-准备部署变量和后端运行配置：
+## 部署材料
 
-```bash
-cp .env.docker.example .env.docker
-cp deploy/env/backend.env.example deploy/env/backend.env
-```
-
-编辑 `deploy/env/backend.env`，填写已有数据库、Redis、MinIO、JWT 和 CORS 配置。同一台 Linux 宿主机上的中间件使用 `host.docker.internal`，不要使用 `localhost`。
-
-首次构建并启动：
-
-```bash
-docker compose --env-file .env.docker \
-  -f compose.yaml \
-  -f compose.verify.yaml \
-  up -d --build
-```
-
-启动顺序固定为：已有数据库执行 `db:deploy`、后端健康、前端启动。宿主机只开放 `127.0.0.1:5002` 和 `127.0.0.1:7000` 给本机 Nginx。
-
-查看状态和日志：
-
-```bash
-docker compose --env-file .env.docker ps
-docker compose --env-file .env.docker logs -f backend frontend
-```
-
-## 二、Docker 提供中间件
-
-先按照 [Docker Secrets 配置](./secrets.md) 在 `deploy/secrets` 创建四个凭证文件，然后启动中间件：
-
-```bash
-docker compose --env-file .env.docker \
-  -f compose.yaml \
-  -f compose.middleware.yaml \
-  -f compose.production.yaml \
-  up -d postgres redis minio
-```
-
-全新空数据库只执行一次初始化：
-
-```bash
-docker compose --env-file .env.docker \
-  -f compose.yaml \
-  -f compose.middleware.yaml \
-  -f compose.production.yaml \
-  run --rm migration npm run db:bootstrap
-```
-
-确认初始化完成后启动全部服务：
-
-```bash
-docker compose --env-file .env.docker \
-  -f compose.yaml \
-  -f compose.middleware.yaml \
-  -f compose.production.yaml \
-  up -d
-```
-
-以后升级只需拉取指定镜像并启动；一次性 migration 服务会执行 `db:deploy`，不会重复初始化数据。
-
-## 三、镜像发布
-
-镜像使用版本号和 Git 提交号双标签，例如：
+每个部署目录只需：
 
 ```text
-ghcr.io/jojoshine/owl-frontend:1.2.0
-ghcr.io/jojoshine/owl-frontend:a83f22c
-ghcr.io/jojoshine/owl-backend:1.2.0
-ghcr.io/jojoshine/owl-backend:a83f22c
+owl/
+├── compose.yaml
+└── .env
 ```
 
-生产服务器只拉取并运行镜像，不在服务器执行 `npm install` 或源码构建。更新前先备份 PostgreSQL 和 MinIO 数据，应用回滚使用上一版本镜像；数据库迁移保持向前兼容。
+从仓库复制 `compose.yaml` 和 `.env.example`，将后者改名 `.env`。服务器不需要源码、Node.js 或 npm；只需要 Docker Engine / Desktop 与支持 `env_file.required` 的 Docker Compose（2.24.0+）。前端独立构建为静态文件，交给现有 Nginx，见 [静态前端部署](../architecture/static-frontend-deployment.md)。
 
-## 四、数据与安全边界
+`.env` 同时用于 Compose 参数替换和后端配置注入，不再区分 `.env.docker` 与 `backend.env`。已有部署请合并这两份旧配置到 `.env`，保留原数据库、密钥和项目名，不要覆盖为示例值。镜像内固定监听 3001，宿主机端口使用 `BACKEND_PORT`；日志轮转和资源限制已包含在主 Compose 中，无需环境覆盖文件。
 
-- 应用镜像不包含 `.env`、密钥、日志、上传文件或数据库数据。
-- PostgreSQL、Redis、MinIO 数据保存在独立命名卷中，删除应用容器不会删除数据。
-- 中间件端口默认不发布到公网，只在 Compose 内部网络访问。
-- `NEXT_PUBLIC_*` 在前端构建时固化，不能保存秘密；API 默认通过同域 `/owl/api` 访问。
-- 正式发布应将 `.env.docker` 中的镜像改为不可变版本，避免只使用 `latest`。
+## 本地与服务器配置差异
+
+| 配置 | 本地镜像验收 | 服务器 |
+|---|---|---|
+| `BACKEND_IMAGE` | 相同已发布版本或 digest | 相同版本或 digest |
+| `DB_HOST` | `host.docker.internal`，连接本机映射的测试数据库端口 | 外部 PostgreSQL 地址 |
+| `DB_NAME / DB_USER / DB_PASSWORD` | 测试库专用凭证 | 项目独立数据库和专用账号 |
+| `MINIO_ENDPOINT` | 本机测试对象存储地址 | 可访问的对象存储地址 |
+| `REDIS_HOST` | 测试 Redis（如使用） | 对应 Redis（如使用） |
+| `CORS_ORIGIN` | 前端本地地址，如 `http://127.0.0.1:4173` | 实际站点域名 |
+| `BACKEND_PORT` | 可设为 3001，与前端开发代理一致 | 默认 5002，由 Nginx 代理 |
+
+容器中的 `localhost` 指容器自身，不能用它连接宿主机数据库。PostgreSQL、MinIO 等属于外部依赖，不打包进后端镜像；主 Compose 不创建数据库。`compose.local-db.yaml` 仅用于可选的本地测试依赖，与应用发布流程分离。
+
+## 相同部署命令
+
+在包含 `compose.yaml` 和 `.env` 的目录中执行：
+
+```bash
+docker compose config --quiet
+docker compose pull
+```
+
+全新空库：在 `.env` 填写至少 12 位的 `INITIAL_ADMIN_PASSWORD`，并设置 `DB_BOOTSTRAP_CONFIRM` 为数据库名，然后仅首次执行：
+
+```bash
+docker compose run --rm migration npm run db:bootstrap
+```
+
+现有 Sequelize 数据库首次接管：先备份，确认已完成旧版 001–005 迁移，再执行一次基线结构校验和登记：
+
+```bash
+docker compose run --rm migration npm run db:baseline
+```
+
+已经由 Prisma 管理的数据库无需初始化或再次基线登记。所有环境启动命令相同：
+
+```bash
+docker compose up -d
+docker compose ps
+docker compose logs --tail=100 migration backend
+```
+
+一次性 migration 和 backend 使用完全相同的镜像及配置。迁移执行 `db:deploy` 成功后才启动后端；失败时不会自动清库或初始化。初始化成功后可清空首次初始化的两个变量。禁止对已有项目库执行 `db push`、`migrate dev` 或 reset。
+
+## 发布与升级
+
+GitHub 配置 `DOCKERHUB_USERNAME`、`DOCKERHUB_TOKEN`。推送 main、v 开头的版本标签或手动触发发布后，先完成前端检查/测试/构建和后端构建/数据库测试，全部成功才构建并推送 Docker Hub。前端产物保存在 Actions artifact `owl-frontend-static`。
+
+main 生成 latest 和 sha 标签；版本标签生成版本和 sha 标签。验收通过的同一版本用于服务器部署。升级前备份数据库，修改 `.env` 中镜像版本，然后执行 `docker compose pull && docker compose up -d`。回退镜像不会自动回退数据库结构。
+
+未发布时可以用同一 Dockerfile 本地构建：`docker build -t owl-backend:local-check backend`，把 `.env` 中 `BACKEND_IMAGE` 改为该标签并直接 `docker compose up -d`（不执行 pull）。发布验收仍应使用 Docker Hub 上将部署到服务器的同一版本。
+
+若本机系统代理未被 Docker 构建鉴权继承，可仅对本次构建设置 `HTTP_PROXY` / `HTTPS_PROXY`；不要把个人代理地址写进 Dockerfile 或 CI。

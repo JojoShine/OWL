@@ -1,8 +1,12 @@
 # Owl Platform 文档中心
 
+> 当前前端构建与部署请查看 [React / Vite 静态部署](architecture/static-frontend-deployment.md)。后端使用 NestJS / Prisma，部署到 Docker Hub / Compose。
+
 本目录是项目唯一的正式文档入口。文档只描述当前有效的系统能力、架构、开发约定和部署方式，不保存设计草稿、执行计划、验收截图或工具生成的过程记录。
 
 ## 基础说明
+
+- [本地快速启动（源码开发入口）](./deployment/quickstart.md)
 
 - [项目总览](./01-overview.md)
 - [系统初始化](./02-initialization.md)
@@ -10,9 +14,9 @@
 
 ## 部署
 
+
 - [Docker 部署](./deployment/docker.md)
-- [传统后端部署](./deployment/backend-traditional.md)
-- [传统前端部署](./deployment/frontend-traditional.md)
+- [静态前端部署](./architecture/static-frontend-deployment.md)
 - [Docker Secrets 配置](./deployment/secrets.md)
 
 ## 架构

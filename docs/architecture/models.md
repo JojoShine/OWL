@@ -1,40 +1,11 @@
 # 数据模型架构
 
-后端模型集中在 `backend/src/models`，由 `index.js` 创建 Sequelize 实例、注册模型、建立关联并安装审计 Hook。
+静态平台模型集中在 `backend/prisma/schema.prisma`，涵盖身份权限、文件、监控、通知邮件、生成器、系统配置与第三方接入。Nest 服务注入 `PrismaService` 访问数据库。
 
-## 模型分类
+- 使用 `@map` 保持既有数据库列与 API 时间字段命名；BIGINT 响应保持字符串。
+- 服务显式维护审计字段、软删除条件与事务，不依赖旧 ORM Hook。
+- 关联表保留原有软删除及唯一约束语义。
+- 无实际主键的字典数据通过参数化 SQL 读取，不虚构唯一约束。
+- 动态项目业务表由业务表/配置服务管理，不加入静态底座 schema。
 
-```text
-models/
-├── system/          # 用户、权限、文件、接口、系统配置等平台模型
-├── monitor/         # API、服务器、指标和告警模型
-├── notification/    # 站内通知、邮件模板、任务和日志
-├── generator/       # 代码生成模块、字段和生成历史
-├── association/     # 用户角色、角色权限、密钥接口等关联表
-├── third_party/     # 第三方厂商密钥与调用日志
-└── index.js         # 模型注册、关联与审计 Hook 入口
-```
-
-## 注册规则
-
-- 新模型放入职责匹配的分类目录，并在 `backend/src/models/index.js` 中注册。
-- 模型关联通过模型的 `associate(models)` 定义，由入口统一执行。
-- 多对多中间模型放在 `association`，避免混入主要实体目录。
-- 接口开发密钥与第三方厂商密钥是两套独立凭证体系，分别位于 `system` 和 `third_party`。
-- 动态生成的业务表可使用原生 SQL 访问，不要求注册为固定 Sequelize 模型。
-
-## 数据库变更
-
-- 已有结构的变更和新表创建都以 `backend/migrations/postgres` 中的迁移为准。
-- 初始化程序按迁移版本执行，不使用 `sequelize.sync({ alter: true })` 代替正式迁移。
-- 生产环境先备份再迁移，迁移失败应停止应用发布。
-- 常用筛选、关联和排序字段应建立索引，并通过分页限制结果集。
-
-## 通用约定
-
-- 模型名使用 PascalCase，表名和数据库字段使用 snake_case。
-- 主键、时间字段和审计字段遵循项目全局 Sequelize 配置。
-- 业务代码优先从统一模型入口获取模型，避免重复创建 Sequelize 实例。
-- 涉及多步写入时由服务层显式开启事务并传递 transaction。
-
-相关初始化流程见[系统初始化](../02-initialization.md)，服务分层见[后端架构与目录](./backend.md)。
+结构变更通过 `prisma/migrations/` 管理，部署运行 `npm run db:deploy`。首次空库使用 `db:bootstrap`；历史数据库需完成结构校验并显式 `db:baseline` 后接管。禁止在已有项目库使用 `db push`、`migrate dev` 或 reset。详见 [初始化指南](../02-initialization.md)。

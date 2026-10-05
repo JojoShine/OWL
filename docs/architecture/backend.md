@@ -1,52 +1,18 @@
 # 后端架构与目录
 
-后端基于 Node.js、Express、Sequelize 和 PostgreSQL，平台能力与业务扩展分层维护。
+后端采用 NestJS、Prisma 和 PostgreSQL。所有业务路由由 Nest 控制器注册，旧 Express 路由与 Sequelize 实现已移除。
 
-## 目录职责
+- `src/main.ts`：启动入口；构建为 `dist/main.js`。
+- `src/nest/`：控制器、业务服务、权限 Guard、数据库服务与生命周期管理。
+- `src/shared/`：校验、HTTP 辅助、日志、存储及纯工具；随构建进入 `dist/shared/`。
+- `prisma/schema.prisma`：静态底座数据模型。
+- `prisma/migrations/`：Prisma 版本迁移；初始化由 Prisma Client seed 完成。
+- `scripts/`：数据库配置、初始化、迁移、旧库基线接管入口。
 
-```text
-backend/
-├── migrations/postgres/       # PostgreSQL 迁移
-├── scripts/                   # 初始化与运维脚本
-├── seeders/                   # 基础数据
-├── sql/                       # SQL 资源
-└── src/
-    ├── business/modules/      # 独立业务模块
-    ├── config/                # 数据库、缓存、日志、对象存储等配置
-    ├── controllers/           # 跨模块控制器
-    ├── core/modules/          # 平台核心模块
-    ├── middlewares/           # 认证、审计、错误处理等中间件
-    ├── models/                # Sequelize 模型和关联
-    ├── routes/                # 路由汇总与动态路由
-    ├── services/              # 跨模块服务
-    ├── utils/                 # 通用工具、加密与 Hook
-    ├── app.js                 # Express 应用组装
-    └── server.js              # 服务启动入口
-```
+请求经过共享 HTTP 中间件、Nest Guard、控制器及业务服务，再由 Prisma 或外部客户端执行；统一响应及异常处理保留原 API 协议。后台任务与 Socket 由 Nest 生命周期管理，关闭时等待在途任务结束。
 
-## 模块边界
+当前 HTTP 主机仍使用 Express 4 适配器以兼容既有通配路径和 query 校验，Express 是 Nest 的传输依赖。共享代码保留有实际用途的实现，不要求为了文件后缀将全部 JavaScript 重写为 TypeScript。
 
-- `src/core/modules` 保存认证、权限、菜单、用户、部门、文件、通知、监控、代码生成器和接口开发等平台能力。
-- `src/business/modules` 保存具体业务模块，不反向修改核心模块来承载业务逻辑。
-- 一个完整模块通常由 route、controller、service、validation 组成；复杂模块可继续拆分内部服务。
-- 公共模型统一从 `src/models/index.js` 注册，模型分类见[数据模型架构](./models.md)。
+生产镜像仅需构建产物、生产依赖、Prisma 文件、数据库脚本与容器入口，不再携带源码。初始化与历史数据库接管见 [初始化指南](../02-initialization.md)，部署见 [Docker 部署](../deployment/docker.md)。
 
-## 请求链路
-
-```text
-请求 → 路由 → 公共中间件 → 模块控制器 → 模块服务 → 模型/外部服务 → 统一响应
-```
-
-- 路由只负责路径、鉴权和参数校验的装配。
-- 控制器负责 HTTP 输入输出，不承载可复用业务规则。
-- 服务负责事务、权限范围和业务逻辑。
-- 模型负责数据结构、关联和持久化。
-- 异常交由统一错误处理中间件转换为标准响应。
-
-## 开发约定
-
-- 文件名使用 kebab-case，类名使用 PascalCase，变量和方法使用 camelCase。
-- 新增表结构必须使用迁移，不依赖运行时自动同步修改生产数据库。
-- 平台模块和业务模块都复用公共认证、审计、数据权限与响应工具。
-- 配置通过环境变量注入，不在源码中保存真实密钥。
-- 初始化方式与迁移顺序见[系统初始化](../02-initialization.md)。
+部署目录只需 `compose.yaml` 与 `.env`。本地容器和服务器容器都运行同一生产镜像；数据库迁移任务复用它，环境差异仅由 `.env` 注入。镜像不包含环境配置文件。

@@ -1,0 +1,424 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: #f5f6f8;
+  --foreground: #1f2328;
+  --card: #ffffff;
+  --card-foreground: #1f2328;
+  --popover: #ffffff;
+  --popover-foreground: #1f2328;
+  --primary: #25282d;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f3f5;
+  --secondary-foreground: #34383e;
+  --muted: #f1f3f5;
+  --muted-foreground: #69707a;
+  --accent: #f1f3f5;
+  --accent-foreground: #25282d;
+  --destructive: #f04438;
+  --border: #e3e5e8;
+  --input: #d4d7dc;
+  --ring: #4b5057;
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #4b5057;
+  --sidebar-primary: #25282d;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f3f5;
+  --sidebar-accent-foreground: #25282d;
+  --sidebar-border: #e3e5e8;
+  --sidebar-ring: #4b5057;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #0b0b0c;
+  --foreground: #f1f1f2;
+  --card: #18181b;
+  --card-foreground: #ededee;
+  --popover: #202023;
+  --popover-foreground: #f1f1f2;
+  --primary: #f4f4f5;
+  --primary-foreground: #18181b;
+  --secondary: #27272a;
+  --secondary-foreground: #e4e4e7;
+  --muted: #222225;
+  --muted-foreground: #a1a1aa;
+  --accent: #2b2b2f;
+  --accent-foreground: #fafafa;
+  --destructive: #fb7185;
+  --border: #2e2e33;
+  --input: #3b3b42;
+  --ring: #a1a1aa;
+  --chart-1: #8d9aae;
+  --chart-2: #7e9f91;
+  --chart-3: #ae9771;
+  --chart-4: #968aa8;
+  --chart-5: #ad7c82;
+  --sidebar: #161618;
+  --sidebar-foreground: #b6b6bd;
+  --sidebar-primary: #f4f4f5;
+  --sidebar-primary-foreground: #18181b;
+  --sidebar-accent: #27272a;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: #29292d;
+  --sidebar-ring: #a1a1aa;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--muted-foreground) 42%, transparent) transparent;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    min-height: 36px;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-color: color-mix(in oklab, var(--muted-foreground) 42%, transparent);
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklab, var(--muted-foreground) 62%, transparent);
+  }
+}
+
+@utility tabular-data {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ========== 主题色方案 ========== */
+/* 默认主题（灰色）- 使用 :root 中的默认值 */
+
+/* 蓝色主题 */
+.theme-blue {
+  --primary: oklch(0.55 0.18 250);
+  --primary-foreground: oklch(0.98 0 0);
+  --ring: oklch(0.55 0.18 250);
+  --chart-1: oklch(0.55 0.18 250);
+  --chart-2: oklch(0.65 0.15 220);
+  --chart-3: oklch(0.50 0.20 280);
+  --chart-4: oklch(0.70 0.12 260);
+  --chart-5: oklch(0.60 0.16 240);
+  --sidebar-primary: oklch(0.55 0.18 250);
+  --sidebar-ring: oklch(0.55 0.18 250);
+}
+
+.theme-blue.dark {
+  --primary: oklch(0.70 0.18 250);
+  --primary-foreground: oklch(0.15 0 0);
+  --ring: oklch(0.60 0.12 250);
+  --chart-1: oklch(0.72 0.13 250);
+  --chart-2: oklch(0.76 0.10 220);
+  --chart-3: oklch(0.70 0.12 280);
+  --chart-4: oklch(0.78 0.08 260);
+  --chart-5: oklch(0.68 0.11 240);
+  --sidebar-primary: oklch(0.60 0.16 250);
+  --sidebar-ring: oklch(0.60 0.12 250);
+}
+
+/* 绿色主题 */
+.theme-green {
+  --primary: oklch(0.45 0.24 140);
+  --primary-foreground: oklch(0.98 0 0);
+  --ring: oklch(0.45 0.24 140);
+  --chart-1: oklch(0.45 0.24 140);
+  --chart-2: oklch(0.60 0.18 120);
+  --chart-3: oklch(0.50 0.22 160);
+  --chart-4: oklch(0.65 0.16 150);
+  --chart-5: oklch(0.55 0.20 130);
+  --sidebar-primary: oklch(0.45 0.24 140);
+  --sidebar-ring: oklch(0.45 0.24 140);
+}
+
+.theme-green.dark {
+  --primary: oklch(0.55 0.22 140);
+  --primary-foreground: oklch(0.15 0 0);
+  --ring: oklch(0.55 0.22 140);
+  --chart-1: oklch(0.70 0.15 140);
+  --chart-2: oklch(0.76 0.12 120);
+  --chart-3: oklch(0.72 0.13 160);
+  --chart-4: oklch(0.80 0.09 150);
+  --chart-5: oklch(0.68 0.12 130);
+  --sidebar-primary: oklch(0.55 0.22 140);
+  --sidebar-ring: oklch(0.55 0.22 140);
+}
+
+/* 紫色主题 */
+.theme-purple {
+  --primary: oklch(0.55 0.18 290);
+  --primary-foreground: oklch(0.98 0 0);
+  --ring: oklch(0.55 0.18 290);
+  --chart-1: oklch(0.55 0.18 290);
+  --chart-2: oklch(0.65 0.15 270);
+  --chart-3: oklch(0.50 0.20 310);
+  --chart-4: oklch(0.70 0.12 300);
+  --chart-5: oklch(0.60 0.16 280);
+  --sidebar-primary: oklch(0.55 0.18 290);
+  --sidebar-ring: oklch(0.55 0.18 290);
+}
+
+.theme-purple.dark {
+  --primary: oklch(0.70 0.18 290);
+  --primary-foreground: oklch(0.15 0 0);
+  --ring: oklch(0.60 0.12 290);
+  --chart-1: oklch(0.72 0.13 290);
+  --chart-2: oklch(0.76 0.10 270);
+  --chart-3: oklch(0.70 0.12 310);
+  --chart-4: oklch(0.78 0.08 300);
+  --chart-5: oklch(0.68 0.11 280);
+  --sidebar-primary: oklch(0.60 0.16 290);
+  --sidebar-ring: oklch(0.60 0.12 290);
+}
+
+/* 橙色主题 */
+.theme-orange {
+  --primary: oklch(0.60 0.18 50);
+  --primary-foreground: oklch(0.98 0 0);
+  --ring: oklch(0.60 0.18 50);
+  --chart-1: oklch(0.60 0.18 50);
+  --chart-2: oklch(0.70 0.16 40);
+  --chart-3: oklch(0.55 0.20 60);
+  --chart-4: oklch(0.75 0.14 55);
+  --chart-5: oklch(0.65 0.17 45);
+  --sidebar-primary: oklch(0.60 0.18 50);
+  --sidebar-ring: oklch(0.60 0.18 50);
+}
+
+.theme-orange.dark {
+  --primary: oklch(0.75 0.18 50);
+  --primary-foreground: oklch(0.15 0 0);
+  --ring: oklch(0.65 0.12 50);
+  --chart-1: oklch(0.74 0.13 50);
+  --chart-2: oklch(0.79 0.10 40);
+  --chart-3: oklch(0.70 0.12 60);
+  --chart-4: oklch(0.82 0.08 55);
+  --chart-5: oklch(0.72 0.11 45);
+  --sidebar-primary: oklch(0.65 0.16 50);
+  --sidebar-ring: oklch(0.65 0.12 50);
+}
+
+/* 红色主题 */
+.theme-red {
+  --primary: oklch(0.55 0.20 20);
+  --primary-foreground: oklch(0.98 0 0);
+  --ring: oklch(0.55 0.20 20);
+  --chart-1: oklch(0.55 0.20 20);
+  --chart-2: oklch(0.65 0.18 10);
+  --chart-3: oklch(0.50 0.22 30);
+  --chart-4: oklch(0.70 0.16 25);
+  --chart-5: oklch(0.60 0.19 15);
+  --sidebar-primary: oklch(0.55 0.20 20);
+  --sidebar-ring: oklch(0.55 0.20 20);
+}
+
+.theme-red.dark {
+  --primary: oklch(0.70 0.20 20);
+  --primary-foreground: oklch(0.15 0 0);
+  --ring: oklch(0.60 0.14 20);
+  --chart-1: oklch(0.72 0.14 20);
+  --chart-2: oklch(0.77 0.11 10);
+  --chart-3: oklch(0.69 0.13 30);
+  --chart-4: oklch(0.80 0.09 25);
+  --chart-5: oklch(0.71 0.12 15);
+  --sidebar-primary: oklch(0.60 0.18 20);
+  --sidebar-ring: oklch(0.60 0.14 20);
+}
+
+/* 青色主题 */
+.theme-cyan {
+  --primary: oklch(0.60 0.16 200);
+  --primary-foreground: oklch(0.98 0 0);
+  --ring: oklch(0.60 0.16 200);
+  --chart-1: oklch(0.60 0.16 200);
+  --chart-2: oklch(0.70 0.14 190);
+  --chart-3: oklch(0.55 0.18 210);
+  --chart-4: oklch(0.75 0.12 205);
+  --chart-5: oklch(0.65 0.15 195);
+  --sidebar-primary: oklch(0.60 0.16 200);
+  --sidebar-ring: oklch(0.60 0.16 200);
+}
+
+.theme-cyan.dark {
+  --primary: oklch(0.75 0.16 200);
+  --primary-foreground: oklch(0.15 0 0);
+  --ring: oklch(0.65 0.12 200);
+  --chart-1: oklch(0.74 0.12 200);
+  --chart-2: oklch(0.79 0.09 190);
+  --chart-3: oklch(0.70 0.11 210);
+  --chart-4: oklch(0.82 0.07 205);
+  --chart-5: oklch(0.72 0.10 195);
+  --sidebar-primary: oklch(0.65 0.14 200);
+  --sidebar-ring: oklch(0.65 0.12 200);
+}
+
+/* ========== 页面设计器组件属性配置统一样式 ========== */
+@layer components {
+  /* 统一所有表单控件的高度为 h-10 (40px) */
+  .component-settings input[type="text"],
+  .component-settings input[type="number"],
+  .component-settings input[type="url"],
+  .component-settings input[type="email"],
+  .component-settings input[type="password"],
+  .component-settings select,
+  .component-settings button[role="combobox"] {
+    @apply h-10;
+  }
+
+  /* Textarea 保持自适应高度，但设置最小高度 */
+  .component-settings textarea {
+    @apply min-h-20;
+  }
+
+  /* 统一Label字号为 text-sm */
+  .component-settings label {
+    @apply text-sm font-medium leading-none;
+  }
+
+  /* 信息簇标题样式 */
+  .component-settings .settings-group-title {
+    @apply text-sm font-semibold mb-3 mt-6 first:mt-0 text-foreground;
+  }
+
+  /* 配置项容器间距 */
+  .component-settings > div + div {
+    @apply mt-4;
+  }
+
+  /* 隐藏滚动条但保留滚动功能 */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+}
+
+/* Scene themes keep the existing neutral surfaces and only tint emphasis. */
+:root[data-scene="government-service"] {
+  --primary: #1677d2;
+  --primary-foreground: #ffffff;
+  --ring: #1677d2;
+  --sidebar-accent: #edf3fa;
+  --sidebar-accent-foreground: #1677d2;
+  --sidebar-ring: #1677d2;
+  --chart-1: #1677d2;
+}
+:root[data-scene="government-service"].dark {
+  --primary: #8db9ee;
+  --primary-foreground: #18181b;
+  --ring: #8db9ee;
+  --sidebar-accent: #202c3c;
+  --sidebar-accent-foreground: #aacdf5;
+  --sidebar-ring: #8db9ee;
+  --chart-1: #8db9ee;
+}
+
+.owl-user-modal .ant-modal-container {
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.owl-user-modal .ant-modal-header { margin: 0; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+.owl-user-modal .ant-modal-body { padding: 0; }
+.owl-user-modal .ant-modal-close { top: 22px; inset-inline-end: 20px; }
+.owl-user-form-body { max-height: calc(85dvh - 165px); overflow-y: auto; padding: 20px 24px; }
+.owl-user-form-footer { padding: 16px 24px; border-top: 1px solid var(--border); background: var(--muted); display: flex; justify-content: flex-end; gap: 8px; }
+.owl-user-table .ant-table { font-variant-numeric: tabular-nums; }
+.owl-user-table .ant-table-cell { overflow-wrap: anywhere; }
+.owl-user-table .ant-table-container { border-radius: 0; }
+.owl-user-table .ant-pagination { margin: 0 !important; padding: 16px; border-top: 1px solid var(--border); }
+.owl-user-modal .ant-form-item-label > label { height: auto; font-weight: 500; }
+.owl-user-modal .owl-role-options { display: grid; gap: 8px; width: 100%; max-height: 240px; overflow-y: auto; padding: 2px; }
+.owl-user-modal .owl-role-option { display: flex; align-items: flex-start; width: 100%; margin: 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); transition: background-color 150ms, border-color 150ms; }
+.owl-user-modal .owl-role-option:not(.ant-checkbox-wrapper-disabled):hover { background: var(--muted); }
+.owl-user-modal .owl-role-option.ant-checkbox-wrapper-checked { border-color: color-mix(in srgb, var(--primary) 35%, var(--border)); background: color-mix(in srgb, var(--primary) 5%, var(--card)); }
+.owl-user-modal .owl-role-option:has(input:focus-visible) { outline: 2px solid var(--ring); outline-offset: 2px; }
+.owl-user-modal .owl-role-option .ant-checkbox { margin-top: 3px; }
+.owl-user-modal .owl-role-option > span:last-child { min-width: 0; padding-inline-start: 10px; }
+.owl-role-name { display: block; color: var(--foreground); font-size: 14px; font-weight: 500; line-height: 22px; }
+.owl-role-description { display: block; margin-top: 2px; color: var(--muted-foreground); font-size: 12px; line-height: 20px; overflow-wrap: anywhere; }
+.owl-user-modal .owl-role-option.ant-checkbox-wrapper-disabled { opacity: 0.55; }
+.ant-alert { border-radius: 12px; }
+.ant-alert.ant-alert-warning { background: color-mix(in srgb, #d99a22 6%, var(--background)); border-color: color-mix(in srgb, #d99a22 15%, var(--background)); }
+.ant-alert.ant-alert-error { background: color-mix(in srgb, var(--destructive) 5%, var(--background)); border-color: color-mix(in srgb, var(--destructive) 15%, var(--background)); }
+@media (max-width: 767px) {
+  .owl-user-modal .ant-modal-header { padding: 16px; }
+  .owl-user-form-body { padding: 16px; max-height: calc(85dvh - 165px); }
+  .owl-user-form-footer { padding: 12px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="dropdown-menu-content"], [data-slot="dialog-content"], [data-slot="dialog-overlay"],
+  [data-slot="button"], .owl-user-modal *, .owl-user-table * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:root { --font-geist-sans: "Geist"; --font-geist-mono: "Geist Mono"; }

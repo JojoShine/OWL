@@ -1,42 +1,69 @@
-name: Pull Request
+name: Application checks
 
 on:
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  check:
+  frontend:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
-
+    defaults:
+      run:
+        working-directory: frontend
     steps:
-      - uses: actions/checkout@v3
-
-      - name: 设置 Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test:ui
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: owl-frontend-static
+          path: frontend/dist
+          if-no-files-found: error
 
-      - name: 后端依赖检查
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: owl_ci
+          POSTGRES_USER: owl_ci
+          POSTGRES_PASSWORD: owl_ci_test_only
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U owl_ci -d owl_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_NAME: owl_ci
+      DB_NAME_TEST: owl_ci
+      DB_USER: owl_ci
+      DB_PASSWORD: owl_ci_test_only
+      INITIAL_ADMIN_PASSWORD: Owl-CI-Only-Password-2026
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: 后端构建与测试
+        working-directory: backend
         run: |
-          cd backend
-          npm install --frozen-lockfile
-          npm run lint
-        continue-on-error: true
-
-      - name: 前端依赖检查
-        run: |
-          cd frontend
-          npm install --frozen-lockfile
-          npm run lint
-        continue-on-error: true
-
-      - name: 检查代码格式
-        run: npm run format:check
-        continue-on-error: true
+          npm ci
+          npm run build
+          npm run db:bootstrap
+          OWL_DATABASE_TEST=1 OWL_MIGRATION_TEST=1 npm test -- --runInBand

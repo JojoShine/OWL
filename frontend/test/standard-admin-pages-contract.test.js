@@ -5,27 +5,26 @@ import { describe, expect, it } from 'vitest';
 const read = (file) => readFileSync(resolve(process.cwd(), file), 'utf8');
 
 const standardPages = [
-  'app/(authenticated)/setting/users/page.js',
-  'app/(authenticated)/setting/roles/page.js',
-  'app/(authenticated)/setting/permissions/page.js',
-  'app/(authenticated)/setting/departments/page.js',
-  'app/(authenticated)/setting/menus/page.js',
-  'app/(authenticated)/setting/sensitive-fields/page.js',
-  'app/(authenticated)/setting/third-party-keys/page.js',
-  'app/(authenticated)/setting/email-templates/page.js',
-  'app/(authenticated)/setting/api-builder/keys/page.js',
+  'src/pages/setting/users/index.jsx',
+  'src/pages/setting/roles/index.jsx',
+  'src/pages/setting/permissions/index.jsx',
+  'src/pages/setting/departments/index.jsx',
+  'src/pages/setting/menus/index.jsx',
+  'src/pages/setting/sensitive-fields/index.jsx',
+  'src/pages/setting/third-party-keys/index.jsx',
+  'src/pages/setting/email-templates/index.jsx',
+  'src/pages/setting/api-builder/keys/index.jsx',
 ];
 
 const standardDialogs = [
-  'components/users/user-form-dialog.jsx',
-  'components/roles/role-form-dialog.jsx',
-  'components/departments/department-form-dialog.jsx',
-  'components/menus/menu-form-dialog.jsx',
-  'components/sensitive-fields/sensitive-field-form-dialog.jsx',
-  'components/third-party-keys/key-form-dialog.jsx',
-  'components/notification/EmailTemplateFormDialog.jsx',
-  'app/(authenticated)/user-auth/UserAuthDialog.js',
-  'app/(authenticated)/setting/api-builder/keys/page.js',
+  'src/components/roles/role-form-dialog.jsx',
+  'src/components/departments/department-form-dialog.jsx',
+  'src/components/menus/menu-form-dialog.jsx',
+  'src/components/sensitive-fields/sensitive-field-form-dialog.jsx',
+  'src/components/third-party-keys/key-form-dialog.jsx',
+  'src/components/notification/EmailTemplateFormDialog.jsx',
+  'src/pages/user-auth/UserAuthDialog.js',
+  'src/pages/setting/api-builder/keys/index.jsx',
 ];
 
 describe('standard admin pages', () => {

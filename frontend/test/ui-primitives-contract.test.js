@@ -53,9 +53,9 @@ describe('neutral UI primitive contract', () => {
 
     expect(controls[0]).toHaveClass('h-10');
     expect(controls[1]).toHaveClass('h-10');
-    expect(controls[3]).toHaveClass('data-[size=default]:h-10');
+    expect(controls[3].closest('.ant-select')).toHaveClass('owl-select');
 
-    for (const control of controls) {
+    for (const control of controls.slice(0, 3)) {
       expect(control).toHaveClass('focus-visible:border-primary', 'focus-visible:ring-0');
       expect(control.className).not.toMatch(/focus-visible:ring-(?:\[3px\]|2)/);
       expect(control).not.toHaveClass('focus-visible:border-foreground');
@@ -81,18 +81,15 @@ describe('neutral UI primitive contract', () => {
       )
     );
 
-    expect(screen.getByText('内容')).toHaveClass('gap-5', 'rounded-lg', 'border', 'py-5');
-    expect(screen.getByText('内容')).not.toHaveClass('shadow-sm');
+    expect(screen.getByText('内容').closest('.ant-card')).toHaveClass('gap-5', 'rounded-lg', 'border', 'py-5');
+    expect(screen.getByText('内容').closest('.ant-card')).not.toHaveClass('shadow-sm');
 
     const tabsList = screen.getByRole('tablist');
     const activeTab = screen.getByRole('tab', { name: '第一项' });
-    expect(tabsList).toHaveClass('bg-muted', 'h-10', 'rounded-lg', 'border-border');
-    expect(activeTab).toHaveClass(
-      'data-[state=active]:bg-foreground',
-      'data-[state=active]:text-background',
-      'data-[state=active]:shadow-[0_1px_3px_rgba(15,23,42,0.22)]'
-    );
-    expect(activeTab).not.toHaveClass('data-[state=active]:bg-primary');
+    expect(tabsList).toHaveClass('ant-tabs-nav');
+    expect(tabsList.closest('.ant-tabs')).toHaveClass('owl-tabs');
+    expect(activeTab).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: '第二项' })).toHaveAttribute('aria-selected', 'false');
   });
 
   it('keeps full-width and wrapped tab layouts safe at narrow widths', () => {
@@ -109,17 +106,9 @@ describe('neutral UI primitive contract', () => {
       )
     );
 
-    expect(screen.getByRole('tablist')).toHaveClass(
-      'w-full',
-      'flex-wrap',
-      '[&>[data-slot=tabs-trigger]]:min-w-0',
-      '[&>[data-slot=tabs-trigger]]:flex-1'
-    );
-    expect(screen.getByRole('tab', { name: '第一项' })).toHaveClass(
-      'min-w-0',
-      'overflow-hidden',
-      'text-ellipsis'
-    );
+    expect(screen.getByRole('tablist').closest('.ant-tabs')).toHaveClass('owl-tabs-stretch', 'owl-tabs-wrap');
+    expect(screen.getByRole('tab', { name: '第一项' })).toHaveAttribute('tabindex', '0');
+    expect(screen.getByRole('tab', { name: '第二项' })).toHaveAttribute('tabindex', '-1');
   });
 
   it('uses the softened overlay while preserving non-input focus affordances', () => {
@@ -144,7 +133,7 @@ describe('neutral UI primitive contract', () => {
       )
     );
 
-    expect(document.querySelector('[data-slot="dialog-overlay"]')).toHaveClass(
+    expect(document.querySelector('.ant-modal-mask')).toHaveClass(
       'bg-black/35',
       'backdrop-blur-[1px]'
     );
@@ -153,9 +142,9 @@ describe('neutral UI primitive contract', () => {
       'active:translate-y-px',
       'focus-visible:ring-[3px]'
     );
-    expect(document.querySelector('[role="checkbox"]')).toHaveClass('focus-visible:ring-2');
-    expect(document.querySelector('[role="radio"]')).toHaveClass('focus-visible:ring-2');
-    expect(document.querySelector('[role="slider"]')).toHaveClass('focus-visible:ring-2');
+    expect(document.querySelector('input[type="checkbox"]')).toHaveClass('ant-checkbox-input');
+    expect(document.querySelector('input[type="radio"]')).toHaveClass('ant-radio-input');
+    expect(document.querySelector('[role="slider"]')).toHaveClass('ant-slider-handle');
   });
 
   it('keeps semantic badge variants distinct', () => {
@@ -176,6 +165,28 @@ describe('neutral UI primitive contract', () => {
     expect(screen.getByText('信息')).toHaveClass('bg-blue-50');
     expect(screen.getByText('危险')).toHaveClass('bg-destructive');
     expect(screen.getByText('中性')).toHaveClass('bg-muted');
+  });
+
+  it('shows strength as a labelled meter and clears it with the input', async () => {
+    const user = userEvent.setup();
+    render(h(PasswordInput, { 'aria-label': '密码', showStrength: true }));
+    const input = screen.getByLabelText('密码');
+    expect(screen.queryByRole('meter')).not.toBeInTheDocument();
+    await user.type(input, 'a');
+    expect(screen.getByRole('meter')).toHaveAttribute('aria-valuetext', '弱');
+    await user.type(input, 'BcD1234!Example');
+    expect(screen.getByRole('meter')).toHaveAttribute('aria-valuetext', '强');
+    expect(input).not.toHaveClass('border-green-500');
+    await user.clear(input);
+    expect(screen.queryByRole('meter')).not.toBeInTheDocument();
+  });
+
+  it('keeps strength hidden when disabled without losing field descriptions', async () => {
+    const user = userEvent.setup();
+    render(h(PasswordInput, { 'aria-label': '密码', 'aria-describedby': 'password-help' }));
+    await user.type(screen.getByLabelText('密码'), 'aBcD1234!Example');
+    expect(screen.queryByRole('meter')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('密码')).toHaveAttribute('aria-describedby', 'password-help');
   });
 
   it('keeps the password visibility toggle in the keyboard tab order with visible focus', async () => {

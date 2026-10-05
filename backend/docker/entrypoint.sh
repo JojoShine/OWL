@@ -21,6 +21,7 @@ load_secret() {
 }
 
 for variable_name in \
+  INITIAL_ADMIN_PASSWORD \
   DB_PASSWORD \
   REDIS_PASSWORD \
   JWT_SECRET \

@@ -1,0 +1,49 @@
+/* Keep the application tokens and compact density on Ant Design controls. */
+.owl-input.ant-input {
+  color: var(--foreground);
+  background: transparent;
+  border-color: var(--input);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+.owl-input.ant-input:focus, .owl-input.ant-input:focus-within {
+  border-color: var(--primary);
+  box-shadow: none;
+}
+.owl-input.ant-input::placeholder { color: var(--muted-foreground); }
+.owl-input.ant-input[aria-invalid="true"] { border-color: var(--destructive); }
+.owl-button.ant-btn { box-shadow: none; font-weight: 500; }
+.owl-button.ant-btn[data-variant="default"] { background: var(--primary); color: var(--primary-foreground); border-color: transparent; }
+.owl-button.ant-btn[data-variant="destructive"] { background: var(--destructive); color: white; border-color: transparent; }
+.owl-button.ant-btn[data-variant="outline"] { background: var(--background); color: var(--foreground); border-color: var(--border); }
+.owl-button.ant-btn[data-variant="secondary"] { background: var(--secondary); color: var(--secondary-foreground); border-color: transparent; }
+.owl-button.ant-btn[data-variant="ghost"] { background: transparent; color: inherit; border-color: transparent; }
+.owl-button.ant-btn[data-variant="link"] { color: var(--primary); border-color: transparent; }
+.owl-button.ant-btn:hover:not(:disabled) { filter: brightness(.96); }
+.owl-select.ant-select { min-width: 5rem; height: 2.5rem; }
+.owl-select.ant-select-sm { height: 2rem; }
+.owl-date-picker.ant-picker { background: transparent; box-shadow: none; }
+.owl-card.ant-card { display: flex; flex-direction: column; gap: 1.25rem; padding-block: 1.25rem; background: var(--card); color: var(--card-foreground); border-color: var(--border); }
+.owl-badge.ant-tag { margin: 0; line-height: 1rem; }
+.owl-table.ant-table-wrapper .ant-table { background: transparent; color: inherit; }
+.owl-table.ant-table-wrapper .ant-table-container { border: 0; }
+input.owl-input.ant-input { height: 2.5rem; padding: .5rem .75rem; }
+textarea.owl-input.ant-input { min-height: 5rem; }
+.owl-password-toggle.ant-btn { position: absolute; right: .75rem; top: 50%; padding: 0; width: 1rem; height: 1rem; color: var(--muted-foreground); }
+.owl-button.ant-btn[data-size="sm"], .owl-button.ant-btn[data-size="icon-sm"] { height: 2rem; }
+.owl-button.ant-btn[data-size="lg"], .owl-button.ant-btn[data-size="icon-lg"], .owl-button.ant-btn.h-10 { height: 2.5rem; }
+.owl-button.ant-btn[data-size="icon"] { width: 2.25rem; padding: 0; }
+.owl-button.ant-btn[data-size="icon-sm"] { width: 2rem; padding: 0; }
+.owl-button.ant-btn[data-size="icon-lg"] { width: 2.5rem; padding: 0; }
+.owl-badge.ant-tag[data-variant="default"] { background: var(--primary); color: var(--primary-foreground); border-color: transparent; }
+.owl-badge.ant-tag[data-variant="secondary"] { background: var(--secondary); color: var(--secondary-foreground); border-color: transparent; }
+.owl-badge.ant-tag[data-variant="destructive"] { background: var(--destructive); color: white; border-color: transparent; }
+.owl-badge.ant-tag[data-variant="outline"] { background: transparent; color: var(--foreground); border-color: var(--border); }
+.owl-badge.ant-tag[data-variant="neutral"] { background: var(--muted); color: var(--muted-foreground); border-color: var(--border); }
+.owl-badge.ant-tag[data-variant="success"] { background: color-mix(in srgb, #10b981 12%, var(--background)); color: light-dark(#047857, #6ee7b7); border-color: color-mix(in srgb, #10b981 30%, var(--border)); }
+.owl-badge.ant-tag[data-variant="warning"] { background: color-mix(in srgb, #f59e0b 12%, var(--background)); color: light-dark(#b45309, #fcd34d); border-color: color-mix(in srgb, #f59e0b 30%, var(--border)); }
+.owl-badge.ant-tag[data-variant="info"] { background: color-mix(in srgb, #3b82f6 12%, var(--background)); color: light-dark(#1d4ed8, #93c5fd); border-color: color-mix(in srgb, #3b82f6 30%, var(--border)); }
+input.owl-password-input.ant-input { padding-right: 2.5rem; }
+.dark .owl-badge.ant-tag[data-variant="success"] { color: #6ee7b7; }
+.dark .owl-badge.ant-tag[data-variant="warning"] { color: #fcd34d; }
+.dark .owl-badge.ant-tag[data-variant="info"] { color: #93c5fd; }

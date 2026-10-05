@@ -6,7 +6,7 @@ const read = (path) => readFileSync(resolve(process.cwd(), path), 'utf8');
 
 describe('admin shell design contract', () => {
   it('defines the approved light palette', () => {
-    const css = read('app/globals.css');
+    const css = read('src/styles.css');
     expect(css).toContain('--background: #f5f6f8');
     expect(css).toContain('--foreground: #1f2328');
     expect(css).toContain('--primary: #25282d');
@@ -17,7 +17,7 @@ describe('admin shell design contract', () => {
   });
 
   it('defines the approved layered charcoal dark palette', () => {
-    const css = read('app/globals.css');
+    const css = read('src/styles.css');
     expect(css).toContain('--background: #0b0b0c');
     expect(css).toContain('--card: #18181b');
     expect(css).toContain('--popover: #202023');
@@ -29,7 +29,7 @@ describe('admin shell design contract', () => {
   });
 
   it('keeps every explicit color theme legible on dark chart surfaces', () => {
-    const css = read('app/globals.css');
+    const css = read('src/styles.css');
 
     for (const theme of ['blue', 'green', 'purple', 'orange', 'red', 'cyan']) {
       expect(css).toMatch(
@@ -39,7 +39,7 @@ describe('admin shell design contract', () => {
   });
 
   it('uses a lightweight sidebar rather than a primary color block', () => {
-    const sidebar = read('components/layout/sidebar.jsx');
+    const sidebar = read('src/components/layout/sidebar.jsx');
     expect(sidebar).toContain('bg-sidebar');
     expect(sidebar).toContain('text-sidebar-foreground');
     expect(sidebar).toContain('bg-sidebar-accent');
@@ -47,7 +47,7 @@ describe('admin shell design contract', () => {
   });
 
   it('uses the real authenticated layout at the approved density', () => {
-    const layout = read('app/(authenticated)/layout.js');
+    const layout = read('src/layouts/AuthenticatedLayout.jsx');
     expect(layout).toContain('w-60');
     expect(layout).toContain('p-4 md:p-5');
     expect(layout).toContain('md:translate-x-0');
@@ -55,21 +55,20 @@ describe('admin shell design contract', () => {
   });
 
   it('loads the bundled Geist fonts without a network dependency', () => {
-    const layout = read('app/layout.js');
-    expect(layout).toContain('import localFont from "next/font/local"');
-    expect(layout).toContain('../node_modules/next/dist/next-devtools/server/font/geist-latin.woff2');
-    expect(layout).toContain('../node_modules/next/dist/next-devtools/server/font/geist-mono-latin.woff2');
-    expect(layout).not.toContain('next/font/google');
+    const entry = read('src/main.tsx');
+    expect(entry).toContain("import '@fontsource/geist/latin-400.css'");
+    expect(entry).toContain("import '@fontsource/geist-mono/latin-400.css'");
+    expect(entry).not.toContain('next/font');
   });
 
   it('bootstraps the fixed QA identity only for an explicit local development preview', () => {
-    const auth = read('lib/utils/auth.js');
+    const auth = read('src/lib/utils/auth.js');
     const syncIndex = auth.indexOf('syncUiPreviewAuth({');
     const tokenReadIndex = auth.indexOf("localStorage.getItem(getStorageKey('token'))");
 
     expect(auth).toContain("import { syncUiPreviewAuth } from './ui-preview-auth';");
-    expect(auth).toContain('nodeEnv: process.env.NODE_ENV');
-    expect(auth).toContain('previewEnabled: process.env.NEXT_PUBLIC_UI_PREVIEW');
+    expect(auth).toContain("nodeEnv: (import.meta.env.PROD ? 'production' : 'development')");
+    expect(auth).toContain('previewEnabled: import.meta.env.VITE_UI_PREVIEW');
     expect(auth).toContain('hostname: window.location.hostname');
     expect(syncIndex).toBeGreaterThan(-1);
     expect(syncIndex).toBeLessThan(tokenReadIndex);

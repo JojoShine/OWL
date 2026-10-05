@@ -1,0 +1,3 @@
+.owl-pagination nav > .ant-pagination { margin: 0; padding: 0; border: 0; white-space: nowrap; }
+.owl-pagination .owl-pagination-page { width: 100%; height: 100%; color: inherit; cursor: pointer; }
+.owl-pagination .owl-pagination-page:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; border-radius: 4px; }

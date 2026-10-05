@@ -1,5 +1,9 @@
 # 系统初始化
 
+本地源码运行请按 [本地快速启动](deployment/quickstart.md) 操作；镜像部署请按 [Docker 部署指南](deployment/docker.md) 操作。源码方式使用数据库管理命令前，先在 backend 执行 `npm ci && npm run build`；镜像内已包含构建产物。
+
+> 当前前端需要 Node 22，已使用 Vite 静态构建；前端完整部署以 [静态部署指南](architecture/static-frontend-deployment.md) 为准，下文旧自动化前端部署步骤不再适用。
+
 本文档说明如何从零开始完成 Owl Platform 的安装与初始化。
 
 ---
@@ -136,13 +140,13 @@ cp .env.example .env
 
 ```bash
 # API URL - 指向本地后端
-NEXT_PUBLIC_API_URL=http://localhost:3001/api/system
+VITE_API_URL=http://localhost:3001/api/system
 
 # Base Path - 本地开发为空
-NEXT_PUBLIC_BASE_PATH=
+VITE_BASE_PATH=
 
 # 应用名称
-NEXT_PUBLIC_APP_NAME=Owl Platform 管理后台
+VITE_APP_NAME=Owl Platform 管理后台
 ```
 
 #### 生产环境配置
@@ -215,13 +219,13 @@ cp .env.example .env.production
 
 ```bash
 # API URL - 使用相对路径，通过 nginx 转发
-NEXT_PUBLIC_API_URL=/owl/api
+VITE_API_URL=/owl/api
 
 # Base Path - 生产环境部署路径前缀
-NEXT_PUBLIC_BASE_PATH=/owl
+VITE_BASE_PATH=/owl
 
 # 应用名称
-NEXT_PUBLIC_APP_NAME=owl系统管理后台
+VITE_APP_NAME=owl系统管理后台
 ```
 
 **生成强随机密钥**
@@ -237,7 +241,8 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```bash
 cd backend
 
-# 开发环境全新空库
+# 先构建 Prisma Client 和后端；.env 中设置至少 12 位 INITIAL_ADMIN_PASSWORD
+npm run build
 npm run db:bootstrap
 
 # 生产环境全新空库：必须明确环境、管理员密码和目标库名
@@ -249,7 +254,7 @@ npm run db:bootstrap
 
 **更新现有数据库**
 
-已有数据库升级只执行新增 Migration，不会重复导入初始化数据：
+现有 Sequelize 库首次切换需先执行 `npm run db:baseline`：检查历史 001–005 均已完成，并比对表字段、索引、约束与枚举，再登记 Prisma 基线，不重放建表或 seed。已有底座表的额外字段、约束和索引也会拒绝接管；额外项目业务表允许保留。结构不一致会拒绝接管；旧版本库须先完成对应版本的历史升级。已由 Prisma 管理的数据库升级只执行新增 Migration，不会重复导入初始化数据：
 
 ```bash
 # 本地开发数据库升级
@@ -259,7 +264,7 @@ npm run db:deploy
 NODE_ENV=production npm run db:deploy
 ```
 
-> **注意**：首次建库和版本升级是两条独立流程。已投入使用的数据库只能新增 Migration，不能修改 `001-initial-schema` 或重新执行 Seeder。
+> **注意**：首次建库和版本升级是两条独立流程。已投入使用的数据库只能新增 Migration，不能修改已应用的 Prisma migration.sql 或重新执行 seed。
 
 **开发数据库重置**
 
@@ -294,6 +299,8 @@ npm run dev
 |------|------|------|
 | `npm run db:bootstrap` | 建立全新空库并导入初始化数据 | 仅首次安装 |
 | `npm run db:init` | `db:bootstrap` 的兼容别名 | 仅首次安装 |
+| `npm run db:baseline` | 校验旧库并登记 Prisma 基线 | 已有 Sequelize 库首次切换 |
+| `npm run db:seed` | 执行 Prisma seed，仅允许表内无数据 | 迁移完成但 seed 失败后的重试 |
 | `npm run db:deploy` | 只执行未运行的 Migration | 日常发布、生产升级 |
 | `npm run db:migrate` | `db:deploy` 的兼容别名 | 日常发布、生产升级 |
 | `npm run db:status` | 查看 Migration 状态 | 发布前检查 |
@@ -306,7 +313,7 @@ npm run dev
 
 ### Docker 部署建议
 
-前后端容器化后，数据库迁移应作为一次性 Job/初始化容器运行：先执行 `npm run db:deploy`，成功后再启动后端容器。不要在每个后端副本启动时自动迁移，避免多副本并发和应用启动循环。首次安装单独执行一次 `db:bootstrap`。
+后端容器化后，数据库迁移应作为一次性 Job/初始化容器运行：先执行 `npm run db:deploy`，成功后再启动后端容器。不要在每个后端副本启动时自动迁移，避免多副本并发和应用启动循环。首次安装单独执行一次 `db:bootstrap`。
 
 ---
 
@@ -318,62 +325,16 @@ npm run dev
 
 ```bash
 cd frontend
-npm run build  # 生成 .next 产物
+npm run build  # 生成 dist 静态产物
 ```
 
-**自动化部署**
-
-```bash
-# 执行部署脚本，自动打包并生成压缩包
-./deploy.sh
-
-# 脚本会输出压缩包路径，用于上传到生产服务器
-# 示例输出：deployment/frontend-20240115-143022.tar.gz
-```
-
-**部署到服务器**
-
-```bash
-# 1. 上传压缩包到生产服务器
-scp deployment/frontend-*.tar.gz user@production-server:/opt/owl/
-
-# 2. 服务器端解压和启动
-cd /opt/owl
-tar -xzf frontend-*.tar.gz
-npm start
-# 或使用 PM2
-pm2 start npm --name "owl-frontend" -- start
-```
+将 `frontend/dist/` 内容上传到现有 Nginx 的站点目录，配置 SPA 路由回退和 `/api` 反向代理，无需 Node 或 PM2 启动前端。详见 [静态前端部署](architecture/static-frontend-deployment.md)。
 
 ### 后端构建与部署
 
-**自动化部署**
+GitHub CI 验证通过后构建并推送 Docker Hub 镜像；本地与服务器使用同一版本镜像和同一份 `compose.yaml`，部署目录仅需 `.env` 注入各自配置。数据库使用外部 PostgreSQL，每个项目独立 database 与账号。
 
-```bash
-cd backend/deploy
-./deploy.sh
-
-# 脚本会构建 Node.js 应用并生成可部署的产物
-```
-
-**使用 PM2 在生产环境启动**
-
-```bash
-# 安装 PM2（全局）
-npm install -g pm2
-
-# 启动后端应用
-cd /opt/owl/backend
-pm2 start ecosystem.config.js --env production
-
-# 查看运行状态
-pm2 status
-pm2 logs owl-backend
-
-# 配置开机自启
-pm2 startup
-pm2 save
-```
+部署时先执行一次性迁移服务，再启动后端；新数据库先完成 Prisma 初始化。完整命令、环境变量与首次部署步骤见 [Docker 部署](deployment/docker.md)。
 
 ### Nginx 反向代理配置
 
@@ -519,3 +480,11 @@ redis-cli ping  # 应返回 PONG
 lsof -i :3000  # 查看占用进程
 kill -9 <PID>
 ```
+
+### Prisma 迁移维护
+
+结构版本位于 `backend/prisma/migrations`，当前基线合并历史 001–005 的最终结构。初始化数据通过 Prisma Client 在事务中导入，保留原始菜单和授权；管理员使用配置密码，示例账号保持禁用。seed 失败会回滚数据、保留已经完成的结构迁移，修正后可用 `npm run db:seed` 重试，禁止清空有数据的库重试。
+
+今后结构变更新增 Prisma migration，使用独立开发/影子数据库生成和检查 SQL，再提交仓库；生产只执行 `db:deploy`。不要对生产或含动态业务表的现有项目库运行 `db push` 或 `migrate dev`。schema 包含底座表；生成器创建的项目业务表仍由业务模块管理，不能通过 Prisma diff 删除它们。字典表保持无主键并标记 `@@ignore`，由 Prisma 参数化 SQL 查询。
+
+所有数据库入口（包括直接 `prisma db seed`）共用环境解析：显式环境变量优先；development/test 优先 `.env.local`、不存在时使用 `.env`；production 优先 `.env.production`、不存在时使用 `.env`。

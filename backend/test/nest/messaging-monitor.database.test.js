@@ -1,0 +1,74 @@
+jest.mock('axios',()=>jest.fn(async()=>({status:200,data:{healthy:true}})));
+const enabled=process.env.OWL_DATABASE_TEST==='1';
+(enabled?describe:describe.skip)('messaging and monitoring PostgreSQL integration',()=>{
+ let db;
+ beforeAll(async()=>{require('dotenv').config();process.env.DB_NAME_TEST=process.env.DB_NAME;const {PrismaService}=require('../../dist/nest/database/prisma.service');db=new PrismaService();await db.$connect();});
+ afterAll(async()=>{await db?.$disconnect();});
+ it('maps existing PostgreSQL rows without altering stored data', async () => { await require('./postgres-contract').assertRowsMatchPostgres(db, ["owl_notifications","owl_notification_settings","owl_email_templates","owl_email_logs","owl_email_tasks","owl_api_monitors","owl_api_monitor_logs","owl_alert_rules","owl_alert_history","owl_server_monitors","owl_server_monitor_logs","owl_server_monitor_ports"]); });
+ it('preserves ownership, task results, monitoring relations and soft deletion',async()=>{
+  const {randomUUID}=require('node:crypto'),suffix=randomUUID().slice(0,8),rollback=new Error('rollback phase4');
+  const {UsersService}=require('../../dist/nest/identity/users.service');
+  const {NotificationsService}=require('../../dist/nest/notification/notifications.service');
+  const {NotificationSettingsService}=require('../../dist/nest/notification/settings.service');
+  const {EmailTemplatesService}=require('../../dist/nest/notification/templates.service');
+  const {EmailService}=require('../../dist/nest/notification/email.service');
+  const {EmailTasksService}=require('../../dist/nest/notification/email-tasks.service');
+  const {ApiMonitorService}=require('../../dist/nest/monitor/api-monitor.service');
+  const {ServerMonitorService}=require('../../dist/nest/monitor/server-monitor.service');
+  const {AlertService}=require('../../dist/nest/monitor/alert.service');
+  let userId;
+  try{await db.$transaction(async tx=>{
+   let store;store=new Proxy(tx,{get(target,key){return key==='$transaction'?work=>work(store):Reflect.get(target,key);}});
+   const users=new UsersService(store,{invalidateUser(){},invalidateRoles(){}});
+   const user=await users.createUser({username:'message_'+suffix,email:suffix+'@test.invalid',password:'test-password'});userId=user.id;
+   const notifications=new NotificationsService(store),settings=new NotificationSettingsService(store),templates=new EmailTemplatesService(store);
+   const transport={available:true,send:jest.fn(async()=>({messageId:'test-message',response:'accepted'}))};
+   const email=new EmailService(store,templates,transport),tasks=new EmailTasksService(store,email),apis=new ApiMonitorService(store,email),servers=new ServerMonitorService(store,email),alerts=new AlertService(store,email,notifications,{});
+   try{
+    const message=await notifications.createNotification({user_id:user.id,title:'test',content:'test'});
+    expect(await notifications.getUnreadCount(user.id)).toBe(1);
+    await expect(notifications.markAsRead(message.id,randomUUID())).rejects.toMatchObject({status:404});
+    expect((await notifications.getUserNotifications(user.id,{isRead:false})).notifications[0].user.username).toBe(user.username);
+    await notifications.markAsRead(message.id,user.id);expect(await notifications.getUnreadCount(user.id)).toBe(0);
+    expect((await notifications.getNotificationStats(user.id)).byType.info).toBe(1);
+    await notifications.clearReadNotifications(user.id);await expect(notifications.getNotificationById(message.id,user.id)).rejects.toMatchObject({status:404});
+    expect((await settings.getUserSettings(user.id)).email_enabled).toBe(true);
+    await settings.updateUserSettings(user.id,{push_enabled:false});expect(await settings.isNotificationEnabled(user.id,'info')).toBe(false);
+    await settings.resetUserSettings(user.id);expect(await settings.isNotificationEnabled(user.id,'info')).toBe(true);
+    const template=await templates.createTemplate({name:'test_'+suffix,subject:'{{title}}',content:'{{content}}'});
+    expect((await templates.previewTemplate(template.id,{title:'safe',content:'<script>'})).html).toBe('&lt;script&gt;');
+    await email.sendEmailWithTemplate({templateName:template.name,to:'test@example.invalid',variables:{title:'test',content:'body'}});
+    expect(transport.send.mock.calls[0][0].html).toBe('body');
+    const task=await tasks.createTask({name:'test',template_id:template.id,recipients:'test@example.invalid',enabled:false,frequency:'once'},user.id);
+    await tasks.manualExecuteTask(task.id);expect((await tasks.getTaskById(task.id)).last_status).toBe('success');
+    transport.available=false;await tasks.manualExecuteTask(task.id);expect((await tasks.getTaskById(task.id)).last_status).toBe('failed');expect((await tasks.getTaskById(task.id)).execution_count).toBe(2);
+    await tasks.deleteTask(task.id,user.id);await expect(tasks.getTaskById(task.id)).rejects.toMatchObject({status:404});
+    const api=await apis.createMonitor({name:'test',url:'http://127.0.0.1:1',created_by:user.id,enabled:false,headers:null,alert_recipients:null});
+    await apis.executeMonitor(api);
+    expect((await apis.getAllMonitors({enabled:'false'})).items.find(row=>row.id===api.id).lastLog.status_code).toBe(200);
+    expect((await apis.getMonitorStats(api.id)).availability).toBe(100);
+    expect((await apis.getMonitorLogs(api.id,{startDate:new Date(Date.now()-60000).toISOString()})).total).toBe(1);
+    await apis.updateMonitor(api.id,{name:'changed',enabled:false,headers:null});
+    const server=await servers.createServer({name:'test',ip_address:'127.0.0.1',username:'test',enabled:false},user.id);
+    const port=await servers.addPort(server.id,{port:8080,enabled:false});
+    expect((await servers.getServerById(server.id)).ports[0].id).toBe(port.id);
+    expect((await servers.getAllServers({enabled:false})).servers.find(row=>row.id===server.id).ports[0].id).toBe(port.id);
+    await servers.updatePort(port.id,{service_name:'test'});await servers.deletePort(port.id);
+    expect((await servers.getServerById(server.id)).ports).toEqual([]);
+    await tx.owl_server_monitors.update({where:{id:server.id},data:{enabled:true}});
+    servers.collectMetrics=async()=>({cpuUsage:12,memoryUsage:20,memoryUsedMb:100,memoryTotalMb:500,diskUsage:30,diskUsedGb:30,diskTotalGb:100,loadAvg1m:0.5,loadAvg5m:0.4,loadAvg15m:0.3});
+    await servers.checkServer(server.id);expect((await servers.getServerLogs(server.id)).items[0].check_status).toBe('success');
+    const rule=await alerts.createRule({name:'test',metric_type:'system',metric_name:'cpu_usage',condition:'>',threshold:90,enabled:false});
+    await alerts.triggerAlert(rule,95);
+    const history=await tx.owl_alert_history.create({data:{rule_id:rule.id,message:'test',status:'pending'}});
+    expect((await alerts.getAlertHistory({rule_id:rule.id})).items[0].rule.name).toBe('test');
+    await alerts.resolveAlert(history.id);expect((await tx.owl_alert_history.findUnique({where:{id:history.id}})).status).toBe('resolved');
+    await alerts.deleteRule(rule.id);await expect(alerts.getRuleById(rule.id)).rejects.toThrow();
+    await servers.deleteServer(server.id,user.id);expect(await servers.getServerById(server.id)).toBeNull();
+    await apis.deleteMonitor(api.id);await expect(apis.getMonitorById(api.id)).rejects.toThrow();
+    throw rollback;
+   }finally{await tasks.stop();apis.stopAllScheduledJobs();servers.stopAllMonitoring();alerts.stopAlertCheckJob();}
+  },{timeout:30000});}catch(error){if(error!==rollback)throw error;}
+  expect(await db.owl_users.findUnique({where:{id:userId}})).toBeNull();
+ },40000);
+});

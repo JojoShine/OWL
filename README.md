@@ -1,5 +1,7 @@
 # Owl Platform
 
+> 前端使用 React / Vite / Ant Design，构建为静态文件交给 Nginx；后端使用 NestJS / Prisma，初始化和历史迁移已统一到 Prisma，旧实现已清理。本地与服务器使用同一版本后端镜像和同一份 Compose，仅 `.env` 不同。详见 [Docker 部署](docs/deployment/docker.md) 与 [静态前端部署](docs/architecture/static-frontend-deployment.md)。
+
 > 项目文档统一维护在 [docs 文档中心](./docs/README.md)，代码目录内不再保留独立说明文档。
 
 <div align="center">
@@ -30,8 +32,8 @@ Owl Platform 是一个面向业务系统的**完整前后端一体的管理后�
 **Owl Platform 的目标是：** 让这些通用能力开箱即用，开发者只需专注在业务逻辑本身，而不是重复建设基础设施。
 
 这不仅仅是一个前端 UI 框架，而是一个**完整的业务系统框架**，包含：
-- 前端：Next.js + React 组件体系
-- 后端：Node.js + Express API 服务
+- 前端：React + Vite + React Router，Ant Design 与现有组件体系
+- 后端：NestJS API 服务
 - 数据库：PostgreSQL 数据模型与迁移
 - 存储：MinIO 文件管理
 - 缓存：Redis 会话与缓存
@@ -314,64 +316,40 @@ Owl Platform 的核心竞争力与创新特性：
 
 | 层级 | 技术 | 说明 |
 |------|------|------|
-| 前端 | Next.js 14 (App Router) | 现代化 React 框架，支持 SSR/SSG |
+| 前端 | React + Vite + React Router | 静态 SPA，构建输出 dist，由 Nginx 托管 |
 | 前端 | Tailwind CSS | 原子化 CSS，快速构建 UI |
 | 前端 | shadcn/ui | 高质量 React 组件库 |
-| 后端 | Node.js 18+ | JavaScript 运行时 |
-| 后端 | Express | 轻量级 Web 框架 |
+| 后端 | Node.js 22.12+ | JavaScript 运行时 |
+| 后端 | NestJS | 模块化 API 服务 |
 | 后端 | PostgreSQL 12+ | 关系数据库 |
-| 后端 | Sequelize | ORM 框架 |
+| 后端 | Prisma | 运行时 ORM、初始化和版本迁移 |
 | 缓存 | Redis 6+ | 会话缓存、速率限制 |
 | 存储 | MinIO | 兼容 S3 的文件存储 |
 | 日志 | Winston | 结构化日志系统 |
-| 部署 | Docker / PM2 | 容器化或进程管理 |
+| 部署 | Docker Hub / Compose / Nginx | 后端镜像与前端静态部署 |
 | 部署 | Nginx | 反向代理与负载均衡 |
 
 ---
 
 ## 快速开始
 
-### 前置要求
+### 本地源码开发
 
-- Node.js 18+
-- PostgreSQL 12+
-- Redis 6+
-- MinIO
+首次拿到仓库，请按 [本地快速启动](docs/deployment/quickstart.md) 操作：
 
-### 安装与初始化
+1. 准备 Node.js 22.12+，配置 `backend/.env`。
+2. 连接已有测试 PostgreSQL、MinIO，或用 `compose.local-db.yaml` 启动测试依赖。
+3. 后端执行 `npm ci`、`npm run build`，首次空库执行 `npm run db:bootstrap`。
+4. 分别在两个终端启动后端与前端的 `npm run dev`；前端开发配置使用 `.env.development.local`。
+5. 按指南访问 `http://127.0.0.1:5173/`，使用 `admin` 和初始化时设置的密码登录。
 
-详细安装步骤请查看 [系统初始化指南](./docs/02-initialization.md)，包含：
+本地开发直接运行源码并热更新。这里的 Docker 仅用于可选测试依赖，不要求构建应用镜像或配置 Nginx。
 
-- 依赖安装（推荐使用 ant-eyes 工具一键安装）
-- 环境配置（开发/生产环境分离）
-- 数据库初始化与迁移
-- 本地启动
-- 生产部署
+### Docker 镜像部署
 
-快速启动命令：
+部署发布版本请使用 [Docker 部署指南](docs/deployment/docker.md)：本地镜像验收与服务器共用同一镜像和 `compose.yaml`，仅部署目录的 `.env` 不同。前端 `dist` 交给现有 Nginx，见 [静态前端部署](docs/architecture/static-frontend-deployment.md)。
 
-```bash
-# 克隆项目
-git clone https://github.com/JojoShine/owl owl_platform
-cd owl_platform
-
-# 安装依赖
-cd backend && npm install
-cd ../frontend && npm install
-
-# 配置环境变量
-cd ../backend && cp .env.example .env.local
-# 编辑 .env.local，填写数据库、Redis、MinIO 等信息
-
-# 初始化数据库
-npm run db:init
-
-# 启动服务
-cd backend && npm run dev       # 后端服务 :3001
-cd frontend && npm run dev      # 前端服务 :3000
-```
-
-访问 http://localhost:3000 进行登录（初始账号密码见 [系统初始化指南](./docs/02-initialization.md)）。
+源码开发与镜像部署是两条独立流程，配置文件不要混用。
 
 ---
 
@@ -379,29 +357,31 @@ cd frontend && npm run dev      # 前端服务 :3000
 
 ```
 owl_platform/
-├── frontend/                   # 前端应用 (Next.js)
-│   ├── app/
-│   │   ├── (authenticated)/   # 登录后页面
-│   │   ├── auth/              # 认证相关页面
-│   │   └── api/               # API 路由
-│   ├── components/            # React 组件库
-│   ├── lib/
-│   │   ├── api/              # API 客户端
-│   │   └── utils/            # 工具函数
-│   ├── public/               # 静态资源
-│   └── deploy/               # 部署脚本
-├── backend/                   # 后端应用 (Express)
+├── frontend/                   # 前端应用 (React / Vite / Ant Design)
 │   ├── src/
-│   │   ├── core/            # 核心模块（权限、日志、文件等）
-│   │   ├── business/        # 业务模块
-│   │   └── middleware/      # Express 中间件
-│   ├── migrations/          # 数据库迁移脚本
-│   ├── seeders/             # 初始化数据脚本
-│   └── deploy/              # 部署脚本
+│   │   ├── pages/             # 业务页面
+│   │   ├── layouts/           # 共享布局
+│   │   ├── routing/           # React Router 路由
+│   │   ├── components/        # 共享与业务组件
+│   │   ├── contexts/          # 应用状态
+│   │   └── lib/               # API 客户端与工具函数
+│   ├── public/                # 静态资源
+│   ├── dist/                  # npm run build 产物
+│   └── deploy/                # Nginx 部署示例
+├── backend/                   # 后端应用 (NestJS)
+│   ├── src/
+│   │   ├── nest/             # Nest 模块、控制器与 Prisma 服务
+│   │   └── shared/           # 随构建编译的共享校验与工具
+│   ├── prisma/               # 数据模型、迁移与初始化
+│   ├── scripts/              # 数据库管理入口
+│   └── Dockerfile            # 后端生产镜像
 ├── nginx/                    # Nginx 配置示例
 │   ├── owl.conf.example     # HTTPS 生产配置
 │   ├── owl-http.conf.example # HTTP 配置
 │   └── owl-dev.conf.example # 本地开发配置
+├── compose.yaml              # 本地和服务器共用的后端部署入口
+├── .env.example              # 复制为部署目录的 .env
+├── compose.local-db.yaml     # 可选的本地测试依赖
 ├── docs/                     # 项目文档
 │   ├── README.md             # 统一文档入口
 │   ├── 01-overview.md       # 项目总览
@@ -424,20 +404,34 @@ owl_platform/
 | [系统初始化](./docs/02-initialization.md) | 完整的安装、配置、部署指南 |
 | [开发指南](./docs/03-development-guide.md) | 开发规范、目录结构、最佳实践 |
 | [架构文档](./docs/architecture/) | 前后端结构、模型与公共能力 |
-| [部署文档](./docs/deployment/) | Docker 与传统部署方式 |
+| [部署文档](./docs/deployment/) | 统一镜像部署与 Nginx 静态部署 |
 | [功能文档](./docs/features/) | 各个功能模块的详细说明 |
 
 ---
 
 ## 部署
 
-### 本地开发
+### 后端统一镜像部署
+
+本地和服务器的部署目录都只需 `compose.yaml` 与 `.env`：
+
 ```bash
-npm run dev  # 前后端同时启动
+cp .env.example .env
+# 填写 BACKEND_IMAGE、数据库、对象存储、密钥和站点配置
+# 两个环境使用同一镜像版本，仅 .env 内容不同
+docker compose config --quiet
+docker compose pull
+# 首次空库需先初始化，旧版数据库需先接管，见下面的部署指南
+docker compose up -d
 ```
 
-### 生产环境
-推荐使用 PM2 或 Docker Compose 部署，详见 [系统初始化指南](./docs/02-initialization.md)。
+主 Compose 包含后端和一次性 Prisma 迁移服务，共用同一镜像；迁移成功后启动后端。数据库使用外部 PostgreSQL。首次初始化、旧库接管、版本升级及配置差异见 [Docker 部署指南](docs/deployment/docker.md)。
+
+GitHub CI 在前后端检查全部通过后发布 Docker Hub 镜像，同一标签支持 amd64/arm64。本地验收通过的相同版本用于服务器，不按环境重新构建。
+
+### 前端静态部署
+
+在 `frontend` 执行 `npm run build`，将 `dist/` 上传到现有 Nginx，配置 SPA 路由回退和后端代理。详见 [静态部署指南](docs/architecture/static-frontend-deployment.md)。
 
 **Nginx 配置示例**
 - `nginx/owl-http.conf.example` - HTTP 80 端口（开发/测试环境）

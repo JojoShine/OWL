@@ -29,9 +29,9 @@ Owl Platform 是一个**面向业务系统的通用管理后台基础框架**，
 
 | 层级 | 技术选型 |
 |------|----------|
-| 前端 | Next.js (App Router) + Tailwind CSS + shadcn/ui |
-| 后端 | Node.js + Express |
-| 数据库 | PostgreSQL + Sequelize ORM |
+| 前端 | React + Vite + React Router + Ant Design / 现有组件 |
+| 后端 | NestJS |
+| 数据库 | PostgreSQL + Prisma ORM |
 | 缓存 | Redis |
 | 文件存储 | MinIO |
 | 日志 | Winston |

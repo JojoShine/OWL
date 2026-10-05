@@ -131,9 +131,9 @@ describe('read-only UI preview isolation', () => {
   });
 
   it('allows the QA environment to disable Socket connections explicitly', async () => {
-    const socketContextPath = fileURLToPath(new URL('../contexts/SocketContext.jsx', import.meta.url));
+    const socketContextPath = fileURLToPath(new URL('../src/contexts/SocketContext.jsx', import.meta.url));
     const source = await readFile(socketContextPath, 'utf8');
 
-    expect(source).toContain("if (process.env.NEXT_PUBLIC_DISABLE_SOCKET === 'true') return null;");
+    expect(source).toContain("if (import.meta.env.VITE_DISABLE_SOCKET === 'true') return null;");
   });
 });

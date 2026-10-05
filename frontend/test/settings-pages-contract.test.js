@@ -5,10 +5,10 @@ import { describe, expect, it } from 'vitest';
 const read = (file) => readFileSync(resolve(process.cwd(), file), 'utf8');
 
 const settingsPages = [
-  'app/(authenticated)/setting/config-management/page.jsx',
-  'app/(authenticated)/setting/dashboard-widgets/page.js',
-  'app/(authenticated)/setting/notification-settings/page.js',
-  'app/(authenticated)/setting/watermark-settings/page.js',
+  'src/pages/setting/config-management/index.jsx',
+  'src/pages/setting/dashboard-widgets/index.jsx',
+  'src/pages/setting/notification-settings/index.jsx',
+  'src/pages/setting/watermark-settings/index.jsx',
 ];
 
 describe('settings page surfaces', () => {
