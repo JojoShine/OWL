@@ -7,7 +7,7 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils"
 
 const alertVariants = cva(
-  "owl-notice relative w-full rounded-xl border px-4 py-3 text-sm leading-6 [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-3.5 [&>svg]:size-4 [&>svg]:text-current",
+  "owl-notice relative w-full rounded-xl border px-4 py-3 text-sm leading-6",
   {
     variants: {
       variant: {

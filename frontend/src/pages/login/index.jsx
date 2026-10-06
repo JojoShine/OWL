@@ -38,7 +38,7 @@ function LoginForm() {
   const [registrationEnabled, setRegistrationEnabled] = useState(true);
   const [loginMethod, setLoginMethod] = useState('both'); // 登录方式：password|sms|both
   const [loginLayout, setLoginLayout] = useState('center');
-  const [loginTab, setLoginTab] = useState('sms'); // 默认短信登录
+  const [loginTab, setLoginTab] = useState('password'); // 默认密码登录
   const captchaInputRef = useRef(null);
 
   const {
@@ -153,7 +153,8 @@ function LoginForm() {
       description="请输入您的账号信息登录系统"
       backgroundUrl={loginBgUrl}
       layout={loginLayout}
-      footer={showTechStack ? 'Powered by TBTParent' : null}
+      footer="Powered by TBTParent"
+      showTechStack={showTechStack}
     >
         {systemStatus && !systemStatus.redis?.available && (
           <Alert variant="warning" className="mb-4">
@@ -163,13 +164,30 @@ function LoginForm() {
           </Alert>
         )}
         
+        {(loginMethod === 'password' || loginMethod === 'both') && (
+          <div className="mb-6 rounded-lg border border-border bg-muted/50 p-4 text-sm">
+            <p className="font-medium">试用账号 · 超级管理员</p>
+            <dl className="mt-2 space-y-1 text-muted-foreground">
+              <div className="flex flex-wrap gap-x-2">
+                <dt>账号</dt>
+                <dd className="select-all font-mono text-foreground">viewer_admin</dd>
+              </div>
+              <div className="flex flex-wrap gap-x-2">
+                <dt>密码</dt>
+                <dd className="select-all font-mono text-foreground">jiqNW1I6wprH</dd>
+              </div>
+            </dl>
+            <p className="mt-2 text-xs text-muted-foreground">使用密码登录即可体验系统功能。</p>
+          </div>
+        )}
+
         {/* 登录方式Tab切换 */}
         <Tabs value={loginTab} onValueChange={setLoginTab} className="w-full">
           {/* 根据配置显示Tab */}
           {loginMethod === 'both' && (
             <TabsList stretch className="mb-6">
-              <TabsTrigger value="sms">短信登录</TabsTrigger>
               <TabsTrigger value="password">密码登录</TabsTrigger>
+              <TabsTrigger value="sms">短信登录</TabsTrigger>
             </TabsList>
           )}
           
@@ -190,11 +208,6 @@ function LoginForm() {
           {(loginMethod === 'password' || loginMethod === 'both') && (
             <TabsContent value="password">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
                 <div className="space-y-2.5">
                   <Label htmlFor="username">用户名或邮箱</Label>
                   <Controller name={'username'} control={control} render={({ field: controlledField }) => (
@@ -231,6 +244,13 @@ function LoginForm() {
                   error={errors.captchaCode?.message}
                   disabled={isLoading}
                 />
+                {error && (
+                  <div aria-live="polite" aria-atomic="true">
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  </div>
+                )}
                 <Button
                   type="submit"
                   className="w-full"

@@ -375,10 +375,7 @@ owl_platform/
 │   ├── prisma/               # 数据模型、迁移与初始化
 │   ├── scripts/              # 数据库管理入口
 │   └── Dockerfile            # 后端生产镜像
-├── nginx/                    # Nginx 配置示例
-│   ├── owl.conf.example     # HTTPS 生产配置
-│   ├── owl-http.conf.example # HTTP 配置
-│   └── owl-dev.conf.example # 本地开发配置
+├── deploy/nginx/owl.conf      # 唯一 Nginx 配置：静态前端与后端代理
 ├── compose.yaml              # 本地和服务器共用的后端部署入口
 ├── .env.example              # 复制为部署目录的 .env
 ├── compose.local-db.yaml     # 可选的本地测试依赖
@@ -433,10 +430,9 @@ GitHub CI 在前后端检查全部通过后发布 Docker Hub 镜像，同一标�
 
 在 `frontend` 执行 `npm run build`，将 `dist/` 上传到现有 Nginx，配置 SPA 路由回退和后端代理。详见 [静态部署指南](docs/architecture/static-frontend-deployment.md)。
 
-**Nginx 配置示例**
-- `nginx/owl-http.conf.example` - HTTP 80 端口（开发/测试环境）
-- `nginx/owl.conf.example` - HTTPS 443 端口（生产环境）
-- `nginx/owl-dev.conf.example` - 本地开发配置
+**Nginx 配置**
+
+使用 [deploy/nginx/owl.conf](deploy/nginx/owl.conf)，按文件注释修改域名、静态目录和后端端口。默认 `/owl/` 对应前端构建路径，后端代理端口为 5002；HTTPS 沿用现有站点配置。
 
 ---
 

@@ -15,7 +15,7 @@
 
 ## 配置方式
 
-在 `.env` 中填写以下参数（生产环境在 `.env.production` 中配置）：
+源码开发在 `backend/.env`、Docker 部署在部署目录 `.env` 中填写以下参数：
 
 ```bash
 # 阿里云通用

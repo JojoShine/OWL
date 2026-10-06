@@ -33,6 +33,7 @@ export default function FileUploader({
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
 
     // 验证文件大小
@@ -85,6 +86,8 @@ export default function FileUploader({
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
+      <input ref={fileInputRef} type="file" accept={accept} aria-label={`上传${label}`}
+        className="hidden" onChange={handleFileChange} disabled={uploading} />
 
       <div
         className={`
@@ -112,11 +115,17 @@ export default function FileUploader({
                 </div>
               </div>
             )}
+            <div className="absolute inset-x-2 bottom-2 flex justify-center">
+              <Button type="button" variant="secondary" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
+                <Upload className="size-4" />{uploading ? '上传中...' : '更换图片'}
+              </Button>
+            </div>
             <Button
+              aria-label={`移除${label}`}
               type="button"
               variant="destructive"
               size="icon"
-              className="absolute top-2 right-2"
+              style={{ position: 'absolute', top: 8, right: 8 }}
               onClick={handleDelete}
               disabled={uploading}
             >
@@ -124,7 +133,7 @@ export default function FileUploader({
             </Button>
           </>
         ) : (
-          <label className="flex flex-col items-center justify-center h-full cursor-pointer hover:bg-muted/50 transition">
+          <button type="button" disabled={uploading} onClick={() => fileInputRef.current?.click()} className="w-full flex flex-col items-center justify-center h-full cursor-pointer hover:bg-muted/50 transition">
             <Upload className="w-8 h-8 text-muted-foreground mb-2" />
             <span className="text-sm text-muted-foreground">
               {uploading ? '上传中...' : '点击上传'}
@@ -132,15 +141,8 @@ export default function FileUploader({
             <span className="text-xs text-muted-foreground mt-1">
               最大 {maxSize}MB
             </span>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={accept}
-              className="hidden"
-              onChange={handleFileChange}
-              disabled={uploading}
-            />
-          </label>
+
+          </button>
         )}
       </div>
     </div>

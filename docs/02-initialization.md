@@ -72,167 +72,16 @@ npm install
 
 ### 3. 配置环境变量
 
-本项目使用分离的环境配置文件：
-- `backend/.env` 和 `frontend/.env` — 本地开发环境（默认）
-- `backend/.env.production` 和 `frontend/.env.production` — 生产环境
+仓库只提交 `.env.example` 模板；实际 `.env*` 保留在各自机器上，已被 Git 忽略。模板按用途分区，逐项说明必填条件、默认值和地址填写方式。
 
-#### 本地开发环境配置
+| 用途 | 模板 → 实际配置 |
+|---|---|
+| 后端本地源码开发 | `backend/.env.example` → `backend/.env` |
+| 前端本地源码开发 | `frontend/.env.example` → `frontend/.env.development.local` |
+| Docker 部署 | 根目录 `.env.example` → 部署目录 `.env` |
+| 自定义前端生产构建 | `frontend/.env.example` → `frontend/.env.production`；调整 VITE_BASE_PATH |
 
-**后端配置**
-
-```bash
-cd backend
-cp .env.example .env
-```
-
-编辑 `backend/.env`：
-
-```bash
-# 数据库
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=owl
-DB_USER=postgres
-DB_PASSWORD=your_password
-
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-
-# JWT
-JWT_SECRET=your_random_secret_key_here
-JWT_REFRESH_SECRET=your_random_refresh_key_here
-
-# MinIO
-MINIO_ENDPOINT=localhost
-MINIO_PORT=9000
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin
-MINIO_BUCKET=owl
-MINIO_USE_SSL=false
-
-# 短信（可选）
-SMS_ACCESS_KEY_ID=
-SMS_ACCESS_KEY_SECRET=
-SMS_SIGN_NAME=
-SMS_TEMPLATE_CODE=
-
-# 邮件（可选）
-SMTP_HOST=
-SMTP_PORT=465
-SMTP_USER=
-SMTP_PASSWORD=
-
-# 应用配置
-APP_ENV=development
-APP_DEBUG=true
-```
-
-**前端配置**
-
-```bash
-cd frontend
-cp .env.example .env
-```
-
-编辑 `frontend/.env`：
-
-```bash
-# API URL - 指向本地后端
-VITE_API_URL=http://localhost:3001/api/system
-
-# Base Path - 本地开发为空
-VITE_BASE_PATH=
-
-# 应用名称
-VITE_APP_NAME=Owl Platform 管理后台
-```
-
-#### 生产环境配置
-
-**后端配置**
-
-```bash
-cd backend
-cp .env.example .env.production
-```
-
-编辑 `backend/.env.production`：
-
-```bash
-# 应用环境
-APP_ENV=production
-APP_DEBUG=false
-NODE_ENV=production
-
-# 数据库 - 生产环境
-DB_HOST=your_production_db_host
-DB_PORT=5432
-DB_NAME=owl_prod
-DB_USER=owl_db_user
-DB_PASSWORD=strong_database_password_here
-
-# 首次建库时使用，至少 12 位；不会输出到日志
-INITIAL_ADMIN_PASSWORD=replace_with_a_strong_password
-# 首次建库确认值，必须与 DB_NAME 完全一致
-DB_BOOTSTRAP_CONFIRM=owl_prod
-
-# Redis - 生产环境
-REDIS_HOST=your_production_redis_host
-REDIS_PORT=6379
-REDIS_PASSWORD=strong_redis_password_here
-
-# JWT - 使用强随机密钥
-JWT_SECRET=<生成的32位随机十六进制字符串>
-JWT_REFRESH_SECRET=<生成的32位随机十六进制字符串>
-
-# MinIO - 生产环境
-MINIO_ENDPOINT=your_minio_server_domain
-MINIO_PORT=9000
-MINIO_ACCESS_KEY=production_access_key
-MINIO_SECRET_KEY=production_secret_key
-MINIO_BUCKET=owl-prod
-MINIO_USE_SSL=true
-
-# 短信服务（如启用）
-SMS_ACCESS_KEY_ID=your_sms_key_id
-SMS_ACCESS_KEY_SECRET=your_sms_key_secret
-SMS_SIGN_NAME=your_sms_sign_name
-SMS_TEMPLATE_CODE=your_sms_template_code
-
-# 邮件服务（如启用）
-SMTP_HOST=your_smtp_host
-SMTP_PORT=465
-SMTP_USER=your_email@example.com
-SMTP_PASSWORD=your_smtp_password
-```
-
-**前端配置**
-
-```bash
-cd frontend
-cp .env.example .env.production
-```
-
-编辑 `frontend/.env.production`：
-
-```bash
-# API URL - 使用相对路径，通过 nginx 转发
-VITE_API_URL=/owl/api
-
-# Base Path - 生产环境部署路径前缀
-VITE_BASE_PATH=/owl
-
-# 应用名称
-VITE_APP_NAME=owl系统管理后台
-```
-
-**生成强随机密钥**
-
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
+不要把后端密码填写到前端 VITE_ 参数中。SMTP、短信等可选服务按实际需求填写，已有配置不要被模板覆盖。完整操作分别见 [本地快速启动](deployment/quickstart.md) 和 [Docker 部署](deployment/docker.md)。
 
 ### 4. 初始化数据库
 
@@ -336,100 +185,11 @@ GitHub CI 验证通过后构建并推送 Docker Hub 镜像；本地与服务器�
 
 部署时先执行一次性迁移服务，再启动后端；新数据库先完成 Prisma 初始化。完整命令、环境变量与首次部署步骤见 [Docker 部署](deployment/docker.md)。
 
-### Nginx 反向代理配置
+### Nginx 配置
 
-项目提供两份 Nginx 配置示例供选择：
+统一使用 [deploy/nginx/owl.conf](../deploy/nginx/owl.conf)。默认将 `/owl/` 映射到 `/srv/www/owl/` 中的静态文件，并将 API 和 Socket.IO 代理到 `127.0.0.1:5002`。前端无需 Node 服务。
 
-#### 方案一：HTTP 80 端口（开发/测试环境）
-
-创建 `/etc/nginx/sites-available/owl-http.conf`：
-
-```bash
-# 使用项目提供的示例配置
-sudo cp nginx/owl-http.conf.example /etc/nginx/sites-available/owl-http.conf
-```
-
-编辑配置，修改 `server_name`：
-
-```bash
-sudo vi /etc/nginx/sites-available/owl-http.conf
-```
-
-启用配置：
-
-```bash
-# Ubuntu/Debian
-sudo ln -s /etc/nginx/sites-available/owl-http.conf /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
-
-# macOS
-sudo nginx -t
-sudo nginx -s reload
-```
-
-#### 方案二：HTTPS + SSL（生产环境）
-
-创建 `/etc/nginx/sites-available/owl.conf`：
-
-```bash
-# 使用项目提供的示例配置
-sudo cp nginx/owl.conf.example /etc/nginx/sites-available/owl.conf
-```
-
-编辑配置，修改以下内容：
-
-```bash
-sudo vi /etc/nginx/sites-available/owl.conf
-```
-
-**需要修改的内容**
-
-1. 修改 `server_name`（你的域名）：
-```nginx
-server_name your-domain.com www.your-domain.com;
-```
-
-2. 修改 SSL 证书路径：
-```nginx
-ssl_certificate /etc/ssl/certs/your-domain.crt;
-ssl_certificate_key /etc/ssl/private/your-domain.key;
-```
-
-3. 修改日志路径（可选）：
-```nginx
-access_log /var/log/nginx/owl-access.log;
-error_log /var/log/nginx/owl-error.log;
-```
-
-启用配置：
-
-```bash
-# Ubuntu/Debian
-sudo ln -s /etc/nginx/sites-available/owl.conf /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
-
-# macOS
-sudo nginx -t
-sudo nginx -s reload
-```
-
-### 完整 Nginx 配置说明
-
-两份配置都包含以下核心功能：
-
-- **API 后端代理**（`/api/*`）— 转发到后端服务 3001 端口
-- **WebSocket 支持**（`/socket.io`）— 实时通知需要
-- **前端代理**（`/`）— 转发到前端服务 3000 端口
-- **请求体大小限制** — 最大 100M（支持大文件上传）
-- **超时配置** — 连接/发送/读取各 60 秒
-
-HTTPS 方案额外提供：
-- HTTP 自动重定向至 HTTPS
-- TLS 1.2+ 加密
-- 静态资源缓存
-- 安全加固
+修改域名、目录和与 `BACKEND_PORT` 一致的代理端口后，将该文件放入现有 Nginx 的 http 配置范围；已有 HTTPS 站点也可合并其中的 location，沿用证书与 TLS 配置。执行 `nginx -t` 成功后再 reload。根路径部署的调整方式见 [静态前端部署](architecture/static-frontend-deployment.md)。
 
 ### 生产环境安全建议
 

@@ -12,6 +12,7 @@ export function resolveApiBaseUrl(kind, configuredUrl = getApiRoot()) {
 }
 
 function handleRequestError(error, { authenticated }) {
+  if (error.config?.inlineError) return Promise.reject(error);
   if (error.response) {
     const { status, data } = error.response;
     if (status === 401 && authenticated && typeof window !== 'undefined') {

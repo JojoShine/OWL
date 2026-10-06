@@ -17,7 +17,8 @@
 .owl-tabs-stretch .ant-tabs-tab { flex: 1; justify-content: center; }
 .owl-tabs-wrap .ant-tabs-nav-list { flex-wrap: wrap; }
 .owl-notice.ant-alert { border-radius: 12px; padding: 12px 16px; align-items: flex-start; font-size: 14px; line-height: 24px; }
-.owl-notice.ant-alert .ant-alert-icon { margin-top: 4px; width: 16px; height: 16px; }
+.owl-notice.ant-alert .ant-alert-icon { position: static; flex-shrink: 0; margin-top: 4px; width: 16px; height: 16px; }
+.owl-notice.ant-alert .ant-alert-content { min-width: 0; overflow-wrap: anywhere; }
 .owl-notice.ant-alert[data-variant="default"] { border-color: color-mix(in srgb, var(--border) 60%, transparent); background: color-mix(in srgb, var(--muted) 40%, transparent); color: var(--foreground); }
 .owl-notice.ant-alert[data-variant="info"] { border-color: rgb(59 130 246 / 10%); background: rgb(59 130 246 / 5%); color: #1e3a8a; }
 .owl-notice.ant-alert[data-variant="warning"] { border-color: rgb(245 158 11 / 10%); background: rgb(245 158 11 / 6%); color: #78350f; }

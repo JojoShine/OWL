@@ -4,6 +4,19 @@
 
 镜像提供 amd64 / arm64 两种架构的同版本内容，Docker 按机器架构选择。容器统一以 production 模式运行；本地容器连接测试库并不需要改成 development。源码热更新的 `npm run dev` 是独立开发方式，不是另一套部署镜像。
 
+## 配置文件用途
+
+| 文件 | 用途 | 是否提交 Git |
+|---|---|---|
+| 根目录 `.env.example` | Docker 部署配置模板，包含 SMTP 配置项 | 是 |
+| 部署目录 `.env` | Compose 和容器实际配置 | 否 |
+| `backend/.env.example` → `backend/.env` | 源码本地运行的后端模板与实际配置 | 仅模板 |
+| `frontend/.env.example` | 前端公开参数模板 | 是 |
+| `frontend/.env` / `.env.production` | 前端实际开发/构建配置，留在本地 | 否 |
+| `frontend/.env.development.local` | 个人前端开发覆盖配置 | 否 |
+
+`.example` 是模板，不会被自动加载。源码运行和镜像部署各选自己的实际配置；旧 `.env.docker`、`deploy/env/backend.env` 已停止使用。邮件发送需要在所用后端配置中填写 `SMTP_HOST`、`SMTP_PORT`、`SMTP_SECURE`、`SMTP_USER`、`SMTP_PASSWORD`；`SMTP_FROM_EMAIL` 默认使用 SMTP_USER。更新后重启源码服务，或执行 `docker compose up -d --force-recreate backend` 重新注入配置。
+
 ## 部署材料
 
 每个部署目录只需：

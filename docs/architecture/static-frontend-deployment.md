@@ -15,17 +15,17 @@ npm run build
 
 输出为 `frontend/dist/`。部署时仅复制其中的静态文件，不需要 Node、PM2 或前端 Docker。`npm run preview` 仅用于本地检查，不作为生产服务。前端 Dockerfile 已移除。
 
-默认生产路径 `/owl/`，开发路径 `/`。站点根路径部署用 `VITE_BASE_PATH=/ VITE_API_URL=/api npm run build`（覆盖仓库 `.env.production` 的 `/owl/api`）。其他子路径用相同变量设置，必须以绝对路径配置；Router、静态资源、默认 API 和 Socket.io 都跟随该路径。不同路径需要重新构建。
+默认生产路径 `/owl/`，开发路径 `/`。站点根路径部署用 `VITE_BASE_PATH=/ VITE_API_URL=/api npm run build`（同时覆盖本地可能配置的 API 路径）。其他子路径用相同变量设置，必须以绝对路径配置；Router、静态资源、默认 API 和 Socket.io 都跟随该路径。不同路径需要重新构建。
 
-公开配置见 frontend/.env.example。原 `NEXT_PUBLIC_*` 不再读取，迁移为对应 `VITE_*`；原 `.env` 和 `.env.production` 不自动覆盖，按项目需要更新。`VITE_BASE_PATH` 决定 Vite 的 BASE_URL。默认 API 为 `${base}/api`，支持指定 VITE_API_URL（兼容旧 /api/system 后缀）；系统、公开、动态接口分别以 /system、/public 或根 API 访问。默认 WebSocket 同源 `${base}/socket.io/`。开发通过 VITE_DEV_PROXY_TARGET 代理到本地后端。
+仓库只提供 `frontend/.env.example` 模板；实际 `.env*` 文件均不提交。需要自定义生产配置时复制为 `.env.production` 并调整路径；不提供配置文件时默认构建到 `/owl/`。公开配置见 frontend/.env.example。原 `NEXT_PUBLIC_*` 不再读取，迁移为对应 `VITE_*`；原 `.env` 和 `.env.production` 不自动覆盖，按项目需要更新。`VITE_BASE_PATH` 决定 Vite 的 BASE_URL。默认 API 为 `${base}/api`，支持指定 VITE_API_URL（兼容旧 /api/system 后缀）；系统、公开、动态接口分别以 /system、/public 或根 API 访问。默认 WebSocket 同源 `${base}/socket.io/`。开发通过 VITE_DEV_PROXY_TARGET 代理到本地后端。
 
 VITE_PLATFORM_ID 建议显式设置为项目唯一值以隔离本地偏好与登录缓存。VITE_APP_SCENE 支持 general、government-service。所有 VITE_ 变量都视为公开信息，不得放入数据库口令、令牌或 Docker Hub 凭据。
 
 ## Nginx
 
-`deploy/nginx/owl-subpath.conf` 对应 `/owl/`，静态文件放 `/srv/www/owl/`。`deploy/nginx/owl-root.conf` 对应根路径，静态文件放 `/srv/www/owl-current/`。示例后端地址为 `127.0.0.1:5002`，与 Compose 的默认宿主机端口一致；若修改 `BACKEND_PORT`，同步修改代理地址。修改域名、目录和后端地址后合并到已有站点配置，执行 `nginx -t` 成功再 reload。TLS 使用现有站点的证书与 HTTPS 配置。
+统一使用 `deploy/nginx/owl.conf`，默认 `/owl/` 对应静态文件目录 `/srv/www/owl/`；根路径部署时将 root 改为 `/srv/www/owl`，删除 `/owl` 跳转及末尾返回 404 的 `location /`，再去掉各 location 和 SPA 回退中的 `/owl` 前缀。示例后端地址为 `127.0.0.1:5002`，与 Compose 的默认宿主机端口一致；若修改 `BACKEND_PORT`，同步修改代理地址。修改域名、目录和后端地址后合并到已有站点配置，执行 `nginx -t` 成功再 reload。TLS 使用现有站点的证书与 HTTPS 配置。
 
-API、Socket.io、旧 uploads 路径单独代理到现有后端，不参与 SPA 回退。页面深层链接回退到入口 HTML；缺失 assets 和常用静态文件返回 404。入口不长缓存，带内容哈希的资源缓存一年。
+API、Socket.io 单独代理到后端；文件流也通过 API 访问，不参与 SPA 回退。页面深层链接回退到入口 HTML；缺失 assets 和常用静态文件返回 404。入口要求重新验证缓存，缺失资源返回 404。
 
 按版本保存前端目录，通过现有发布流程切换当前版本链接。旧版本带哈希的 assets 应保留一段时间，避免已经打开的浏览器在切换后请求旧延迟加载资源失败；新版本目录可合并保留上一版 assets，入口 HTML 使用新版。回退时切换到兼容后端版本的静态目录。
 

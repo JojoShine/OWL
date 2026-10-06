@@ -8,7 +8,7 @@
     <script>
       try {
         const saved = localStorage.getItem('theme');
-        const dark = saved === 'dark' || (saved !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+        const dark = saved === 'dark' || (saved === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.classList.add(dark ? 'dark' : 'light');
         document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
       } catch {}

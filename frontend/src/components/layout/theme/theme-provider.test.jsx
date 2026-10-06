@@ -36,3 +36,12 @@ it('follows system changes only when system is selected and syncs other tabs', (
   expect(query.removeEventListener).toHaveBeenCalled();
   window.matchMedia = original;
 });
+it('defaults to light even when the system is dark', () => {
+  const original = window.matchMedia;
+  window.matchMedia = () => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() });
+  const view = render(<ThemeProvider><Probe /></ThemeProvider>);
+  expect(screen.getByText('light:light')).toBeInTheDocument();
+  expect(document.documentElement).not.toHaveClass('dark');
+  view.unmount();
+  window.matchMedia = original;
+});

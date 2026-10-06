@@ -56,20 +56,20 @@ export default function SystemInfoTab({ config, onUpdate }) {
 
   const handleLogoUpload = (path) => {
     if (path === null) {
-      setFormData({ ...formData, logo_url: '' });
+      setFormData((current) => ({ ...current, logo_url: '' }));
       toast.success('Logo 已删除');
       return;
     }
-    setFormData({ ...formData, logo_url: path });
+    setFormData((current) => ({ ...current, logo_url: path }));
   };
 
   const handleBgUpload = (path) => {
     if (path === null) {
-      setFormData({ ...formData, login_bg_url: '' });
+      setFormData((current) => ({ ...current, login_bg_url: '' }));
       toast.success('登录背景已删除');
       return;
     }
-    setFormData({ ...formData, login_bg_url: path });
+    setFormData((current) => ({ ...current, login_bg_url: path }));
   };
 
   return (

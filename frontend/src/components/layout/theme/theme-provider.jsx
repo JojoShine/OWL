@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useLayoutEffect, useState } from 
 const ThemeContext = createContext(null);
 const validTheme = (value) => ['light', 'dark', 'system'].includes(value);
 
-export function ThemeProvider({ children, defaultTheme = 'system' }) {
+export function ThemeProvider({ children, defaultTheme = 'light' }) {
   const [theme, updateTheme] = useState(() => {
     try {
       const saved = localStorage.getItem('theme');

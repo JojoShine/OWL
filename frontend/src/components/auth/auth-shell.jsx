@@ -1,5 +1,3 @@
-import { getBasePath } from '@/lib/config/runtime';
-
 import { ThemeToggle } from '@/components/layout/theme/theme-toggle';
 import {
   Card,
@@ -16,10 +14,11 @@ export function AuthShell({
   logoUrl,
   description,
   footer,
+  showTechStack = true,
   backgroundUrl,
   layout = 'center',
 }) {
-  const coverUrl = backgroundUrl || `${getBasePath()}/login-cover.png`;
+  const coverUrl = backgroundUrl;
   const isSplit = layout === 'left-image' || layout === 'right-image';
 
   const brandPanel = (
@@ -42,11 +41,11 @@ export function AuthShell({
 
   const formPanel = (
     <section className="relative flex min-h-dvh items-center justify-center px-4 py-16 sm:px-8">
-      <Card className="w-full max-w-md border-0 bg-transparent shadow-none">
+      <Card className="w-full max-w-md border-0 bg-transparent shadow-none" style={{ background: 'transparent', border: 0, boxShadow: 'none' }}>
         <CardHeader className="items-center gap-3 text-center">
           <div className="flex flex-col items-center gap-1.5">
             {logoUrl ? (
-              // 系统 Logo 支持后台配置的任意资源地址，无法预先加入 Next Image 域名白名单。
+              // 系统 Logo 支持后台配置的资源地址。
               <img
                 src={logoUrl}
                 alt={`${systemName} 标志`}
@@ -55,7 +54,7 @@ export function AuthShell({
             ) : null}
             {footer ? (
               <p className="text-center text-xs leading-5 text-muted-foreground">
-                {footer}
+                <a href="https://tbtparent.me" target="_blank" rel="noopener noreferrer" className="hover:text-foreground hover:underline focus-visible:underline">{footer}</a>
               </p>
             ) : null}
           </div>
@@ -67,6 +66,11 @@ export function AuthShell({
           </div>
         </CardHeader>
         <CardContent>{children}</CardContent>
+        {showTechStack && (
+          <footer aria-label="技术栈" className="px-5 text-center text-xs leading-6 text-muted-foreground">
+            React · Ant Design · NestJS · Prisma · PostgreSQL
+          </footer>
+        )}
       </Card>
     </section>
   );

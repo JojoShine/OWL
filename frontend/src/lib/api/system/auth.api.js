@@ -2,7 +2,7 @@ import axios from '../../utils/http-client';
 
 export const authApi = {
   // 登录
-  login: (data) => axios.post('/auth/login', data),
+  login: (data) => axios.post('/auth/login', data, { inlineError: true }),
 
   // 注册
   register: (data) => axios.post('/auth/register', data),
