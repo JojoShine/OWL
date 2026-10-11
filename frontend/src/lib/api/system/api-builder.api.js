@@ -17,7 +17,7 @@ export const apiBuilderApi = {
   deleteInterface: (id) => axios.delete(`/api-builder/${id}`),
 
   // 测试接口
-  testInterface: (id, params = {}) => axios.post(`/api-builder/test/${id}`, { params }),
+  testInterface: (id, params = {}) => axios.post(`/api-builder/test/${id}`, { params }, { errorMode: 'inline' }),
 
   // 创建可授权多个 SQL 接口的调用密钥
   createApiKey: (data) => axios.post('/api-builder/keys', data),
@@ -41,7 +41,7 @@ export const apiBuilderApi = {
 
   // 测试SQL查询
   testSql: (sql_query, parameters = {}) =>
-    axios.post('/api-builder/test-sql', { sql_query, parameters }),
+    axios.post('/api-builder/test-sql', { sql_query, parameters }, { errorMode: 'inline' }),
 
   // 执行SQL查询（实际执行，用于自定义API）
   executeSql: (sql_query, parameters = {}) =>

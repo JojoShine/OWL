@@ -51,7 +51,7 @@ export default function ApiBuilderPage() {
       setTotal(response.data?.pagination?.total || 0);
     } catch (error) {
       console.error('获取接口列表失败:', error);
-      toast.error('获取接口列表失败');
+      toast.requestError(error, '获取接口列表失败');
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +84,7 @@ export default function ApiBuilderPage() {
       fetchInterfaces();
     } catch (error) {
       console.error('删除接口失败:', error);
-      toast.error('删除接口失败');
+      toast.requestError(error, '删除接口失败');
     }
   };
 
@@ -105,7 +105,7 @@ export default function ApiBuilderPage() {
       fetchInterfaces();
     } catch (error) {
       console.error('更新状态失败:', error);
-      toast.error('更新状态失败');
+      toast.requestError(error, '更新状态失败');
     }
   };
 

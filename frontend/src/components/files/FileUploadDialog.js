@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useRef, useCallback } from 'react';
 import {
@@ -194,7 +195,7 @@ export default function FileUploadDialog({ open, onClose, folderId, onUploadComp
         setFiles(prev =>
           prev.map(f =>
             f.id === fileItem.id
-              ? { ...f, status: 'error', error: error.message || '上传失败' }
+              ? { ...f, status: 'error', error: getRequestErrorMessage(error, '上传失败'), errorHandled: error.errorHandled }
               : f
           )
         );
@@ -224,7 +225,7 @@ export default function FileUploadDialog({ open, onClose, folderId, onUploadComp
           // 部分成功
           toast.success(`成功上传 ${successCount} 个文件，${errorCount} 个失败`);
           setTimeout(() => onUploadComplete?.(), 0);
-        } else {
+        } else if (!currentBatchFiles.every(f => f.errorHandled)) {
           // 全部失败
           toast.error('文件上传失败');
         }

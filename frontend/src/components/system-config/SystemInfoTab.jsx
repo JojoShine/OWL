@@ -48,7 +48,7 @@ export default function SystemInfoTab({ config, onUpdate }) {
         onUpdate?.();
       }
     } catch (error) {
-      toast.error('配置保存失败：' + error.message);
+      toast.requestError(error, '配置保存失败');
     } finally {
       setSaving(false);
     }

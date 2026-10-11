@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useEffect, useCallback } from 'react';
 import { thirdPartyKeysApi } from '@/lib/api';
@@ -98,8 +99,8 @@ export default function ThirdPartyKeysPage() {
       fetchKeys();
     } catch (error) {
       console.error('删除密钥失败:', error);
-      const errorMessage = error.response?.data?.message || error.message || '删除失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '删除失败');
+      toast.requestError(error, errorMessage);
     } finally {
       setKeyToDelete(null);
     }
@@ -126,8 +127,8 @@ export default function ThirdPartyKeysPage() {
       fetchKeys();
     } catch (error) {
       console.error('重新生成密钥失败:', error);
-      const errorMessage = error.response?.data?.message || error.message || '重新生成失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '重新生成失败');
+      toast.requestError(error, errorMessage);
     } finally {
       setKeyToRegenerate(null);
     }
@@ -150,8 +151,8 @@ export default function ThirdPartyKeysPage() {
       fetchKeys();
     } catch (error) {
       console.error('改变密钥状态失败:', error);
-      const errorMessage = error.response?.data?.message || error.message || '操作失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '操作失败');
+      toast.requestError(error, errorMessage);
     } finally {
       setKeyToChangeStatus(null);
     }

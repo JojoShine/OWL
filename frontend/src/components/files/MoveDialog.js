@@ -45,7 +45,7 @@ export default function MoveDialog({ open, onClose, item, isFolder, onSuccess })
       setFolders(allFolders);
     } catch (error) {
       console.error('Failed to load folders:', error);
-      toast.error('加载文件夹列表失败');
+      toast.requestError(error, '加载文件夹列表失败');
     } finally {
       setLoadingFolders(false);
     }

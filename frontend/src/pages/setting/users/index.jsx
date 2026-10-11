@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { userApi } from '@/lib/api';
@@ -42,7 +43,7 @@ export default function UsersPage() {
     setIsLoading(true);
     setLoadError('');
     try {
-      const response = await userApi.getUsers({ search, page, limit });
+      const response = await userApi.getUsers({ search, page, limit }, { errorMode: 'inline' });
       if (requestId !== latestRequestId.current) return;
 
       const usersData = response.data?.items || [];
@@ -57,7 +58,7 @@ export default function UsersPage() {
       }
     } catch (error) {
       if (requestId !== latestRequestId.current) return;
-      setLoadError(error.response?.data?.message || error.message || '用户列表加载失败，请重试');
+      setLoadError(getRequestErrorMessage(error, '用户列表加载失败，请重试'));
     } finally {
       if (requestId === latestRequestId.current) setIsLoading(false);
     }
@@ -107,13 +108,13 @@ export default function UsersPage() {
     setDeleting(true);
     setDeleteError('');
     try {
-      await userApi.deleteUser(userToDelete.id);
+      await userApi.deleteUser(userToDelete.id, { errorMode: 'inline' });
       toast.success('删除用户成功');
       setConfirmDialogOpen(false);
       setUserToDelete(null);
       await fetchUsers();
     } catch (error) {
-      setDeleteError(error.response?.data?.message || error.message || '删除失败，请重试');
+      setDeleteError(getRequestErrorMessage(error, '删除失败，请重试'));
     } finally {
       deleteRequest.current = false;
       setDeleting(false);
@@ -136,7 +137,7 @@ export default function UsersPage() {
       // 失败回滚
       setUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: prevStatus } : u));
       console.error('切换状态失败:', error);
-      toast.error(error.response?.data?.message || error.message || '操作失败');
+      toast.requestError(error, getRequestErrorMessage(error, '操作失败'));
     } finally {
       statusRequests.current.delete(user.id);
       setPendingStatus(new Set(statusRequests.current));

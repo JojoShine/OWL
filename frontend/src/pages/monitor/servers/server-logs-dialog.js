@@ -37,7 +37,7 @@ export default function ServerLogsDialog({ open, onOpenChange, server }) {
       }
     } catch (error) {
       console.error('加载日志失败:', error);
-      toast.error('加载日志失败');
+      toast.requestError(error, '加载日志失败');
     } finally {
       setLoading(false);
     }

@@ -59,7 +59,7 @@ export default function SendNotificationDialog({ open, onOpenChange, onSuccess }
       setUsers(Array.isArray(usersData) ? usersData : []);
     } catch (error) {
       console.error('Failed to load users:', error);
-      toast.error('加载用户列表失败');
+      toast.requestError(error, '加载用户列表失败');
     } finally {
       setIsLoadingUsers(false);
     }

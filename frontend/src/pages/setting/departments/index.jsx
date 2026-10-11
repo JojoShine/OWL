@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useEffect, useMemo } from 'react';
 import { departmentApi } from '@/lib/api';
@@ -123,8 +124,8 @@ export default function DepartmentsPage() {
       fetchDepartments();
     } catch (error) {
       console.error('删除部门失败:', error);
-      const errorMessage = error.response?.data?.message || error.message || '删除失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '删除失败');
+      toast.requestError(error, errorMessage);
     } finally {
       setDepartmentToDelete(null);
     }

@@ -113,14 +113,18 @@ export const fileShareApi = {
   getShares: () => axios.get('/file-shares'),
 
   // 获取分享信息（通过分享码）
-  getShareByCode: (shareCode) => axios.get(`/file-shares/${shareCode}`),
+  getShareByCode: (shareCode, config) => axios.get(`/file-shares/${shareCode}`, { ...config, authenticated: false }),
 
   // 创建文件分享
   createShare: (data) => axios.post('/file-shares', data),
 
   // 下载分享的文件
-  downloadSharedFile: (shareCode) => axios.get(`/file-shares/${shareCode}/download`, { responseType: 'blob' }),
+  downloadSharedFile: (shareCode, config) => axios.get(`/file-shares/${shareCode}/download`, { responseType: 'blob', ...config, authenticated: false }),
 
   // 删除分享
   deleteShare: (id) => axios.delete(`/file-shares/${id}`),
+};
+
+export const filePermissionApi = {
+  deletePermission: (id) => axios.delete(`/file-permissions/${id}`),
 };

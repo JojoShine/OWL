@@ -43,6 +43,7 @@ function createHttpApp({ maskingMiddleware } = {}) {
       }
     },
     credentials: true,
+    exposedHeaders: ['Retry-After'],
   }));
 
   app.use(express.json({

@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useEffect, useCallback } from 'react';
 import { serverMonitorApi } from '@/lib/api';
@@ -55,7 +56,7 @@ export default function ServerMonitorPage() {
     } catch (error) {
       console.error('获取服务器列表失败:', error);
       setServers([]);
-      toast.error('加载服务器列表失败');
+      toast.requestError(error, '加载服务器列表失败');
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +104,7 @@ export default function ServerMonitorPage() {
       fetchServers();
     } catch (error) {
       console.error('删除失败:', error);
-      toast.error(error.response?.data?.message || '删除失败');
+      toast.requestError(error, getRequestErrorMessage(error, '删除失败'));
     } finally {
       setServerToDelete(null);
     }
@@ -120,7 +121,7 @@ export default function ServerMonitorPage() {
     } catch (error) {
       toast.dismiss();
       console.error('采集指标失败:', error);
-      toast.error(error.response?.data?.message || '采集失败');
+      toast.requestError(error, getRequestErrorMessage(error, '采集失败'));
     }
   };
 
@@ -149,7 +150,7 @@ export default function ServerMonitorPage() {
       // 失败回滚
       setServers(prev => prev.map(s => s.id === server.id ? { ...s, enabled: prevEnabled } : s));
       console.error('切换状态失败:', error);
-      toast.error(error.response?.data?.message || '操作失败');
+      toast.requestError(error, getRequestErrorMessage(error, '操作失败'));
     }
   };
 

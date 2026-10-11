@@ -1,5 +1,6 @@
 import { useLayoutEffect } from 'react';
 import { App } from 'antd';
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 let messageApi;
 let notificationApi;
@@ -20,6 +21,12 @@ function show(type, content, options = {}) {
 }
 
 export const toast = Object.fromEntries(['success', 'error', 'warning', 'info', 'loading'].map((type) => [type, (content, options) => show(type, content, options)]));
+toast.requestError = (error, content, options) => {
+  if (error?.errorHandled) return;
+  const key = toast.error(error?.userMessage ? getRequestErrorMessage(error, content) : content, options);
+  if (error && typeof error === 'object') error.errorHandled = true;
+  return key;
+};
 toast.dismiss = (key) => run(() => { messageApi.destroy(key); notificationApi.destroy(key); });
 
 export function ToastProvider({ children }) {

@@ -3,7 +3,7 @@ import { useId, useRef, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Upload, X } from 'lucide-react';
-import { getApiBaseUrl } from '@/lib/utils/http-client';
+import { getBackendBaseUrl as getApiBaseUrl } from '@/lib/config/runtime';
 
 export default function ImageUploader({
   label,

@@ -133,7 +133,7 @@ export default function AlertsPage() {
       setRules(response.data.items || []);
     } catch (error) {
       console.error('加载告警规则失败:', error);
-      toast.error('加载告警规则失败');
+      toast.requestError(error, '加载告警规则失败');
     } finally {
       setLoading(false);
     }
@@ -151,7 +151,7 @@ export default function AlertsPage() {
       setHistoryTotalPages(Math.ceil((response.data.total || 0) / historyLimit));
     } catch (error) {
       console.error('加载告警历史失败:', error);
-      toast.error('加载告警历史失败');
+      toast.requestError(error, '加载告警历史失败');
     } finally {
       setLoading(false);
     }
@@ -259,7 +259,7 @@ export default function AlertsPage() {
       loadRules();
     } catch (error) {
       console.error('保存告警规则失败:', error);
-      toast.error(editingRule ? '更新告警规则失败' : '创建告警规则失败');
+      toast.requestError(error, editingRule ? '更新告警规则失败' : '创建告警规则失败');
     }
   };
 
@@ -278,7 +278,7 @@ export default function AlertsPage() {
       loadRules();
     } catch (error) {
       console.error('删除告警规则失败:', error);
-      toast.error('删除失败');
+      toast.requestError(error, '删除失败');
     }
   };
 
@@ -289,7 +289,7 @@ export default function AlertsPage() {
       loadHistory();
     } catch (error) {
       console.error('解决告警失败:', error);
-      toast.error('解决告警失败');
+      toast.requestError(error, '解决告警失败');
     }
   };
 

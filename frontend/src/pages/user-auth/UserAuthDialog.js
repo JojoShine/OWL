@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useEffect } from 'react';
 import { userAuthApi } from '@/lib/api';
@@ -104,7 +105,7 @@ export default function UserAuthDialog({ open, onClose, user, onSuccess }) {
         }
       } catch (error) {
         console.error('获取交接人员列表失败:', error);
-        toast.error('获取交接人员列表失败');
+        toast.requestError(error, '获取交接人员列表失败');
         setTargetUsers([]);
         setTargetUserId('');
       } finally {
@@ -155,7 +156,7 @@ export default function UserAuthDialog({ open, onClose, user, onSuccess }) {
       onSuccess();
     } catch (error) {
       console.error('保存失败:', error);
-      toast.error(error.response?.data?.message || '保存失败');
+      toast.requestError(error, getRequestErrorMessage(error, '保存失败'));
     } finally {
       setIsSubmitting(false);
     }

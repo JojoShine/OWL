@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -124,8 +125,8 @@ export default function MenuFormDialog({ open, onOpenChange, menu, onSuccess }) 
       setPermissionPreview(null);
     } catch (error) {
       console.error('保存菜单失败:', error);
-      const errorMessage = error.response?.data?.message || error.message || '保存失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '保存失败');
+      toast.requestError(error, errorMessage);
     }
   };
 
@@ -150,7 +151,7 @@ export default function MenuFormDialog({ open, onOpenChange, menu, onSuccess }) 
       setPermissionPreview(response.data);
     } catch (error) {
       console.error('预览权限失败:', error);
-      toast.error('预览权限失败');
+      toast.requestError(error, '预览权限失败');
     } finally {
       setIsPreviewLoading(false);
     }

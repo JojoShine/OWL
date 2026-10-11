@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useEffect, useCallback } from 'react';
 import { roleApi } from '@/lib/api';
@@ -90,8 +91,8 @@ export default function RolesPage() {
       fetchRoles();
     } catch (error) {
       console.error('删除角色失败:', error);
-      const errorMessage = error.response?.data?.message || error.message || '删除失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '删除失败');
+      toast.requestError(error, errorMessage);
     } finally {
       setRoleToDelete(null);
     }
@@ -110,7 +111,7 @@ export default function RolesPage() {
       // 失败回滚
       setRoles(prev => prev.map(r => r.id === role.id ? { ...r, status: prevStatus } : r));
       console.error('切换状态失败:', error);
-      toast.error(error.response?.data?.message || error.message || '操作失败');
+      toast.requestError(error, getRequestErrorMessage(error, '操作失败'));
     }
   };
 

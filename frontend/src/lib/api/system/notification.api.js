@@ -6,7 +6,7 @@ export const notificationApi = {
   getNotifications: (params) => axios.get('/notifications', { params }),
 
   // 获取未读消息数量
-  getUnreadCount: () => axios.get('/notifications/unread-count'),
+  getUnreadCount: (config) => axios.get('/notifications/unread-count', config),
 
   // 获取通知统计
   getStats: () => axios.get('/notifications/stats'),

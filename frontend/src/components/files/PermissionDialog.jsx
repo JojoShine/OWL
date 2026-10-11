@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useCallback, useState, useEffect } from 'react';
 import {
@@ -17,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from '@/components/ui/toast';
-import { fileApi, folderApi, roleApi } from '@/lib/api';
+import { fileApi, folderApi, roleApi, filePermissionApi } from '@/lib/api';
 import { Trash2, Plus } from 'lucide-react';
 
 export default function PermissionDialog({ open, onClose, item, isFolder }) {
@@ -39,7 +40,7 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
       setInherit(item.inherit_permissions ?? true);
     } catch (error) {
       console.error('Failed to load permissions:', error);
-      toast.error('加载权限列表失败');
+      toast.requestError(error, '加载权限列表失败');
     } finally {
       setLoading(false);
     }
@@ -85,7 +86,7 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
       await loadPermissions();
     } catch (error) {
       console.error('Failed to add permission:', error);
-      toast.error(error.response?.data?.message || '添加权限失败');
+      toast.requestError(error, getRequestErrorMessage(error, '添加权限失败'));
     } finally {
       setLoading(false);
     }
@@ -98,20 +99,14 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
 
     try {
       setLoading(true);
-      // Delete permission through a custom endpoint
-      await fetch(`/api/file-permissions/${permissionId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await filePermissionApi.deletePermission(permissionId);
 
       toast.success('权限删除成功');
 
       await loadPermissions();
     } catch (error) {
       console.error('Failed to delete permission:', error);
-      toast.error('删除权限失败');
+      toast.requestError(error, '删除权限失败');
     } finally {
       setLoading(false);
     }
@@ -127,7 +122,7 @@ export default function PermissionDialog({ open, onClose, item, isFolder }) {
       toast.success('继承设置已更新');
     } catch (error) {
       console.error('Failed to update inherit setting:', error);
-      toast.error('更新继承设置失败');
+      toast.requestError(error, '更新继承设置失败');
     } finally {
       setLoading(false);
     }

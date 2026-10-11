@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 import { getBasePath } from '@/lib/config/runtime';
 
 import { useState, Suspense, useRef, useEffect } from 'react';
@@ -139,7 +140,7 @@ function LoginForm() {
       }
     } catch (err) {
       console.error('登录错误:', err);
-      setError(err.response?.data?.message || '登录失败，请检查用户名和密码');
+      setError(getRequestErrorMessage(err, '登录失败，请检查用户名和密码'));
       setIsLoading(false);
       // 登录失败后刷新验证码
       captchaInputRef.current?.refresh();

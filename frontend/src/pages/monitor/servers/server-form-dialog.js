@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useEffect } from 'react';
 import { serverMonitorApi, emailTemplateApi } from '@/lib/api';
@@ -124,7 +125,7 @@ export default function ServerFormDialog({ open, onOpenChange, server, onSuccess
       onSuccess?.();
     } catch (error) {
       console.error('保存失败:', error);
-      toast.error(error.response?.data?.message || '保存失败');
+      toast.requestError(error, getRequestErrorMessage(error, '保存失败'));
     } finally {
       setLoading(false);
     }

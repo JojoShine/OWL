@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useEffect } from 'react';
 import { watermarkApi } from '@/lib/api';
@@ -47,7 +48,7 @@ export default function WatermarkSettingsPage() {
         setConfig(response.data);
       }
     } catch (error) {
-      toast.error('加载配置失败');
+      toast.requestError(error, '加载配置失败');
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -78,7 +79,7 @@ export default function WatermarkSettingsPage() {
       toast.success('配置已保存');
       fetchPreview();
     } catch (error) {
-      toast.error(error.response?.data?.message || '保存失败');
+      toast.requestError(error, getRequestErrorMessage(error, '保存失败'));
     } finally {
       setIsSaving(false);
     }

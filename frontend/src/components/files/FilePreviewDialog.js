@@ -35,7 +35,7 @@ export default function FilePreviewDialog({ open, onClose, file, onShare }) {
       .catch((error) => {
         if (!active) return;
         console.error('Failed to load preview:', error);
-        toast.error('预览加载失败');
+        toast.requestError(error, '预览加载失败');
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -64,7 +64,7 @@ export default function FilePreviewDialog({ open, onClose, file, onShare }) {
       toast.success('文件下载成功');
     } catch (error) {
       console.error('Failed to download file:', error);
-      toast.error('文件下载失败');
+      toast.requestError(error, '文件下载失败');
     }
   };
 

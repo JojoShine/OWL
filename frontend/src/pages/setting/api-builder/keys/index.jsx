@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from '@/lib/navigation';
@@ -42,7 +43,7 @@ export default function ApiKeyManagementPage() {
       setInterfaces(interfacesResponse.data?.items || []);
     } catch (error) {
       console.error(error);
-      toast.error('获取接口密钥数据失败');
+      toast.requestError(error, '获取接口密钥数据失败');
     } finally {
       setLoading(false);
     }
@@ -96,7 +97,7 @@ export default function ApiKeyManagementPage() {
       setFormOpen(false);
       await fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.message || '保存失败');
+      toast.requestError(error, getRequestErrorMessage(error, '保存失败'));
     } finally {
       setSubmitting(false);
     }
@@ -115,7 +116,7 @@ export default function ApiKeyManagementPage() {
       toast.success(type === 'delete' ? '接口密钥已删除' : type === 'status' ? '状态已更新' : '接口密钥已重新生成');
       await fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.message || '操作失败');
+      toast.requestError(error, getRequestErrorMessage(error, '操作失败'));
     } finally {
       setPendingAction(null);
     }

@@ -52,7 +52,7 @@ export default function ExamplePage() {
       toast.success('删除成功');
       fetchData();
     } catch (error) {
-      toast.error('删除失败');
+      toast.requestError(error, '删除失败');
     }
   };
 

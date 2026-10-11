@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useRouter } from '@/lib/navigation';
@@ -84,7 +85,7 @@ export default function FilesPage() {
       setFiles(filesResponse.data?.items || []);
     } catch (error) {
       console.error('Failed to load root contents:', error);
-      toast.error('加载根目录失败');
+      toast.requestError(error, '加载根目录失败');
     } finally {
       setLoading(false);
     }
@@ -99,7 +100,7 @@ export default function FilesPage() {
       setFiles(data.files || []);
     } catch (error) {
       console.error('Failed to load folder contents:', error);
-      toast.error('加载文件夹内容失败');
+      toast.requestError(error, '加载文件夹内容失败');
     } finally {
       setLoading(false);
     }
@@ -115,7 +116,7 @@ export default function FilesPage() {
       .catch((error) => {
         if (!active) return;
         console.error('Failed to load initial data:', error);
-        toast.error('加载数据失败');
+        toast.requestError(error, '加载数据失败');
       });
     loadRootContents();
     return () => { active = false; };
@@ -161,7 +162,7 @@ export default function FilesPage() {
       setSelectedItems([]);
     } catch (error) {
       console.error('Failed to get folder info:', error);
-      toast.error('获取文件夹信息失败');
+      toast.requestError(error, '获取文件夹信息失败');
     }
   };
 
@@ -190,7 +191,7 @@ export default function FilesPage() {
           toast.success('文件下载成功');
         } catch (error) {
           console.error('Failed to download file:', error);
-          toast.error('文件下载失败');
+          toast.requestError(error, '文件下载失败');
         }
         break;
       case 'share':
@@ -236,8 +237,8 @@ export default function FilesPage() {
       handleRefresh();
     } catch (error) {
       console.error('Failed to delete:', error);
-      const errorMessage = error.response?.data?.message || error.message || '删除失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '删除失败');
+      toast.requestError(error, errorMessage);
     } finally {
       setItemToDelete(null);
     }
@@ -256,8 +257,8 @@ export default function FilesPage() {
       handleRefresh();
     } catch (error) {
       console.error('Failed to rename:', error);
-      const errorMessage = error.response?.data?.message || error.message || '重命名失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '重命名失败');
+      toast.requestError(error, errorMessage);
       throw error;
     }
   };
@@ -275,8 +276,8 @@ export default function FilesPage() {
       handleRefresh();
     } catch (error) {
       console.error('Failed to move:', error);
-      const errorMessage = error.response?.data?.message || error.message || '移动失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '移动失败');
+      toast.requestError(error, errorMessage);
       throw error;
     }
   };

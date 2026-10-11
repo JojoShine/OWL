@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,7 +61,7 @@ export default function SqlEditor({ value, onChange, onFieldsGenerated }) {
     } catch (error) {
       setValidationResult({
         valid: false,
-        error: error.response?.data?.message || '验证失败',
+        error: getRequestErrorMessage(error, '验证失败'),
       });
     } finally {
       setIsValidating(false);
@@ -90,7 +91,7 @@ export default function SqlEditor({ value, onChange, onFieldsGenerated }) {
     } catch (error) {
       setValidationResult({
         valid: false,
-        error: error.response?.data?.message || '预览失败',
+        error: getRequestErrorMessage(error, '预览失败'),
       });
       setPreviewData(null);
     } finally {
@@ -125,7 +126,7 @@ export default function SqlEditor({ value, onChange, onFieldsGenerated }) {
     } catch (error) {
       setValidationResult({
         valid: false,
-        error: error.response?.data?.message || '生成字段配置失败',
+        error: getRequestErrorMessage(error, '生成字段配置失败'),
       });
     } finally {
       setIsGenerating(false);

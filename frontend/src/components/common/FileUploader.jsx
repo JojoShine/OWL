@@ -55,7 +55,7 @@ export default function FileUploader({
       }
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('文件上传失败：' + (error.response?.data?.message || error.message));
+      toast.requestError(error, '文件上传失败');
     } finally {
       setUploading(false);
     }

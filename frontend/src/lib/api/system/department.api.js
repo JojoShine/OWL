@@ -2,7 +2,7 @@ import axios from '../../utils/http-client';
 
 export const departmentApi = {
   // 获取部门树
-  getDepartmentTree: () => axios.get('/departments/tree'),
+  getDepartmentTree: (config) => axios.get('/departments/tree', config),
 
   // 获取部门列表（分页）
   getDepartments: (params) => axios.get('/departments', { params }),

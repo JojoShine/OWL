@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useCallback, useState, useEffect } from 'react';
 import { serverMonitorApi } from '@/lib/api';
@@ -56,7 +57,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
       setServices(ports);
     } catch (error) {
       console.error('加载服务列表失败:', error);
-      toast.error('加载服务列表失败');
+      toast.requestError(error, '加载服务列表失败');
     } finally {
       setLoading(false);
     }
@@ -83,7 +84,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
       fetchServices();
     } catch (error) {
       console.error('添加失败:', error);
-      toast.error(error.response?.data?.message || '添加失败');
+      toast.requestError(error, getRequestErrorMessage(error, '添加失败'));
     }
   };
 
@@ -95,7 +96,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
       fetchServices();
     } catch (error) {
       console.error('删除失败:', error);
-      toast.error('删除失败');
+      toast.requestError(error, '删除失败');
     }
   };
 
@@ -109,7 +110,7 @@ export default function ServerServicesDialog({ open, onOpenChange, server }) {
     } catch (error) {
       setServices(prev => prev.map(p => p.id === port.id ? { ...p, enabled: prevEnabled } : p));
       console.error('切换状态失败:', error);
-      toast.error('操作失败');
+      toast.requestError(error, '操作失败');
     }
   };
 

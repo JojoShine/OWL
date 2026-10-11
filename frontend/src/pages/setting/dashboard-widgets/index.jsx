@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useCallback, useState, useEffect } from 'react';
 import { dashboardWidgetApi } from '@/lib/api';
@@ -84,8 +85,8 @@ export default function DashboardWidgetsPage() {
       const start = (pageNum - 1) * limit;
       const end = start + limit;
       setWidgets(allWidgets.slice(start, end));
-    } catch {
-      toast.error('加载失败');
+    } catch (error) {
+      toast.requestError(error, '加载失败');
     } finally {
       setLoading(false);
     }
@@ -110,7 +111,7 @@ export default function DashboardWidgetsPage() {
       setDialogOpen(false);
       fetchWidgets();
     } catch (err) {
-      toast.error(err.message || '保存失败');
+      toast.requestError(err, '保存失败');
     } finally {
       setSaving(false);
     }
@@ -121,11 +122,11 @@ export default function DashboardWidgetsPage() {
     setTestResult(null);
     try {
       // 先保存再测试
-      await dashboardWidgetApi.update(editingWidget.id, { sql_query: sqlQuery, enabled });
-      const response = await dashboardWidgetApi.execute(editingWidget.id);
+      await dashboardWidgetApi.update(editingWidget.id, { sql_query: sqlQuery, enabled }, { errorMode: 'inline' });
+      const response = await dashboardWidgetApi.execute(editingWidget.id, { errorMode: 'inline' });
       setTestResult({ success: true, data: response.data?.data || [] });
     } catch (err) {
-      setTestResult({ success: false, error: err.message });
+      setTestResult({ success: false, error: getRequestErrorMessage(err, 'SQL测试失败') });
     } finally {
       setTesting(false);
     }

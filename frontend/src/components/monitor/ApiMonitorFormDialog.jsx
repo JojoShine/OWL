@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -131,8 +132,8 @@ export default function ApiMonitorFormDialog({ open, onOpenChange, monitor, onSu
       reset();
     } catch (error) {
       console.error('保存监控配置失败:', error);
-      const errorMessage = error.response?.data?.message || error.message || '保存失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '保存失败');
+      toast.requestError(error, errorMessage);
     }
   };
 

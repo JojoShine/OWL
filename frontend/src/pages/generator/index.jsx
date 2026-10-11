@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
@@ -144,7 +145,7 @@ export default function GeneratorPage() {
     } catch (error) {
       if (requestId !== latestTableRequestId.current) return;
       console.error('Failed to load tables:', error);
-      toast.error('加载表列表失败');
+      toast.requestError(error, '加载表列表失败');
     } finally {
       if (requestId === latestTableRequestId.current) setLoading(false);
     }
@@ -187,7 +188,7 @@ export default function GeneratorPage() {
       }
     } catch (error) {
       console.error('Failed to load module configs:', error);
-      toast.error('加载模块配置失败');
+      toast.requestError(error, '加载模块配置失败');
     } finally {
       setLoading(false);
     }
@@ -216,7 +217,7 @@ export default function GeneratorPage() {
       }
     } catch (error) {
       console.error('Failed to load history:', error);
-      toast.error('加载生成历史失败');
+      toast.requestError(error, '加载生成历史失败');
     } finally {
       setLoading(false);
     }
@@ -248,7 +249,7 @@ export default function GeneratorPage() {
         }
       } catch (error) {
         console.error('Failed to load module configs:', error);
-        toast.error('加载模块配置失败');
+        toast.requestError(error, '加载模块配置失败');
       } finally {
         setLoading(false);
       }
@@ -280,7 +281,7 @@ export default function GeneratorPage() {
         }
       } catch (error) {
         console.error('Failed to load history:', error);
-        toast.error('加载生成历史失败');
+        toast.requestError(error, '加载生成历史失败');
       } finally {
         setLoading(false);
       }
@@ -315,7 +316,7 @@ export default function GeneratorPage() {
       await doInitializeConfig(tableName);
     } catch (error) {
       console.error('Failed to check audit fields:', error);
-      toast.error(error.response?.data?.message || '检查审计字段失败');
+      toast.requestError(error, getRequestErrorMessage(error, '检查审计字段失败'));
     }
   };
 
@@ -330,7 +331,7 @@ export default function GeneratorPage() {
       loadModuleConfigs();
     } catch (error) {
       console.error('Failed to initialize config:', error);
-      toast.error(error.response?.data?.message || '初始化模块配置失败');
+      toast.requestError(error, getRequestErrorMessage(error, '初始化模块配置失败'));
     }
   };
 
@@ -359,7 +360,7 @@ export default function GeneratorPage() {
       });
     } catch (error) {
       console.error('Failed to check audit fields:', error);
-      toast.error('检查审计字段失败');
+      toast.requestError(error, '检查审计字段失败');
       setAuditDialog(prev => ({ ...prev, checking: false, tableName: null }));
     }
   };
@@ -383,7 +384,7 @@ export default function GeneratorPage() {
       }
     } catch (error) {
       console.error('Failed to add audit fields:', error);
-      toast.error(error.response?.data?.message || '补全审计字段失败');
+      toast.requestError(error, getRequestErrorMessage(error, '补全审计字段失败'));
       setAuditDialog(prev => ({ ...prev, adding: false }));
     }
   };
@@ -400,7 +401,7 @@ export default function GeneratorPage() {
       setConfigDialogOpen(true);
     } catch (error) {
       console.error('Failed to load config:', error);
-      toast.error('加载配置失败');
+      toast.requestError(error, '加载配置失败');
     } finally {
       setIsLoadingConfig(false);
     }
@@ -468,7 +469,7 @@ export default function GeneratorPage() {
       loadModuleConfigs();
     } catch (error) {
       console.error('Failed to save config:', error);
-      toast.error('保存配置失败');
+      toast.requestError(error, '保存配置失败');
     }
   };
 
@@ -489,7 +490,7 @@ export default function GeneratorPage() {
       loadHistory();
     } catch (error) {
       console.error('Failed to generate code:', error);
-      toast.error(error.response?.data?.message || '代码生成失败');
+      toast.requestError(error, getRequestErrorMessage(error, '代码生成失败'));
     }
   };
 
@@ -515,7 +516,7 @@ export default function GeneratorPage() {
       loadTables(); // 刷新表列表，更新表的生成状态
     } catch (error) {
       console.error('Failed to delete config:', error);
-      toast.error('删除模块配置失败');
+      toast.requestError(error, '删除模块配置失败');
     }
   };
 
@@ -541,7 +542,7 @@ export default function GeneratorPage() {
       loadTables(); // 刷新表列表，更新表的生成状态
     } catch (error) {
       console.error('Failed to delete generated code:', error);
-      toast.error('删除生成的代码失败');
+      toast.requestError(error, '删除生成的代码失败');
     }
   };
 

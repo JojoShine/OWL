@@ -13,13 +13,13 @@ it('loads the module named in the URL and reloads when its parameter changes', a
   http.get.mockResolvedValue({ data: null });
   render(<MemoryRouter initialEntries={['/orders']}><Link to="/customers">客户</Link><Routes><Route path="/:slug" element={<DynamicModulePage />} /></Routes></MemoryRouter>);
   await screen.findByText('模块不存在');
-  expect(http.get).toHaveBeenCalledWith('/generator/page-config/orders');
+  expect(http.get).toHaveBeenCalledWith('/generator/page-config/orders', { errorMode: 'inline' });
   await userEvent.click(screen.getByRole('link', { name: '客户' }));
-  await waitFor(() => expect(http.get).toHaveBeenCalledWith('/generator/page-config/customers'));
+  await waitFor(() => expect(http.get).toHaveBeenCalledWith('/generator/page-config/customers', { errorMode: 'inline' }));
 });
 it('loads a public share by code and renders an expired-link response', async () => {
   http.get.mockRejectedValue({ response: { data: { message: '链接已过期' } } });
   render(<MemoryRouter initialEntries={['/share/example']}><Routes><Route path="/share/:shareCode" element={<SharePage />} /></Routes></MemoryRouter>);
   expect(await screen.findByText('链接已过期')).toBeInTheDocument();
-  expect(http.get).toHaveBeenCalledWith('/file-shares/example');
+  expect(http.get).toHaveBeenCalledWith('/file-shares/example', { errorMode: 'inline', authenticated: false });
 });

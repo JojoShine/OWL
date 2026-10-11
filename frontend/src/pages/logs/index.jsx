@@ -144,7 +144,7 @@ export default function LogsPage() {
       console.error('Failed to load logs:', error);
       setTableType(activeTab);
       setLogs([]);
-      toast.error('加载日志失败');
+      toast.requestError(error, '加载日志失败');
     } finally {
       if (requestId === latestRequestId.current) setLoading(false);
     }
@@ -211,7 +211,7 @@ export default function LogsPage() {
       toast.success('日志导出成功');
     } catch (error) {
       console.error('Failed to export logs:', error);
-      toast.error('日志导出失败');
+      toast.requestError(error, '日志导出失败');
     }
   };
 

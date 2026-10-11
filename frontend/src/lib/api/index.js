@@ -32,7 +32,7 @@ export const authApi = authModule.authApi;
 export const smsAuthApi = smsModule.smsAuthApi;
 
 // 导出文件管理相关 API
-export const { folderApi, fileApi, fileShareApi } = fileManagerModule;
+export const { folderApi, fileApi, fileShareApi, filePermissionApi } = fileManagerModule;
 
 // 导出监控相关 API
 export const { monitorApi, apiMonitorApi, alertApi, serverMonitorApi } = monitorModule;
@@ -76,6 +76,7 @@ const api = {
   folderApi,
   fileApi,
   fileShareApi,
+  filePermissionApi,
   
   // 监控相关
   monitorApi,

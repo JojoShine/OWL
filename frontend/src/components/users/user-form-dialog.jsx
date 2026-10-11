@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Checkbox, Form, Input, Modal, Select } from 'antd';
@@ -68,15 +69,15 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
     if (!open) return;
     let cancelled = false;
     setLookupError('');
-    Promise.all([departmentApi.getDepartmentTree(), roleApi.getRoles({ limit: 100 })])
+    Promise.all([departmentApi.getDepartmentTree({ errorMode: 'inline' }), roleApi.getRoles({ limit: 100 }, { errorMode: 'inline' })])
       .then(([departmentResponse, roleResponse]) => {
         if (cancelled) return;
         const data = departmentResponse.data;
         setDepartments(Array.isArray(data) ? data : data?.items || []);
         setRoles(roleResponse.data?.items || []);
       })
-      .catch(() => {
-        if (!cancelled) setLookupError('组织与角色暂时无法加载，请关闭后重试。现有分配不会被更改。');
+      .catch((error) => {
+        if (!cancelled) setLookupError(getRequestErrorMessage(error, '组织与角色暂时无法加载，请关闭后重试。现有分配不会被更改。'));
       });
     return () => { cancelled = true; };
   }, [open]);
@@ -111,15 +112,15 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
     const currentGeneration = generation.current;
     try {
       const payload = buildUserPayload(parsed.data, isEdit);
-      if (isEdit) await userApi.updateUser(user.id, payload);
-      else await userApi.createUser(payload);
+      if (isEdit) await userApi.updateUser(user.id, payload, { errorMode: 'inline' });
+      else await userApi.createUser(payload, { errorMode: 'inline' });
       if (currentGeneration !== generation.current) return;
       toast.success(isEdit ? '更新用户成功' : '创建用户成功');
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
       if (currentGeneration !== generation.current) return;
-      setSaveError(error.response?.data?.message || error.message || '保存失败，请重试');
+      setSaveError(getRequestErrorMessage(error, '保存失败，请重试'));
     } finally {
       if (currentGeneration === generation.current) { savingRef.current = false; setSaving(false); }
     }

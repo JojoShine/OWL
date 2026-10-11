@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -111,7 +112,7 @@ export default function RoleFormDialog({ open, onOpenChange, role, onSuccess }) 
           setSelectedMenus(roleDetail.menus?.map(m => m.id) || []);
         } catch (error) {
           console.error('获取角色详情失败:', error);
-          toast.error('获取角色详情失败');
+          toast.requestError(error, '获取角色详情失败');
           // 如果获取失败，使用列表数据
           reset({
             name: role.name || '',
@@ -161,8 +162,8 @@ export default function RoleFormDialog({ open, onOpenChange, role, onSuccess }) 
       reset();
     } catch (error) {
       console.error('保存角色失败:', error);
-      const errorMessage = error.response?.data?.message || error.message || '保存失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '保存失败');
+      toast.requestError(error, errorMessage);
     }
   };
 

@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
@@ -128,7 +129,7 @@ export default function BusinessTableDialog({ open, onOpenChange, onCreated }) {
       onOpenChange(false);
       onCreated?.(result.moduleConfig, result.tableName);
     } catch (error) {
-      toast.error(error.response?.data?.message || '业务表创建失败');
+      toast.requestError(error, getRequestErrorMessage(error, '业务表创建失败'));
     } finally {
       setSubmitting(false);
     }

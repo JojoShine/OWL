@@ -60,7 +60,7 @@ describe('UserFormDialog', () => {
     const interaction = userEvent.setup();
     await interaction.click(await screen.findByRole('checkbox', { name: '管理员' }));
     await interaction.click(screen.getByRole('button', { name: '保存', exact: true }));
-    await waitFor(() => expect(userApi.updateUser).toHaveBeenCalledWith(1, expect.objectContaining({ role_ids: expect.arrayContaining(['101', '2']) })));
+    await waitFor(() => expect(userApi.updateUser).toHaveBeenCalledWith(1, expect.objectContaining({ role_ids: expect.arrayContaining(['101', '2']) }), { errorMode: 'inline' }));
   });
 
   it('groups fields and resets an edited value when reopened', async () => {
@@ -178,7 +178,8 @@ describe('UserFormDialog', () => {
     await waitFor(() =>
       expect(userApi.updateUser).toHaveBeenCalledWith(
         1,
-        expect.objectContaining({ username: 'alice' })
+        expect.objectContaining({ username: 'alice' }),
+        { errorMode: 'inline' }
       )
     );
     expect(userApi.updateUser.mock.calls[0][1]).not.toHaveProperty('password');
@@ -212,7 +213,8 @@ describe('UserFormDialog', () => {
           email: 'new@example.com',
           department_id: null,
           role_ids: [],
-        })
+        }),
+        { errorMode: 'inline' }
       )
     );
     expect(userApi.updateUser).not.toHaveBeenCalled();
@@ -231,14 +233,18 @@ describe('UserFormDialog', () => {
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
-  it('preserves input and displays a retryable save error in the dialog', async () => {
-    userApi.updateUser.mockRejectedValueOnce(new Error('保存暂时不可用'));
+  it('preserves input and displays the normalized save error in the dialog', async () => {
+    userApi.updateUser.mockRejectedValueOnce(Object.assign(new Error('Request failed with status code 500'), {
+      userMessage: '服务器出错，请稍后重试',
+      response: { status: 500, data: { message: 'SQL connection failed' } },
+    }));
     const interaction = userEvent.setup();
     render(<UserFormDialog open user={{ id: 1, username: 'alice', email: 'alice@example.com', status: 'active', roles: [] }} onOpenChange={vi.fn()} />);
     await interaction.clear(screen.getByLabelText(/邮箱/));
     await interaction.type(screen.getByLabelText(/邮箱/), 'changed@example.com');
     await interaction.click(screen.getByRole('button', { name: '保存', exact: true }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('保存暂时不可用');
+    expect(await screen.findByRole('alert')).toHaveTextContent('服务器出错，请稍后重试');
+    expect(screen.queryByText('SQL connection failed')).not.toBeInTheDocument();
     expect(screen.getByLabelText(/邮箱/)).toHaveValue('changed@example.com');
     expect(screen.getByRole('button', { name: '保存', exact: true })).toBeEnabled();
   });

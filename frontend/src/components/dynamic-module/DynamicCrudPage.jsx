@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
 import { PageHeader, PageShell, PageSurface, PageToolbar, PageWorkspace } from '@/components/layout/page-shell';
 import { toast } from '@/components/ui/toast';
-import axios from '@/lib/utils/module-client';
+import { dynamicModuleApi } from '@/lib/api/dynamic-module.api';
 import { usePermission } from '@/lib/hooks/usePermission';
 import { useListQuery } from '@/lib/hooks/use-list-query';
 import { DynamicFilters } from './DynamicFilters';
@@ -95,7 +96,7 @@ export function DynamicCrudPage({ config }) {
     const requestId = ++latestRequestId.current;
     try {
       setLoading(true);
-      const response = await axios.get(config.api.list, {
+      const response = await dynamicModuleApi.getList(config.api.list, {
         params: {
           ...appliedFilters,
           page: pagination.page,
@@ -114,7 +115,7 @@ export function DynamicCrudPage({ config }) {
     } catch (error) {
       if (requestId !== latestRequestId.current) return;
       console.error('加载数据失败:', error);
-      toast.error('加载数据失败');
+      toast.requestError(error, '加载数据失败');
       setData([]);
     } finally {
       if (requestId === latestRequestId.current) setLoading(false);
@@ -165,18 +166,18 @@ export function DynamicCrudPage({ config }) {
   const handleFormSubmit = async (formData) => {
     try {
       if (formDialog.mode === 'create') {
-        await axios.post(config.api.create, formData);
+        await dynamicModuleApi.create(config.api.create, formData);
         toast.success('创建成功');
       } else {
         const url = config.api.update.replace(':id', formDialog.data.id);
-        await axios.put(url, formData);
+        await dynamicModuleApi.update(url, formData);
         toast.success('更新成功');
       }
       setFormDialog({ open: false, mode: 'create', data: null });
       fetchData();
     } catch (error) {
       console.error('提交失败:', error);
-      toast.error(error.response?.data?.message || '操作失败');
+      toast.requestError(error, getRequestErrorMessage(error, '操作失败'));
       // 错误已通过 toast 显示，不再抛出以避免重复提示
     }
   };
@@ -197,13 +198,13 @@ export function DynamicCrudPage({ config }) {
   const handleConfirmDelete = async () => {
     try {
       const url = config.api.delete.replace(':id', deleteDialog.id);
-      await axios.delete(url);
+      await dynamicModuleApi.delete(url);
       toast.success('删除成功');
       setDeleteDialog({ open: false, id: null });
       fetchData();
     } catch (error) {
       console.error('删除失败:', error);
-      toast.error(error.response?.data?.message || '删除失败');
+      toast.requestError(error, getRequestErrorMessage(error, '删除失败'));
     }
   };
 
@@ -227,7 +228,7 @@ export function DynamicCrudPage({ config }) {
       await Promise.all(
         selectedRows.map((id) => {
           const url = config.api.delete.replace(':id', id);
-          return axios.delete(url);
+          return dynamicModuleApi.delete(url);
         })
       );
       toast.success(`成功删除 ${selectedRows.length} 项`);
@@ -236,14 +237,14 @@ export function DynamicCrudPage({ config }) {
       fetchData();
     } catch (error) {
       console.error('批量删除失败:', error);
-      toast.error(error.response?.data?.message || '批量删除失败');
+      toast.requestError(error, getRequestErrorMessage(error, '批量删除失败'));
     }
   };
 
   // 下载导入模板
   const handleDownloadTemplate = async () => {
     try {
-      const response = await axios.get(config.api.downloadTemplate);
+      const response = await dynamicModuleApi.getImportTemplate(config.api.downloadTemplate);
       const template = response.data;
 
       // 使用 ExcelJS 创建 Excel 文件
@@ -296,7 +297,7 @@ export function DynamicCrudPage({ config }) {
       toast.success('模板下载成功');
     } catch (error) {
       console.error('下载模板失败:', error);
-      toast.error('下载模板失败');
+      toast.requestError(error, '下载模板失败');
     }
   };
 
@@ -360,10 +361,10 @@ export function DynamicCrudPage({ config }) {
 
             try {
               // 每批设置 5 分钟超时
-              const result = await axios.post(
+              const result = await dynamicModuleApi.importRows(
                 config.api.import,
                 { rows: batches[i] },
-                { timeout: IMPORT_BATCH_TIMEOUT }
+                { timeout: IMPORT_BATCH_TIMEOUT, errorMode: 'inline' }
               );
 
               // 拦截器返回的是完整响应体 { success, data, message }，实际导入结果在 result.data 中
@@ -404,7 +405,7 @@ export function DynamicCrudPage({ config }) {
                   });
                   if (errData.successCount) totalSuccess += errData.successCount;
                 } else {
-                  const msg = errData?.message || `第 ${i + 1} 批导入失败`;
+                  const msg = getRequestErrorMessage(err, `第 ${i + 1} 批导入失败`);
                   totalErrors.push({
                     row: null, field: '', fieldLabel: '', columnNum: null,
                     message: msg,
@@ -450,7 +451,7 @@ export function DynamicCrudPage({ config }) {
           }
         } catch (error) {
           console.error('导入失败:', error);
-          const errorMessage = error.response?.data?.message || '导入失败，请检查网络连接或联系管理员';
+          const errorMessage = getRequestErrorMessage(error, '导入失败，请检查网络连接或联系管理员');
           setImportResult({
             success: false,
             message: '导入失败',

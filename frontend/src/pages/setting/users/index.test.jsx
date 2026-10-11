@@ -54,13 +54,13 @@ describe('UsersPage queries', () => {
       search: 'alice',
       page: 1,
       limit: 10,
-    }));
+    }, { errorMode: 'inline' }));
     await user.click(screen.getByRole('button', { name: '重置' }));
     await waitFor(() => expect(userApi.getUsers).toHaveBeenLastCalledWith({
       search: '',
       page: 1,
       limit: 10,
-    }));
+    }, { errorMode: 'inline' }));
   });
 
   it('keeps the status action visible and adds a semantic label', async () => {
@@ -152,7 +152,7 @@ describe('UsersPage queries', () => {
     await screen.findAllByText('last');
     await interaction.click(screen.getAllByRole('button', { name: '删除用户 last' })[0]);
     await interaction.click(screen.getByRole('button', { name: '删除', exact: true }));
-    await waitFor(() => expect(userApi.getUsers).toHaveBeenLastCalledWith({ search: '', page: 1, limit: 10 }));
+    await waitFor(() => expect(userApi.getUsers).toHaveBeenLastCalledWith({ search: '', page: 1, limit: 10 }, { errorMode: 'inline' }));
     expect((await screen.findAllByText('first')).length).toBeGreaterThan(0);
   });
 

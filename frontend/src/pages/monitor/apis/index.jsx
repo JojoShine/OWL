@@ -135,7 +135,7 @@ export default function ApiMonitorPage() {
       setTotal(response.data.total || 0);
     } catch (error) {
       console.error('Failed to load monitors:', error);
-      toast.error('加载监控列表失败');
+      toast.requestError(error, '加载监控列表失败');
     } finally {
       setLoading(false);
     }
@@ -230,7 +230,7 @@ export default function ApiMonitorPage() {
       });
     } catch (error) {
       console.error('Failed to load monitor detail:', error);
-      toast.error('加载监控详情失败，请稍后重试');
+      toast.requestError(error, '加载监控详情失败，请稍后重试');
 
       setFormData({
         name: monitor.name,
@@ -341,7 +341,7 @@ export default function ApiMonitorPage() {
       loadMonitors();
     } catch (error) {
       console.error('Failed to save monitor:', error);
-      toast.error(editingMonitor ? '更新监控配置失败' : '创建监控配置失败');
+      toast.requestError(error, editingMonitor ? '更新监控配置失败' : '创建监控配置失败');
     }
   };
 
@@ -363,7 +363,7 @@ export default function ApiMonitorPage() {
       loadMonitors();
     } catch (error) {
       console.error('Failed to delete monitor:', error);
-      toast.error('删除失败');
+      toast.requestError(error, '删除失败');
     }
   };
 
@@ -387,7 +387,7 @@ export default function ApiMonitorPage() {
       loadMonitors();
     } catch (error) {
       console.error('Failed to test API:', error);
-      toast.error('测试失败');
+      toast.requestError(error, '测试失败');
     }
   };
 
@@ -406,7 +406,7 @@ export default function ApiMonitorPage() {
       setLogsPage(page);
     } catch (error) {
       console.error('Failed to load logs:', error);
-      toast.error('加载日志失败');
+      toast.requestError(error, '加载日志失败');
     }
   };
 
@@ -427,7 +427,7 @@ export default function ApiMonitorPage() {
       await loadLogs(monitor.id, 1);
     } catch (error) {
       console.error('Failed to load logs:', error);
-      toast.error('加载日志失败');
+      toast.requestError(error, '加载日志失败');
     }
   };
 

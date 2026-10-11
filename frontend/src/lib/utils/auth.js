@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { createContext, useCallback, useContext, useMemo, useState, useEffect } from 'react';
 import { useRouter } from '@/lib/navigation';
@@ -59,7 +60,7 @@ export const AuthProvider = ({ children }) => {
 
           // 先使用本地信息快速渲染，再后台同步角色、部门等最新资料。
           if (token !== 'preview-only') {
-            authApi.getCurrentUser()
+            authApi.getCurrentUser({ errorMode: 'silent' })
               .then((response) => {
                 if (!isActive || !response?.data) return;
                 localStorage.setItem(getStorageKey('user'), JSON.stringify(response.data));
@@ -137,7 +138,7 @@ export const AuthProvider = ({ children }) => {
       console.error('登录失败:', error);
       return {
         success: false,
-        error: error.response?.data?.message || '登录失败',
+        error: getRequestErrorMessage(error, '登录失败'),
       };
     }
   }, []);
@@ -155,7 +156,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true, data: userData };
     } catch (error) {
       console.error('刷新用户信息失败:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: getRequestErrorMessage(error, '刷新用户信息失败') };
     }
   }, []);
 

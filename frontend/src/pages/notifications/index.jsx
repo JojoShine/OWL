@@ -68,7 +68,7 @@ export default function NotificationsPage() {
     } catch (error) {
       if (requestId !== latestRequestId.current) return;
       console.error('Failed to fetch notifications:', error);
-      toast.error('获取通知失败');
+      toast.requestError(error, '获取通知失败');
     } finally {
       if (requestId === latestRequestId.current) setIsLoading(false);
     }
@@ -85,7 +85,7 @@ export default function NotificationsPage() {
       toast.success('已标记为已读');
     } catch (error) {
       console.error('Failed to mark as read:', error);
-      toast.error('标记失败');
+      toast.requestError(error, '标记失败');
     }
   };
 
@@ -98,7 +98,7 @@ export default function NotificationsPage() {
       toast.success('已全部标记为已读');
     } catch (error) {
       console.error('Failed to mark all as read:', error);
-      toast.error('标记失败');
+      toast.requestError(error, '标记失败');
     }
   };
 
@@ -115,7 +115,7 @@ export default function NotificationsPage() {
       toast.success('已删除');
     } catch (error) {
       console.error('Failed to delete notification:', error);
-      toast.error('删除失败');
+      toast.requestError(error, '删除失败');
     }
   };
 
@@ -128,7 +128,7 @@ export default function NotificationsPage() {
       toast.success('已清空已读消息');
     } catch (error) {
       console.error('Failed to clear read notifications:', error);
-      toast.error('清空失败');
+      toast.requestError(error, '清空失败');
     }
   };
 
@@ -222,7 +222,7 @@ export default function NotificationsPage() {
       fetchNotifications();
     } catch (error) {
       console.error('Failed to send notification:', error);
-      toast.error('发送通知失败');
+      toast.requestError(error, '发送通知失败');
       throw error;
     }
   };
@@ -236,7 +236,7 @@ export default function NotificationsPage() {
       fetchNotifications();
     } catch (error) {
       console.error('Failed to broadcast notification:', error);
-      toast.error('广播通知失败');
+      toast.requestError(error, '广播通知失败');
       throw error;
     }
   };

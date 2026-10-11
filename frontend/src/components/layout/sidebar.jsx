@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ChevronDown, ChevronRight, LogOut } from 'lucide-react';
 import { useAuth } from '@/lib/utils/auth';
-import { getApiBaseUrl } from '@/lib/utils/http-client';
+import { getBackendBaseUrl as getApiBaseUrl } from '@/lib/config/runtime';
 import { useAppShellData } from '@/contexts/AppShellDataContext';
 
 const basePath = getBasePath();

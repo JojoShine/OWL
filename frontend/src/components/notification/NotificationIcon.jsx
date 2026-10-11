@@ -44,7 +44,7 @@ export default function NotificationIcon() {
   // 使用场景：初始化加载、WebSocket重连后同步未读数
   const fetchUnreadCount = useCallback(async () => {
     try {
-      const response = await notificationApi.getUnreadCount();
+      const response = await notificationApi.getUnreadCount({ errorMode: 'silent' });
       // http-client 拦截器已解包 response.data，直接用 response 访问
       if (response?.success && typeof response.data?.count === 'number') {
         setUnreadCount(response.data.count);
@@ -71,7 +71,7 @@ export default function NotificationIcon() {
       }
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
-      toast.error('获取通知失败');
+      toast.requestError(error, '获取通知失败');
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +93,7 @@ export default function NotificationIcon() {
       toast.success('已标记为已读');
     } catch (error) {
       console.error('Failed to mark as read:', error);
-      toast.error('标记失败');
+      toast.requestError(error, '标记失败');
     }
   };
 
@@ -112,7 +112,7 @@ export default function NotificationIcon() {
       toast.success('已全部标记为已读');
     } catch (error) {
       console.error('Failed to mark all as read:', error);
-      toast.error('标记失败');
+      toast.requestError(error, '标记失败');
     }
   };
 

@@ -3,6 +3,9 @@ import { getBasePath } from '@/lib/config/runtime';
 import axios from 'axios';
 import { toast } from '@/components/ui/toast';
 import { getStorageKey } from './storage-key';
+import { normalizeRequestError } from './request-error';
+
+let sessionRedirectTimer;
 
 export function resolveApiBaseUrl(kind, configuredUrl = getApiRoot()) {
   const root = (configuredUrl || getApiRoot()).replace(/\/$/, '').replace(/\/system$/, '');
@@ -11,38 +14,39 @@ export function resolveApiBaseUrl(kind, configuredUrl = getApiRoot()) {
   return root;
 }
 
-function handleRequestError(error, { authenticated }) {
-  if (error.config?.inlineError) return Promise.reject(error);
-  if (error.response) {
-    const { status, data } = error.response;
-    if (status === 401 && authenticated && typeof window !== 'undefined') {
+async function handleRequestError(error, { authenticated }) {
+  await normalizeRequestError(error);
+  const mode = error.config?.inlineError ? 'inline' : error.config?.errorMode || 'global';
+  if (error.errorKind === 'cancelled') return Promise.reject(error);
+  if (error.response?.status === 401 && authenticated && error.config?.authenticated !== false && !error.config?.inlineError && typeof window !== 'undefined') {
+    error.userMessage = '登录已过期，请重新登录';
+    if (!sessionRedirectTimer) {
       localStorage.removeItem(getStorageKey('token'));
       localStorage.removeItem(getStorageKey('user'));
-      toast.error(data?.message || '登录已过期，请重新登录');
-      setTimeout(() => {
+      toast.error(error.userMessage, { id: 'owl-session-expired' });
+      sessionRedirectTimer = setTimeout(() => {
         window.location.href = `${getBasePath()}/login`;
+        sessionRedirectTimer = undefined;
       }, 500);
-    } else if (status === 403) {
-      toast.error('您没有权限访问此资源');
-    } else if (status === 404) {
-      toast.error('请求的资源不存在');
-    } else if (status === 500) {
-      toast.error('服务器出错，请稍后重试');
-    } else {
-      toast.error(data?.message || '请求失败，请重试');
     }
-  } else if (error.request) {
-    toast.error('网络连接失败，请检查网络');
-  } else {
-    toast.error('请求出错，请稍后重试');
+    error.errorHandled = true;
+  } else if (mode === 'global') {
+    toast.error(error.userMessage, {
+      id: error.errorKind === 'rate-limit' ? 'owl-rate-limit' : `owl-request-error:${error.response?.status || error.errorKind}:${error.userMessage}`,
+      duration: error.errorKind === 'rate-limit' ? 6000 : 3000,
+    });
+    error.errorHandled = true;
+  } else if (mode === 'silent') {
+    error.errorHandled = true;
   }
   return Promise.reject(error);
 }
 
-export function createHttpClient({ kind = 'module', authenticated = true, timeout = 10_000 } = {}) {
+export function createHttpClient({ kind = 'module', authenticated = true, timeout = 10_000, errorMode = 'global' } = {}) {
   const client = axios.create({
     baseURL: resolveApiBaseUrl(kind),
     timeout,
+    errorMode,
     headers: { 'Content-Type': 'application/json' },
   });
 
@@ -50,15 +54,19 @@ export function createHttpClient({ kind = 'module', authenticated = true, timeou
     client.interceptors.request.use((config) => {
       if (typeof window !== 'undefined') {
         const token = localStorage.getItem(getStorageKey('token'));
-        if (token) config.headers.Authorization = `Bearer ${token}`;
+        if (token && config.authenticated !== false) config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
     }, (error) => Promise.reject(error));
   }
 
-  client.interceptors.response.use((response) => (
-    response.config.responseType === 'blob' ? response : response.data
-  ), (error) => handleRequestError(error, { authenticated }));
+  client.interceptors.response.use((response) => {
+    if (response.config.responseType === 'blob') return response;
+    if (response.data?.success === false) {
+      return handleRequestError(new axios.AxiosError('Business request failed', 'ERR_BAD_RESPONSE', response.config, response.request, response), { authenticated });
+    }
+    return response.data;
+  }, (error) => handleRequestError(error, { authenticated }));
 
   return client;
 }

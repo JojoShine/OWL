@@ -55,7 +55,7 @@ export default function EmailTaskDialog({ open, onOpenChange, task, onSave }) {
       }
     } catch (error) {
       console.error('Failed to fetch templates:', error);
-      toast.error('获取邮件模板列表失败');
+      toast.requestError(error, '获取邮件模板列表失败');
     } finally {
       setIsLoadingTemplates(false);
     }

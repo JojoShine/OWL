@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -66,7 +67,7 @@ export default function SmsLoginForm({ onSuccess }) {
       setError('');
     } catch (err) {
       console.error('发送验证码失败:', err);
-      setError(err.response?.data?.message || '发送失败，请稍后重试');
+      setError(getRequestErrorMessage(err, '发送失败，请稍后重试'));
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +93,7 @@ export default function SmsLoginForm({ onSuccess }) {
       }
     } catch (err) {
       console.error('短信登录错误:', err);
-      setError(err.response?.data?.message || '登录失败，请检查验证码');
+      setError(getRequestErrorMessage(err, '登录失败，请检查验证码'));
     } finally {
       setIsLoading(false);
     }

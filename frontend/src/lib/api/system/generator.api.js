@@ -50,16 +50,16 @@ export const generatorApi = {
   cleanupHistory: (daysToKeep) => axios.delete('/generator/history/cleanup', { data: { daysToKeep } }),
 
   // 验证SQL语法
-  validateSql: (sql) => axios.post('/generator/validate-sql', { sql }).then(res => res.data),
+  validateSql: (sql) => axios.post('/generator/validate-sql', { sql }, { errorMode: 'inline' }).then(res => res.data),
 
   // 预览SQL查询结果
-  previewSql: (sql, limit = 10) => axios.post('/generator/preview-sql', { sql, limit }).then(res => res.data),
+  previewSql: (sql, limit = 10) => axios.post('/generator/preview-sql', { sql, limit }, { errorMode: 'inline' }).then(res => res.data),
 
   // 从SQL生成字段配置
-  generateFieldsFromSql: (sql) => axios.post('/generator/generate-fields-from-sql', { sql }).then(res => res.data),
+  generateFieldsFromSql: (sql) => axios.post('/generator/generate-fields-from-sql', { sql }, { errorMode: 'inline' }).then(res => res.data),
 
   // 根据模块路径获取页面配置
-  getPageConfigByPath: (modulePath) => axios.get(`/generator/page-config/${modulePath}`).then(res => res.data),
+  getPageConfigByPath: (modulePath, config) => axios.get(`/generator/page-config/${modulePath}`, config).then(res => res.data),
 
   // 检查表审计字段缺失情况
   checkAuditFields: (tableName) => axios.get(`/generator/tables/${tableName}/audit-check`).then(res => res.data),

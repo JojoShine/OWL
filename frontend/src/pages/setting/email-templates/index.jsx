@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit, Trash2, Play } from 'lucide-react';
@@ -78,7 +79,7 @@ export default function EmailManagementPage() {
     } catch (error) {
       console.error('获取邮件任务列表失败:', error);
       setTasks([]);
-      toast.error('获取邮件任务列表失败');
+      toast.requestError(error, '获取邮件任务列表失败');
     } finally {
       setIsLoadingTasks(false);
     }
@@ -120,7 +121,7 @@ export default function EmailManagementPage() {
       fetchTasks();
     } catch (error) {
       console.error('删除邮件任务失败:', error);
-      toast.error('删除失败');
+      toast.requestError(error, '删除失败');
     } finally {
       setTaskToDelete(null);
     }
@@ -133,7 +134,7 @@ export default function EmailManagementPage() {
       fetchTasks();
     } catch (error) {
       console.error('执行邮件任务失败:', error);
-      toast.error('执行失败');
+      toast.requestError(error, '执行失败');
     }
   };
 
@@ -151,7 +152,7 @@ export default function EmailManagementPage() {
       fetchTasks();
     } catch (error) {
       console.error('保存邮件任务失败:', error);
-      toast.error(error.response?.data?.message || '保存失败');
+      toast.requestError(error, getRequestErrorMessage(error, '保存失败'));
     }
   };
 
@@ -174,7 +175,7 @@ export default function EmailManagementPage() {
     } catch (error) {
       console.error('获取邮件模板列表失败:', error);
       setTemplates([]);
-      toast.error('获取邮件模板列表失败');
+      toast.requestError(error, '获取邮件模板列表失败');
     } finally {
       setIsLoadingTemplates(false);
     }
@@ -216,7 +217,7 @@ export default function EmailManagementPage() {
       fetchTemplates();
     } catch (error) {
       console.error('删除邮件模板失败:', error);
-      toast.error('删除失败');
+      toast.requestError(error, '删除失败');
     } finally {
       setTemplateToDelete(null);
     }
@@ -236,7 +237,7 @@ export default function EmailManagementPage() {
       fetchTemplates();
     } catch (error) {
       console.error('保存邮件模板失败:', error);
-      toast.error(error.response?.data?.message || '保存失败');
+      toast.requestError(error, getRequestErrorMessage(error, '保存失败'));
     }
   };
 

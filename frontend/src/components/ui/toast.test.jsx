@@ -18,3 +18,9 @@ it('preserves notification title and description', async () => {
   expect(screen.getByText('审批已完成')).toBeInTheDocument();
   act(() => toast.dismiss());
 });
+it('keeps page fallback errors for failures that were not handled globally', async () => {
+  render(<ConfigProvider theme={{ token: { motion: false } }}><App><ToastProvider /></App></ConfigProvider>);
+  act(() => toast.requestError(new Error('failure'), '文件下载失败'));
+  expect(await screen.findByText('文件下载失败')).toBeInTheDocument();
+  act(() => toast.dismiss());
+});

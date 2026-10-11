@@ -1,8 +1,9 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useEffect, useState } from 'react';
 import { useParams } from '@/lib/navigation';
-import axios from '@/lib/utils/http-client';
-import { getApiBaseUrl } from '@/lib/utils/http-client';
+import { fileShareApi } from '@/lib/api';
+import { getBackendBaseUrl as getApiBaseUrl } from '@/lib/config/runtime';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loading } from '@/components/ui/loading';
@@ -31,11 +32,11 @@ export default function SharePage() {
     const fetchShare = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`/file-shares/${shareCode}`);
+        const response = await fileShareApi.getShareByCode(shareCode, { errorMode: 'inline' });
         setShare(response.data);
         setError(null);
       } catch (err) {
-        setError(err.response?.data?.message || '分享不存在或已过期');
+        setError(getRequestErrorMessage(err, '分享不存在或已过期'));
         setShare(null);
       } finally {
         setLoading(false);
@@ -50,9 +51,7 @@ export default function SharePage() {
   const handleDownload = async () => {
     try {
       setDownloading(true);
-      const response = await axios.get(`/file-shares/${shareCode}/download`, {
-        responseType: 'blob',
-      });
+      const response = await fileShareApi.downloadSharedFile(shareCode, { errorMode: 'inline' });
 
       // 创建下载链接
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -65,7 +64,7 @@ export default function SharePage() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('下载失败:', err);
-      setError('下载失败，请重试');
+      setError(getRequestErrorMessage(err, '下载失败，请重试'));
     } finally {
       setDownloading(false);
     }

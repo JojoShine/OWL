@@ -2,7 +2,7 @@ import axios from '../../utils/http-client';
 
 export const roleApi = {
   // 获取角色列表
-  getRoles: (params) => axios.get('/roles', { params }),
+  getRoles: (params, config) => axios.get('/roles', { params, ...config }),
 
   // 获取角色详情
   getRole: (id) => axios.get(`/roles/${id}`),

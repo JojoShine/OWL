@@ -36,7 +36,7 @@ export default function NotificationSettingsPage() {
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error);
-      toast.error('获取设置失败');
+      toast.requestError(error, '获取设置失败');
     } finally {
       setIsLoading(false);
     }
@@ -60,7 +60,7 @@ export default function NotificationSettingsPage() {
       setHasChanges(false);
     } catch (error) {
       console.error('Failed to save settings:', error);
-      toast.error('保存失败');
+      toast.requestError(error, '保存失败');
     } finally {
       setIsSaving(false);
     }
@@ -78,7 +78,7 @@ export default function NotificationSettingsPage() {
       }
     } catch (error) {
       console.error('Failed to reset settings:', error);
-      toast.error('重置失败');
+      toast.requestError(error, '重置失败');
     }
   };
 

@@ -1,8 +1,9 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useEffect, useState } from 'react';
 import { useParams } from '@/lib/navigation';
 import { Link } from 'react-router-dom';
-import axios from '@/lib/utils/http-client';
+import { generatorApi } from '@/lib/api';
 import { DynamicCrudPage } from '@/components/dynamic-module/DynamicCrudPage';
 import { AlertCircle, ArrowLeft, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,11 +23,11 @@ export default function DynamicModulePage() {
         setError(null);
 
         // 从后端加载页面配置
-        const response = await axios.get(`/generator/page-config/${slug}`);
-        setPageConfig(response.data);
+        const pageConfig = await generatorApi.getPageConfigByPath(slug, { errorMode: 'inline' });
+        setPageConfig(pageConfig);
       } catch (err) {
         console.error('Failed to load page config:', err);
-        setError(err.response?.data?.message || '模块不存在或加载失败');
+        setError(getRequestErrorMessage(err, '模块不存在或加载失败'));
       } finally {
         setLoading(false);
       }

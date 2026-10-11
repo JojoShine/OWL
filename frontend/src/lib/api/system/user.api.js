@@ -2,17 +2,17 @@ import axios from '../../utils/http-client';
 
 export const userApi = {
   // 获取用户列表
-  getUsers: (params) => axios.get('/users', { params }),
+  getUsers: (params, config) => axios.get('/users', { params, ...config }),
 
   // 获取用户详情
   getUser: (id) => axios.get(`/users/${id}`),
 
   // 创建用户
-  createUser: (data) => axios.post('/users', data),
+  createUser: (data, config) => axios.post('/users', data, config),
 
   // 更新用户
-  updateUser: (id, data) => axios.put(`/users/${id}`, data),
+  updateUser: (id, data, config) => axios.put(`/users/${id}`, data, config),
 
   // 删除用户
-  deleteUser: (id) => axios.delete(`/users/${id}`),
+  deleteUser: (id, config) => axios.delete(`/users/${id}`, config),
 };

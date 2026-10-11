@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 import { getBasePath } from '@/lib/config/runtime';
 
 import { useState, useEffect } from 'react';
@@ -88,7 +89,7 @@ export default function RegisterPage() {
       }
     } catch (err) {
       console.error('注册错误:', err);
-      setError(err.response?.data?.message || '注册失败，请检查输入信息');
+      setError(getRequestErrorMessage(err, '注册失败，请检查输入信息'));
     } finally {
       setIsLoading(false);
     }

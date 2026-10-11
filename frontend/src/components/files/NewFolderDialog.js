@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState } from 'react';
 import { FolderPlusIcon } from 'lucide-react';
@@ -45,7 +46,7 @@ export default function NewFolderDialog({ open, onClose, parentFolderId, onSucce
       onClose();
     } catch (error) {
       console.error('Failed to create folder:', error);
-      toast.error(error.response?.data?.message || '创建文件夹失败');
+      toast.requestError(error, getRequestErrorMessage(error, '创建文件夹失败'));
     } finally {
       setCreating(false);
     }

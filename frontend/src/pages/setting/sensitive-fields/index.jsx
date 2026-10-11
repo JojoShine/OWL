@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useEffect, useCallback } from 'react';
 import { sensitiveFieldApi } from '@/lib/api';
@@ -91,8 +92,8 @@ export default function SensitiveFieldsPage() {
       fetchFields();
     } catch (error) {
       console.error('删除敏感字段配置失败:', error);
-      const errorMessage = error.response?.data?.message || error.message || '删除失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '删除失败');
+      toast.requestError(error, errorMessage);
     } finally {
       setFieldToDelete(null);
     }

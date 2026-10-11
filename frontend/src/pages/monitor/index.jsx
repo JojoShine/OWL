@@ -63,7 +63,7 @@ export default function MonitorPage() {
       }
     } catch (error) {
       console.error('Failed to load metrics:', error);
-      toast.error('加载监控数据失败');
+      toast.requestError(error, '加载监控数据失败');
     } finally {
       setLoading(false);
     }

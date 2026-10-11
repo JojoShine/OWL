@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState } from 'react';
 import {
@@ -39,19 +40,7 @@ export default function TestInterfaceDialog({ open, onOpenChange, interface_ }) 
       toast.success('接口测试成功');
     } catch (error) {
       console.error('接口测试失败:', error);
-      // 优先获取后端返回的错误信息
-      let errorMsg = '接口测试失败';
-
-      if (error.response?.data?.message) {
-        errorMsg = error.response.data.message;
-      } else if (error.response?.data?.error) {
-        errorMsg = error.response.data.error;
-      } else if (error.message) {
-        errorMsg = error.message;
-      }
-
-      setError(errorMsg);
-      toast.error(errorMsg);
+      setError(getRequestErrorMessage(error, '接口测试失败'));
     } finally {
       setIsLoading(false);
     }

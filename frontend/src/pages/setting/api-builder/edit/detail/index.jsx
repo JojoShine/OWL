@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTheme } from '@/components/layout/theme/theme-provider';
@@ -93,7 +94,7 @@ export default function ApiBuilderEditPage() {
       });
     } catch (error) {
       console.error('获取接口详情失败:', error);
-      toast.error('获取接口详情失败');
+      toast.requestError(error, '获取接口详情失败');
       router.push('/setting/api-builder');
     } finally {
       setIsLoading(false);
@@ -191,9 +192,8 @@ export default function ApiBuilderEditPage() {
       toast.success('SQL测试成功');
     } catch (error) {
       console.error('SQL测试失败:', error);
-      const errorMsg = error.response?.data?.message || 'SQL测试失败';
+      const errorMsg = getRequestErrorMessage(error, 'SQL测试失败');
       setTestError(errorMsg);
-      toast.error(errorMsg);
     } finally {
       setIsTesting(false);
     }
@@ -253,7 +253,7 @@ export default function ApiBuilderEditPage() {
       router.push('/setting/api-builder');
     } catch (error) {
       console.error('保存接口失败:', error);
-      toast.error(error.response?.data?.message || '保存接口失败');
+      toast.requestError(error, getRequestErrorMessage(error, '保存接口失败'));
     } finally {
       setIsSaving(false);
     }

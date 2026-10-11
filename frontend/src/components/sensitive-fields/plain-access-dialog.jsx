@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useState, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -90,8 +91,8 @@ export default function PlainAccessDialog({
       reset();
     } catch (error) {
       console.error('申请明文访问失败:', error);
-      const errorMessage = error.response?.data?.message || error.message || '申请失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '申请失败');
+      toast.requestError(error, errorMessage);
     } finally {
       setIsSubmitting(false);
     }

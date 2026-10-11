@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 import { getBasePath } from '@/lib/config/runtime';
 
 import { useState, useEffect } from 'react';
@@ -69,7 +70,7 @@ export default function FileShareDialog({ open, onClose, file }) {
       toast.success('分享链接创建成功');
     } catch (error) {
       console.error('Failed to create share:', error);
-      toast.error(error.response?.data?.message || '创建分享链接失败');
+      toast.requestError(error, getRequestErrorMessage(error, '创建分享链接失败'));
     } finally {
       setCreating(false);
     }

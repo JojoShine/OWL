@@ -1,3 +1,4 @@
+import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -117,8 +118,8 @@ export default function DataAccessFormDialog({ open, onOpenChange, request, onSu
       reset();
     } catch (error) {
       console.error('保存数据访问申请失败:', error);
-      const errorMessage = error.response?.data?.message || error.message || '保存失败';
-      toast.error(errorMessage);
+      const errorMessage = getRequestErrorMessage(error, '保存失败');
+      toast.requestError(error, errorMessage);
     }
   };
 
