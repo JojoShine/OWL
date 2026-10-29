@@ -77,7 +77,7 @@ export const SocketProvider = ({ children }) => {
       // console.error('Socket.io connection error:', error.message);
       setIsConnected(false);
       setIsReconnecting(true);
-      setConnectionError(error.message);
+      setConnectionError('实时连接暂时不可用，请稍后重试');
       reconnectAttemptsRef.current++;
 
       // 如果是认证错误（token过期或无效），停止重连

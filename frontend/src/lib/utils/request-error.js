@@ -1,14 +1,12 @@
+import { safeBusinessMessage, getBusinessErrorMessage } from './business-errors';
 function responseMessage(data) {
-  const message = typeof data === 'string' ? data : data?.message;
-  if (Array.isArray(message)) return message.filter(item => typeof item === 'string').join('；');
-  if (typeof message !== 'string' || /<\/?[a-z][^>]*>/i.test(message)) return '';
-  return message.trim();
+  return getBusinessErrorMessage(data?.errorCode, data?.params) || safeBusinessMessage(typeof data === 'string' ? data : data?.message);
 }
 
 export function getRequestErrorMessage(error, fallback = '操作失败，请稍后重试') {
   if (error?.errorKind === 'cancelled') return '';
   return error?.userMessage || responseMessage(error?.response?.data)
-    || (!error?.isAxiosError && error?.message) || fallback;
+    || (!error?.isAxiosError && safeBusinessMessage(error?.message)) || fallback;
 }
 
 export async function normalizeRequestError(error) {
@@ -28,7 +26,10 @@ export async function normalizeRequestError(error) {
   }
   const message = responseMessage(data);
   error.errorKind = status ? 'http' : 'network';
-  if (status === 429) {
+  if (getBusinessErrorMessage(data?.errorCode, data?.params)) {
+    error.errorKind = 'business';
+    error.userMessage = getBusinessErrorMessage(data.errorCode, data.params);
+  } else if (status === 429) {
     error.errorKind = 'rate-limit';
     const headers = error.response.headers;
     const retryAfter = headers?.get?.('Retry-After') ?? headers?.['retry-after'];

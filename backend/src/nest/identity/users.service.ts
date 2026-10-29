@@ -1,3 +1,5 @@
+import { SystemConfigService } from '../system-config/system-config.service';
+import { validatePassword } from './password-policy';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { ensureUnique, live, pageRows, pick, requireRow, rolesFor, safeUser, searchWhere, userProfile, validateIds } from './identity.helpers';
@@ -5,7 +7,10 @@ const bcrypt = require('bcryptjs');
 const fields = ['username', 'email', 'real_name', 'phone', 'avatar', 'status', 'access_level', 'department_id'];
 @Injectable()
 export class UsersService {
-    constructor(private readonly db: PrismaService) { }
+    constructor(private readonly db: PrismaService, private readonly config: SystemConfigService) { }
+    private async validatePassword(password: string) {
+        validatePassword(password, (await this.config.getConfig()).password_policy);
+    }
     async getUsers(query: any) {
         const where: any = searchWhere(query, ['username', 'email', 'real_name'], ['status']);
         if (query.role_id) {
@@ -19,6 +24,7 @@ export class UsersService {
     }
     getUserById(id: string) { return userProfile(this.db, id, false, false); }
     async createUser(body: any) {
+        if (body.password) await this.validatePassword(body.password);
         const user = await this.db.$transaction(async (tx) => {
             await ensureUnique(tx.owl_users, pick(body, ['username', 'email', 'phone']), { username: '用户名已存在', email: '邮箱已被注册', phone: '手机号已被注册' });
             await validateIds(tx.owl_roles, body.role_ids, '角色');
@@ -31,6 +37,7 @@ export class UsersService {
         return this.getUserById(user.id);
     }
     async updateUser(id: string, body: any) {
+        if (body.password) await this.validatePassword(body.password);
         await this.db.$transaction(async (tx) => {
             await requireRow(tx.owl_users, id, '用户');
             await ensureUnique(tx.owl_users, pick(body, ['username', 'email', 'phone']), { username: '用户名已存在', email: '邮箱已被注册', phone: '手机号已被注册' }, id);
@@ -53,6 +60,7 @@ export class UsersService {
         return { message: '用户删除成功' };
     }
     async resetPassword(id: string, password: string) {
+        await this.validatePassword(password);
         await requireRow(this.db.owl_users, id, '用户');
         await this.db.owl_users.update({ where: { id }, data: { password: await bcrypt.hash(password, 10), updatedAt: new Date() } });
         return { message: '密码重置成功' };

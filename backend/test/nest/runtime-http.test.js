@@ -19,5 +19,5 @@ it('preserves the public API index', async () => {
 it('preserves unknown-route errors after removing the legacy router', async () => {
   const response = await fetch(base + '/api/biz/missing?x=1');
   expect(response.status).toBe(404);
-  expect(await response.json()).toMatchObject({ success: false, message: 'Route not found - /api/biz/missing?x=1' });
+  expect(await response.json()).toMatchObject({ success: false, message: '请求的资源不存在', errorCode: 'NOT_FOUND' });
 });

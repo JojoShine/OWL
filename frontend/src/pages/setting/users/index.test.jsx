@@ -133,7 +133,7 @@ describe('UsersPage queries', () => {
     userApi.getUsers.mockRejectedValueOnce(new Error('连接中断'));
     const interaction = userEvent.setup();
     render(<UsersPage />);
-    expect(await screen.findByRole('alert')).toHaveTextContent('连接中断');
+    expect(await screen.findByRole('alert')).toHaveTextContent('用户列表加载失败，请重试');
     await interaction.click(screen.getByRole('button', { name: '重试' }));
     await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
   });
@@ -167,7 +167,7 @@ describe('UsersPage queries', () => {
     expect(userApi.deleteUser).not.toHaveBeenCalled();
     await interaction.click(screen.getAllByRole('button', { name: '删除用户 alice' })[0]);
     await interaction.click(screen.getByRole('button', { name: '删除', exact: true }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('删除暂时不可用');
+    expect(await screen.findByRole('alert')).toHaveTextContent('删除失败，请重试');
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 

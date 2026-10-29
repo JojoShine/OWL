@@ -139,7 +139,6 @@ function LoginForm() {
         captchaInputRef.current?.refresh();
       }
     } catch (err) {
-      console.error('登录错误:', err);
       setError(getRequestErrorMessage(err, '登录失败，请检查用户名和密码'));
       setIsLoading(false);
       // 登录失败后刷新验证码

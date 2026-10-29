@@ -15,8 +15,8 @@ export const userSchema = z.object({
 
   password: z.string()
     .min(1, '密码是必填项')
-    .min(6, '密码至少6个字符')
-    .max(50, '密码最多50个字符')
+    .min(1, '请输入密码')
+    .max(100, '密码过长')
     .optional()
     .or(z.literal('')),
 

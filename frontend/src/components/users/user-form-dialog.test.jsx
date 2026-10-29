@@ -20,6 +20,7 @@ vi.mock('@/lib/utils', async () => {
 });
 
 vi.mock('@/lib/api', () => ({
+  systemConfigApi: {getConfig:vi.fn().mockResolvedValue({data:{password_policy:'standard'}})},
   userApi: {
     updateUser: vi.fn().mockResolvedValue({}),
     createUser: vi.fn().mockResolvedValue({}),
@@ -203,7 +204,7 @@ describe('UserFormDialog', () => {
 
     await interaction.type(screen.getByLabelText(/用户名/), 'new_user');
     await interaction.type(screen.getByLabelText(/邮箱/), 'new@example.com');
-    await interaction.type(screen.getByLabelText(/密码/), 'secret123');
+    await interaction.type(screen.getByLabelText(/密码/), 'secret12345');
     await interaction.click(screen.getByRole('button', { name: '保存' }));
 
     await waitFor(() =>

@@ -1,3 +1,4 @@
+import {validatePassword,passwordPolicyLabels} from '@/lib/schemas/password-policy';
 import { getRequestErrorMessage } from '@/lib/utils/request-error';
 import { getBasePath } from '@/lib/config/runtime';
 
@@ -20,7 +21,7 @@ import { getFileUrl } from '@/lib/utils/image';
 const registerSchema = z.object({
   username: z.string().min(3, '用户名至少3个字符').max(20, '用户名最多20个字符'),
   email: z.string().email('请输入有效的邮箱地址'),
-  password: z.string().min(6, '密码至少6个字符'),
+  password: z.string().min(1, '请输入密码'),
   confirmPassword: z.string().min(6, '请确认密码'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: '两次输入的密码不一致',
@@ -31,6 +32,7 @@ const basePath = getBasePath();
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [policy,setPolicy] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -52,6 +54,7 @@ export default function RegisterPage() {
       try {
         const response = await systemConfigApi.getConfig();
         if (response?.success) {
+          setPolicy(response.data?.password_policy);
           setShowTechStack(response.data?.show_tech_stack ?? true);
           setSystemName(response.data?.system_name || 'Owl管理平台');
           // 处理 logo - 支持 Minio 路径和本地路径，空值回退到默认 logo
@@ -69,6 +72,8 @@ export default function RegisterPage() {
   }, []);
 
   const onSubmit = async (data) => {
+    const violations = validatePassword(data.password,policy);
+    if (violations.length) {setError(violations.join('；'));return;}
     setIsLoading(true);
     setError('');
     setSuccess(false);
@@ -88,7 +93,6 @@ export default function RegisterPage() {
         setError('注册失败，请重试');
       }
     } catch (err) {
-      console.error('注册错误:', err);
       setError(getRequestErrorMessage(err, '注册失败，请检查输入信息'));
     } finally {
       setIsLoading(false);
@@ -150,6 +154,7 @@ export default function RegisterPage() {
 
             <div className="space-y-2.5">
               <Label htmlFor="password">密码</Label>
+                <p className="text-xs text-muted-foreground">{passwordPolicyLabels[policy] || '安全规则暂未加载，请稍后重试'}</p>
               <Controller name={'password'} control={control} render={({ field: controlledField }) => (
                 <PasswordInput
                   id="password"

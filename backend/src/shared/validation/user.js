@@ -50,11 +50,11 @@ const createUser = {
         'any.required': '邮箱是必填项',
       }),
     password: Joi.string()
-      .min(6)
-      .max(50)
+      .min(1)
+      .max(100)
       .allow(null, '')
       .messages({
-        'string.min': '密码至少6个字符',
+        'string.min': '请输入密码',
       }),
     real_name: Joi.string()
       .max(50)
@@ -89,11 +89,11 @@ const updateUser = {
     username: Joi.string().pattern(/^[a-zA-Z0-9_-]+$/).min(3).max(50),
     email: Joi.string().email(),
     password: Joi.string()
-      .min(6)
-      .max(50)
+      .min(1)
+      .max(100)
       .allow(null, '')
       .messages({
-        'string.min': '密码至少6个字符',
+        'string.min': '请输入密码',
       }),
     real_name: Joi.string().max(50).allow(null, ''),
     phone: Joi.string()
@@ -124,11 +124,11 @@ const resetPassword = {
   }),
   body: Joi.object({
     password: Joi.string()
-      .min(6)
-      .max(50)
+      .min(1)
+      .max(100)
       .required()
       .messages({
-        'string.min': '密码至少6个字符',
+        'string.min': '请输入密码',
         'any.required': '密码是必填项',
       }),
   }),

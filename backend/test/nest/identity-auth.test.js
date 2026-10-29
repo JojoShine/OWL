@@ -4,7 +4,7 @@ const user = { id:'u1', username:'alice', password:null, status:'active', delete
 function setup(row=user){
  const db={owl_users:{findFirst:async()=>row}};
  const effects={verifyCaptcha:async()=>true};
- return new AuthService(db,{},effects);
+ return new AuthService(db,{},effects,{assertUnlocked:async()=>{},recordFailure:async()=>{},acceptSuccess:async()=>{}});
 }
 it('rejects an invalid captcha before checking a password',async()=>{
  const service=new AuthService({}, {}, {verifyCaptcha:async()=>false});

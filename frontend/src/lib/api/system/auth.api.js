@@ -1,8 +1,14 @@
+import { encryptLoginCredentials } from '../../utils/login-envelope';
 import axios from '../../utils/http-client';
 
 export const authApi = {
   // 登录
-  login: (data) => axios.post('/auth/login', data, { errorMode: 'inline', authenticated: false }),
+  login: async (data) => {
+    const options = { errorMode: 'inline', authenticated: false };
+    const response = await axios.post('/auth/challenge', {}, options);
+    const envelope = await encryptLoginCredentials(data, response.data);
+    return axios.post('/auth/login', { ...envelope, captchaId: data.captchaId, captchaCode: data.captchaCode }, options);
+  },
 
   // 注册
   register: (data) => axios.post('/auth/register', data, { errorMode: 'inline', authenticated: false }),

@@ -135,7 +135,6 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, data: response.data };
     } catch (error) {
-      console.error('登录失败:', error);
       return {
         success: false,
         error: getRequestErrorMessage(error, '登录失败'),

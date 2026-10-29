@@ -160,7 +160,7 @@ export default function ApiBuilderEditPage() {
       toast.success('SQL已格式化');
     } catch (error) {
       console.error('SQL格式化失败:', error);
-      toast.error('SQL格式化失败：' + error.message);
+      toast.error('SQL 格式无法识别，请检查语句后重试');
     }
   };
 

@@ -1,3 +1,4 @@
+import { LoginChallengeService } from './login-challenge.service';
 import { Controller, Get, Post, Put, Delete, Req, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { shared } from '../compatibility/shared';
@@ -9,7 +10,13 @@ const { parseUserAgent } = shared('utils/user-agent-parser');
 @Controller('api/system/auth')
 @UseGuards(IdentityGuard)
 export class AuthController {
-    constructor(private readonly service: AuthService) { }
+    constructor(private readonly service: AuthService, private readonly challenges: LoginChallengeService) { }
+    @Post('challenge')
+    @IdentityRoute({public:true})
+    async challenge(@Res() res: Response) {
+        res.setHeader('Cache-Control', 'no-store');
+        success(res, await this.challenges.issue(), '登录验证已就绪');
+    }
     @Post('register')
     @IdentityRoute({ "public": true, "validation": ["auth", "register"] })
     async register(
@@ -26,7 +33,7 @@ export class AuthController {
         }
     }
     @Post('login')
-    @IdentityRoute({ "public": true, "validation": ["auth", "login"] })
+    @IdentityRoute({ "public": true })
     async login(
     @Req()
     req: any,
@@ -34,12 +41,14 @@ export class AuthController {
     res: Response) {
         const ip = req.clientIp;
         const userAgent = req.get('user-agent') || '';
-        const { username } = req.body;
+        let username: string | undefined;
         try {
+            const credentials = await this.challenges.consume(req.body);
+            username = credentials.username;
             // 解析设备信息
             const deviceInfo = parseUserAgent(userAgent);
             // 调用认证服务并传递设备信息和IP
-            const result = await this.service.login(req.body, deviceInfo, ip);
+            const result = await this.service.login({ ...credentials, captchaId: req.body.captchaId, captchaCode: req.body.captchaCode }, deviceInfo, ip);
             // 记录登录成功日志
             loginLogger.info(JSON.stringify({
                 user: result.user.id,

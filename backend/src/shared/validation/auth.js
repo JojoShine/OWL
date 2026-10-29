@@ -24,12 +24,12 @@ const register = {
         'any.required': '邮箱是必填项',
       }),
     password: Joi.string()
-      .min(6)
-      .max(50)
-      .allow(null, '')
+      .min(1)
+      .max(100)
+      .required()
       .messages({
-        'string.min': '密码至少6个字符',
-        'string.max': '密码最多50个字符',
+        'string.min': '请输入密码',
+        'string.max': '密码过长',
       }),
     real_name: Joi.string()
       .max(50)
@@ -48,40 +48,6 @@ const register = {
 };
 
 /**
- * 登录验证
- */
-const login = {
-  body: Joi.object({
-    username: Joi.string()
-      .required()
-      .messages({
-        'any.required': '用户名是必填项',
-      }),
-    password: Joi.string()
-      .required()
-      .messages({
-        'any.required': '密码是必填项',
-      }),
-    captchaId: Joi.string()
-      .required()
-      .messages({
-        'any.required': '验证码ID是必填项',
-      }),
-    captchaCode: Joi.string()
-      .min(1)
-      .max(3)
-      .pattern(/^-?\d+$/)
-      .required()
-      .messages({
-        'string.min': '请输入计算结果',
-        'string.max': '计算结果不能超过3位数',
-        'string.pattern.base': '请输入有效的数字',
-        'any.required': '验证码是必填项',
-      }),
-  }),
-};
-
-/**
  * 修改密码验证
  */
 const changePassword = {
@@ -92,13 +58,13 @@ const changePassword = {
         'any.required': '原密码是必填项',
       }),
     newPassword: Joi.string()
-      .min(6)
-      .max(50)
+      .min(1)
+      .max(100)
       .required()
       .invalid(Joi.ref('oldPassword'))
       .messages({
-        'string.min': '新密码至少6个字符',
-        'string.max': '新密码最多50个字符',
+        'string.min': '请输入新密码',
+        'string.max': '新密码过长',
         'any.required': '新密码是必填项',
         'any.invalid': '新密码不能与原密码相同',
       }),
@@ -114,6 +80,5 @@ const changePassword = {
 
 module.exports = {
   register,
-  login,
   changePassword,
 };

@@ -17,7 +17,7 @@ const accessLogMiddleware = morgan(
 const filterSensitiveData = (obj) => {
   if (!obj || typeof obj !== 'object') return obj;
   
-  const sensitiveFields = ['password', 'pwd', 'passwd', 'secret', 'token', 'access_token', 'refresh_token'];
+  const sensitiveFields = ['oldPassword', 'newPassword', 'confirmPassword', 'ciphertext', 'nonce', 'password', 'pwd', 'passwd', 'secret', 'token', 'access_token', 'refresh_token'];
   const filtered = { ...obj };
   
   sensitiveFields.forEach(field => {

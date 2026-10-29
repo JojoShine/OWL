@@ -4,6 +4,9 @@ import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../database/prisma.service';
 
 const editableConfig = Joi.object({
+  password_policy: Joi.string().valid('basic', 'standard', 'strict'),
+  login_failure_limit: Joi.number().valid(3, 5, 10),
+  login_lock_minutes: Joi.number().valid(5, 15, 30),
   logo_url: Joi.string().max(500).allow(null, ''),
   login_bg_url: Joi.string().max(500).allow(null, ''),
   company_name: Joi.string().max(100).allow(''),

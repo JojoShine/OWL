@@ -10,23 +10,11 @@ const errorHandler = (err, req, res, next) => {
   });
 
   const statusCode = err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
-
   const response = {
     success: false,
-    message,
+    ...require('../utils/business-errors').publicError(err),
     timestamp: new Date().toISOString(),
   };
-
-  // 如果有验证错误详情，添加到响应中
-  if (err.errors) {
-    response.errors = err.errors;
-  }
-
-  // 开发环境返回堆栈信息
-  if (process.env.NODE_ENV === 'development') {
-    response.stack = err.stack;
-  }
 
   res.status(statusCode).json(response);
 };

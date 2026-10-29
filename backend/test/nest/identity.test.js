@@ -28,7 +28,7 @@ describe('identity contract', () => {
     const store = {
       owl_users: { findFirst: async () => ({id:'u1', password:'old'}), update: async ({data}) => { saved = data.password; return { id: 'u1', ...data }; } },
     };
-    const service = new UsersService(store);
+    const service = new UsersService(store,{getConfig:async()=>({password_policy:'standard'})});
     await service.resetPassword('u1','new-password');
     expect(saved).not.toBe('new-password');
     expect(await bcrypt.compare('new-password',saved)).toBe(true);

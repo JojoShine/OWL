@@ -21,8 +21,8 @@ export const registerSchema = z.object({
   email: z.string().email('请输入有效的邮箱地址'),
   password: z
     .string()
-    .min(6, '密码至少6个字符')
-    .max(50, '密码最多50个字符'),
+    .min(1, '请输入密码')
+    .max(100, '密码过长'),
   confirmPassword: z.string().min(1, '请确认密码'),
   captchaCode: z.string().min(1, '请输入验证码'),
 }).refine((data) => data.password === data.confirmPassword, {

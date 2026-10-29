@@ -16,6 +16,9 @@ model owl_system_configs {
   system_name          String    @default("Owl Platform") @db.VarChar(100)
   show_tech_stack      Boolean   @default(true)
   registration_enabled Boolean   @default(true)
+  password_policy      String    @default("standard") @db.VarChar(20)
+  login_failure_limit  Int       @default(5)
+  login_lock_minutes   Int       @default(15)
   tech_stack_info      Json?
   enable_theme_switch  Boolean   @default(true)
   theme_mode           String?   @default("auto") @db.VarChar(20)

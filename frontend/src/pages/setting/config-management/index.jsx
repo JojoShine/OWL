@@ -1,3 +1,4 @@
+import SecurityConfigTab from '@/components/system-config/SecurityConfigTab';
 
 import { useState, useEffect } from 'react';
 import SystemInfoTab from '@/components/system-config/SystemInfoTab';
@@ -48,6 +49,7 @@ export default function ConfigManagementPage() {
       />
       <PageSurface className="p-5">
         <SystemInfoTab config={config} onUpdate={fetchConfig} />
+        <SecurityConfigTab config={config} onUpdate={fetchConfig} />
       </PageSurface>
     </PageShell>
   );

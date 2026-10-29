@@ -26,7 +26,7 @@ const enabled = process.env.OWL_DATABASE_TEST === '1';
       let store;
       store = new Proxy(tx, { get(target,key) { return key === '$transaction' ? work => work(store) : Reflect.get(target,key); } });
       const effects = { invalidateUser: jest.fn(), invalidateRoles: jest.fn(), verifyCaptcha: async()=>true, generateToken: user=>'test-token-'+user.id, location:()=>({city:'local',country:'test'}), kicked:jest.fn() };
-      const users=new UsersService(store,effects), roles=new RolesService(store,effects), perms=new PermissionsService(store,effects), menus=new MenusService(store,effects), depts=new DepartmentsService(store,effects), auth=new AuthService(store,users,effects);
+      const users=new UsersService(store,{getConfig:async()=>({password_policy:'standard'})}), roles=new RolesService(store,effects), perms=new PermissionsService(store,effects), menus=new MenusService(store,effects), depts=new DepartmentsService(store,effects), auth=new AuthService(store,users,effects,{assertUnlocked:async()=>{},recordFailure:async()=>{},acceptSuccess:async()=>{}});
       const permission=await perms.createPermission({name:'test',code:'test:'+suffix,resource:'user',action:'read',category:'test'});
       const parent=await menus.createMenu({name:'test root',menu_type:'system',auto_generate_permission:false});
       const middle=await menus.createMenu({name:'test middle',parent_id:parent.id,auto_generate_permission:false});

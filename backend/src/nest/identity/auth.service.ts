@@ -1,3 +1,4 @@
+import { LoginSecurityService } from './login-security.service';
 import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { PrismaService } from '../database/prisma.service';
@@ -7,7 +8,7 @@ import { live, pick, requireRow, safeUser, userProfile } from './identity.helper
 const bcrypt = require('bcryptjs');
 @Injectable()
 export class AuthService {
-    constructor(private readonly db: PrismaService, private readonly users: UsersService, private readonly effects: IdentityEffects) { }
+    constructor(private readonly db: PrismaService, private readonly users: UsersService, private readonly effects: IdentityEffects, private readonly security: LoginSecurityService) { }
     async authenticate(authorization?: string) {
         const token = authorization?.replace('Bearer ', '');
         if (!token)
@@ -37,11 +38,15 @@ export class AuthService {
     async login(body: any, device: any = null, ip: string | null = null) {
         if (!await this.effects.verifyCaptcha(body.captchaId, body.captchaCode))
             throw new BadRequestException('验证码错误或已过期');
+        await this.security.assertUnlocked(body.username);
         const user = await this.db.owl_users.findFirst({ where: { username: body.username, ...live } });
-        if (!user?.password || !await bcrypt.compare(body.password, user.password))
-            throw new UnauthorizedException('用户名或密码错误');
+        if (!user?.password || !await bcrypt.compare(body.password, user.password)) {
+            await this.security.recordFailure(body.username);
+            throw new UnauthorizedException({errorCode: 'AUTH_INVALID_CREDENTIALS', message: '用户名或密码错误'});
+        }
         if (user.status !== 'active')
             throw new ForbiddenException(user.status === 'banned' ? '账户已被封禁' : '账户已被禁用');
+        await this.security.acceptSuccess(body.username);
         const token = this.effects.generateToken(user);
         const now = new Date();
         const location = ip ? this.effects.location(ip) : null;

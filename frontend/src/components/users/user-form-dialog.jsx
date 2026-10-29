@@ -1,10 +1,11 @@
+import {validatePassword,passwordPolicyLabels} from '@/lib/schemas/password-policy';
 import { getRequestErrorMessage } from '@/lib/utils/request-error';
 
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Checkbox, Form, Input, Modal, Select } from 'antd';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Edit2 } from 'lucide-react';
-import { userApi, departmentApi, roleApi } from '@/lib/api';
+import { userApi, departmentApi, roleApi, systemConfigApi } from '@/lib/api';
 import { toast } from '@/components/ui/toast';
 import { useSensitiveField } from '@/contexts/SensitiveFieldContext';
 import { userSchema, filterMaskedFields } from '@/lib/schemas';
@@ -43,6 +44,14 @@ function departmentOptions(departments, level = 0) {
 export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) {
   const [form] = Form.useForm();
   const { shouldShowEditButton } = useSensitiveField();
+  const [policy, setPolicy] = useState(null);
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    setPolicy(null);
+    systemConfigApi.getConfig().then(response=>{if(!cancelled) setPolicy(response.data?.password_policy);}).catch(()=>{});
+    return ()=>{cancelled=true;};
+  },[open]);
   const [departments, setDepartments] = useState([]);
   const [roles, setRoles] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -101,6 +110,10 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
     const parsed = userSchema.safeParse(values);
     const fieldErrors = parsed.success ? [] : parsed.error.issues.map((issue) => ({ name: issue.path, errors: [issue.message] }));
     if (!isEdit && !values.password) fieldErrors.push({ name: ['password'], errors: ['密码是必填项'] });
+    if (values.password) {
+      const errors = validatePassword(values.password,policy);
+      if(errors.length) fieldErrors.push({name:['password'],errors});
+    }
     if (fieldErrors.length) {
       form.setFields(fieldErrors);
       form.scrollToField(fieldErrors[0].name, { focus: true });
@@ -156,7 +169,7 @@ export default function UserFormDialog({ open, onOpenChange, user, onSuccess }) 
             <div className="grid gap-x-4 md:grid-cols-2">
               <Form.Item name="username" label="用户名" required><Input placeholder="请输入用户名" disabled={isEdit || saving} /></Form.Item>
               {sensitiveField('email', '邮箱', '请输入邮箱', true)}
-              <Form.Item name="password" label="密码" required={!isEdit}><Input.Password autoComplete="new-password" placeholder={isEdit ? '留空则不修改密码' : '请输入密码'} disabled={saving} /></Form.Item>
+              <Form.Item name="password" label="密码" required={!isEdit} extra={passwordPolicyLabels[policy] || '安全规则加载中，请稍后设置密码'}><Input.Password autoComplete="new-password" placeholder={isEdit ? '留空则不修改密码' : '请输入密码'} disabled={saving} /></Form.Item>
               {sensitiveField('real_name', '真实姓名', '请输入真实姓名')}
               {sensitiveField('phone', '手机号', '请输入手机号（11位中国手机号）')}
             </div>

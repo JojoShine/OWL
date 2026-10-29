@@ -54,11 +54,12 @@ it.each([
   await userEvent.click(screen.getByRole('button', { name: '登录' }));
   expect(await screen.findByRole('alert')).toHaveTextContent(message);
   expect(screen.getAllByText(message)).toHaveLength(1);
-  expect(requestConfig.url).toBe('/auth/login');
+  expect(requestConfig.url).toBe('/auth/challenge');
   expect(requestConfig.errorMode).toBe('inline');
   expect(requestConfig.authenticated).toBe(false);
   expect(requestConfig.headers.Authorization).toBeUndefined();
   expect(localStorage.getItem(getStorageKey('token'))).toBe('existing-token');
   expect(screen.queryByText('登录已过期，请重新登录')).not.toBeInTheDocument();
   expect(screen.queryByText('SQL connection failed')).not.toBeInTheDocument();
+  expect(console.error).not.toHaveBeenCalled();
 });
