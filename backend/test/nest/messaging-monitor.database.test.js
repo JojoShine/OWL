@@ -19,7 +19,7 @@ const enabled=process.env.OWL_DATABASE_TEST==='1';
   let userId;
   try{await db.$transaction(async tx=>{
    let store;store=new Proxy(tx,{get(target,key){return key==='$transaction'?work=>work(store):Reflect.get(target,key);}});
-   const users=new UsersService(store,{invalidateUser(){},invalidateRoles(){}});
+   const users=new UsersService(store,{getConfig:async()=>({password_policy:'standard'})});
    const user=await users.createUser({username:'message_'+suffix,email:suffix+'@test.invalid',password:'test-password'});userId=user.id;
    const notifications=new NotificationsService(store),settings=new NotificationSettingsService(store),templates=new EmailTemplatesService(store);
    const transport={available:true,send:jest.fn(async()=>({messageId:'test-message',response:'accepted'}))};

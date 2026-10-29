@@ -32,6 +32,8 @@ const enabled = process.env.OWL_MIGRATION_TEST === '1';
     // Use the configured Prisma seed entry point, not a helper bypass.
     expect(run('node_modules/prisma/build/index.js','db','seed').status).not.toBe(0);
     expect((await db.query('SELECT id,username,password,status,created_by FROM owl_users ORDER BY id')).rows).toEqual(before);
+    // Model a legacy database at the immutable baseline, before later Prisma migrations.
+    await db.query('ALTER TABLE owl_system_configs DROP COLUMN password_policy, DROP COLUMN login_failure_limit, DROP COLUMN login_lock_minutes');
     await db.query('DROP TABLE _prisma_migrations');
     await db.query('CREATE TABLE "SequelizeMeta" (name varchar(255) PRIMARY KEY)');
     for (const file of ['001-initial-schema.js','002-add-audit-fields.js','003-separate-credential-systems.js','004-remove-zabbix.js','005-system-config-primary-key.js']) await db.query('INSERT INTO "SequelizeMeta" VALUES ($1)',[file]);

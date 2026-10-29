@@ -29,7 +29,7 @@ const enabled = process.env.OWL_DATABASE_TEST === '1';
     try {
       try { await db.$transaction(async tx => {
         let store; store=new Proxy(tx,{get(target,key){return key==='$transaction'?work=>work(store):Reflect.get(target,key);}});
-        const users=new UsersService(store,{invalidateUser(){},invalidateRoles(){}});
+        const users=new UsersService(store,{getConfig:async()=>({password_policy:'standard'})});
         const owner=await users.createUser({username:'storage_'+suffix,email:suffix+'@test.invalid',password:'example-password'});
         const stranger=await users.createUser({username:'other_'+suffix,email:'other_'+suffix+'@test.invalid',password:'example-password'});
         fixture=owner.id;
